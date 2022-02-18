@@ -6,7 +6,7 @@ import haar_cascade as hc
 import mission
 import math
 
-fbRange = [32000, 48000] # preset parameter for detected image boundary size
+fbRange = [32000, 52000] # preset parameter for detected image boundary size
 w, h = 720, 480 # display size of the screen
 location = [0, 0, 0, 0] # Initialized list of x, y and angle coordinates for the drone.
 turbine_locations = [] # List containing the locations of found turbines
@@ -44,7 +44,6 @@ def trackObject(drone, info, location, mission_list, turbine_list, detected_obje
         targety = location[1] + distance * math.sin(math.radians(location[2]))
         for i in turbine_locations:
             if(i[0] < targetx < i[1]) and (i[2] < targety < i[3]):
-                print(">>>>>>>>>>>>>>>>>>>>>>>>>Turbine already located (For debugging)")
                 location = mv.move(location, drone, ccw=45)
                 sleep(0.5)
                 return location, detected_object
@@ -65,12 +64,12 @@ def trackObject(drone, info, location, mission_list, turbine_list, detected_obje
                 QR, img, info = droneReadQR(drone)
                 if len(QR) > 0:
                     print(">>>>>>>>>>>>>>>>QR CODE FOUND: ", QR)
-                    turbine_locations.append([location[0] + 70, location[0] - 70, location[1] + 70, location[1] - 70, QR])
+                    turbine_locations.append([location[0] - 20, location[0] + 20, location[1] - 20, location[1] + 20, QR])
                     turbine_found = 0 # Flag to determine if the correct turbine was found
                     for i in turbine_list:
                         if i == QR:
                             turbine_found = 1
-                            #mission.mission0(location, drone, mission_list, QR)
+                            mission.mission0(location, drone, mission_list, QR)
                             mv.return_path(location, drone)
                             drone.streamoff()
                             quit()
@@ -89,6 +88,7 @@ def trackObject(drone, info, location, mission_list, turbine_list, detected_obje
     return location, detected_object
 
 def boundingBox(img, bbox):
+    '''Draws the bounding box around the detected QR code and sends returns a list of data'''
     if bbox is not None:
         bbox = [bbox[0].astype(int)]
         n = len(bbox[0])
@@ -112,6 +112,30 @@ def droneReadQR(drone):
     if len(QR) > 0:
         img, info = boundingBox(img, bbox)
     return QR, img, info
+
+def test(mission_list, turbine_list):
+    '''Function called by the GUI. Takes a mission list of selected angles and the name
+    of the turbine being selected that matches the QR code format. Examples: [0, 0, 0, 0], WindTurbine_1.'''
+    drone = Tello()
+    drone.connect()
+    sleep(0.5)
+    print("Current battery remaining: ", drone.get_battery())
+    sleep(0.3)
+    drone.streamon()
+    sleep(0.5)
+    drone.takeoff()
+    sleep(0.5)
+    while True:
+        frame = drone.get_frame_read()
+        sleep(0.2)
+        img = frame.frame
+        img = cv.resize(img, (w, h))
+        img, info = hc.findTurbine(img)
+        QR, img, info = droneReadQR(drone)
+        location, detected_object = trackObject(drone, info, location, mission_list, turbine_list, detected_object)
+        img = cv.resize(img, None, fx=1, fy=1, interpolation=cv.INTER_AREA)
+        cv.imshow("Output", img)
+        cv.waitKey(1)
 
 if __name__ == "__main__":
     mission_list = [1, 1, 1, 1]
