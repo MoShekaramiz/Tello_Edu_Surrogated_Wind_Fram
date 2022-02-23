@@ -5,8 +5,9 @@ from djitellopy import Tello
 
 def mission0(location, drone, mission, turbine):
     '''Film directly in front of the fan after rising 20cm'''
-    mv.move(location, drone, up=20)
-    recordVideo(drone, turbine, 0)
+    if mission[0] != 0:
+        mv.move(location, drone, up=20)
+        recordVideo(drone, turbine, 0)
     mission[0] = 0
     if mission[1] == 1:
         mission1(drone, location, mission, turbine)
@@ -77,7 +78,7 @@ def mission3(drone, location, mission, turbine, recent_mission = 0):
         drone.move_forward(50)
         mv.move(location, drone, ccw=90)
     recordVideo(drone, turbine, 3)
-    drone.move_down(50)
+    drone.move_down(20)
     mission[3] = 0
     if mission[2] == 1:
         mission2(drone, location, mission, turbine)
