@@ -2,10 +2,17 @@ import cv2 as cv
 import movement as mv
 from time import sleep
 from djitellopy import Tello
+import os
 
+path = "Default"
 def mission0(location, drone, mission, turbine):
     '''Film directly in front of the fan after rising 20cm'''
-    if mission[0] != 0:
+    parent_directory = os.getcwd()
+    directory = turbine
+    path = os.path.join(parent_directory, directory)
+    os.mkdir(path)
+    os.chdir(path)
+    if mission[0] == 1:
         mv.move(location, drone, up=20)
         recordVideo(drone, turbine, 0)
     mission[0] = 0
