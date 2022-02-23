@@ -12,7 +12,7 @@ location = [0, 0, 0, 0] # Initialized list of x, y and angle coordinates for the
 turbine_locations = [] # List containing the locations of found turbines
 detected_object = 0 # A flag to determine if the camera detected an object in the previous 5 frames
 
-def trackObject(drone, info, location, mission_list, turbine_list, detected_object):
+def trackObject(drone, info, location, turbines, detected_object):
     '''Take the variable for the drone, the output array from calling findTurbine in haar_cascade.py, and the current drone x,y location and relative angle (initialized as [0, 0, 0]).
     It scans for the target object of findTurbine and approaches the target. Once it is at a pre-determined distance fbRange, it will scan and return the value of the QR code
     and return the drone to the starting point.'''
@@ -66,16 +66,20 @@ def trackObject(drone, info, location, mission_list, turbine_list, detected_obje
                     print(">>>>>>>>>>>>>>>>QR CODE FOUND: ", QR)
                     turbine_locations.append([location[0] - 20, location[0] + 20, location[1] - 20, location[1] + 20, QR])
                     turbine_found = 0 # Flag to determine if the correct turbine was found
-                    for i in turbine_list:
+                    for i in turbines:
                         if i == QR:
                             turbine_found = 1
-                            mission.mission0(location, drone, mission_list, QR)
-                            mv.return_path(location, drone)
-                            drone.streamoff()
-                            quit()
+                            mission.mission0(location, drone, turbines[i], QR)
+                            turbines.pop(i) 
+                            if len(turbines) != 0:
+                                mv.move(location, drone, ccw=45)
+                                break
+                            else:
+                                mv.return_path(location, drone)
+                                drone.streamoff()
+                                quit()
                     if turbine_found == 0:
                         mv.move(location, drone, ccw=45)
-                        sleep(0.5)
                     break
         elif area > fbRange[1]:
             # The drone is too close to the target
@@ -88,7 +92,6 @@ def trackObject(drone, info, location, mission_list, turbine_list, detected_obje
     return location, detected_object
 
 def boundingBox(img, bbox):
-    '''Draws the bounding box around the detected QR code and sends returns a list of data'''
     if bbox is not None:
         bbox = [bbox[0].astype(int)]
         n = len(bbox[0])
@@ -138,8 +141,7 @@ def test(mission_list, turbine_list):
         cv.waitKey(1)
 
 if __name__ == "__main__":
-    mission_list = [1, 1, 1, 1]
-    turbine_list = ["WindTurbine_2"]
+    turbines = {"WindTurbine_1": [0, 1, 0, 1], "WindTurbine_2": [1, 0, 1, 0]}
     drone = Tello()
     drone.connect()
     sleep(0.5)
@@ -156,7 +158,7 @@ if __name__ == "__main__":
         img = cv.resize(img, (w, h))
         #img, info = hc.findTurbine(img)
         QR, img, info = droneReadQR(drone)
-        location, detected_object = trackObject(drone, info, location, mission_list, turbine_list, detected_object)
+        location, detected_object = trackObject(drone, info, location, turbines, detected_object)
         img = cv.resize(img, None, fx=1, fy=1, interpolation=cv.INTER_AREA)
         cv.imshow("Output", img)
         cv.waitKey(1)
