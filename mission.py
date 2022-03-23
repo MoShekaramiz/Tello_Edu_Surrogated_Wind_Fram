@@ -1,5 +1,6 @@
 import cv2 as cv
 import movement as mv
+import shutil
 from time import sleep
 from djitellopy import Tello
 import os
@@ -10,6 +11,8 @@ def mission0(location, drone, mission, turbine):
     parent_directory = os.getcwd()
     directory = turbine
     path = os.path.join(parent_directory, directory)
+    if os.path.isdir(directory):
+        shutil.rmtree(directory)
     os.mkdir(path)
     os.chdir(path)
     if mission[0] == 1:
@@ -96,11 +99,17 @@ def mission3(drone, location, mission, turbine, recent_mission = 0):
         mv.move(location, drone, down=20)
 
 def recordVideo(drone, turbine, step):
+    count = 0
+    img_num = 1
     frame_read = drone.get_frame_read()
     height, width, _ = frame_read.frame.shape
     record = 300
     video = cv.VideoWriter(f'{turbine}_{step}.mp4', cv.VideoWriter_fourcc(*'XVID'), 30, (width, height))
     while record > 0:
+        if count%30 == 0:
+            cv.imwrite(f'{turbine}_{step}_img{img_num}.png', frame_read.frame)
+            img_num += 1
+        count += 1
         video.write(frame_read.frame)
         sleep(1/60)
         record -= 1

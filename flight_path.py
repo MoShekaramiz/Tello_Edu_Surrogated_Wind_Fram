@@ -1,12 +1,12 @@
 from djitellopy import Tello
 import cv2 as cv
 from time import sleep
-import movement as mv
+import movement_test as mv
 import haar_cascade as hc
 import mission
 import math
 
-fbRange = [32000, 52000] # preset parameter for detected image boundary size
+fbRange = [62000,82000]#[32000, 52000] # preset parameter for detected image boundary size
 w, h = 720, 480 # display size of the screen
 location = [0, 0, 0, 0] # Initialized list of x, y and angle coordinates for the drone.
 turbine_locations = [] # List containing the locations of found turbines
@@ -20,11 +20,12 @@ def trackObject(drone, info, location, turbines, detected_object):
     area = info[1]
     x, y = info[0]
     width = info[2]
+    print(area)
     # No object detected
     if(x == 0):
         if detected_object == 0:
             location = mv.move(location, drone, ccw=30)
-            sleep(0.5)
+            sleep(1)
         elif detected_object < 5: # An object was detected in on of the previous 5 frames but is no longer present
             detected_object += 1
             if detected_object % 2 == 0:
@@ -37,7 +38,7 @@ def trackObject(drone, info, location, turbines, detected_object):
             sleep(0.1)
     else:
         detected_object = 1
-        distance = int((690 * 16) / width) - 50
+        distance = int((650 * 40.64) / width) - 50
         if distance < 20:
             distance = 20
         targetx = location[0] + distance * math.cos(math.radians(location[2]))
@@ -59,37 +60,58 @@ def trackObject(drone, info, location, turbines, detected_object):
             return location, detected_object
         if area > fbRange[0] and area < fbRange[1]:
             # The drone has approached the target and will scan for a QR code
-            QR = None 
-            while True:
-                QR, img, info = droneReadQR(drone)
-                if len(QR) > 0:
-                    print(">>>>>>>>>>>>>>>>QR CODE FOUND: ", QR)
-                    turbine_locations.append([location[0] - 20, location[0] + 20, location[1] - 20, location[1] + 20, QR])
-                    turbine_found = 0 # Flag to determine if the correct turbine was found
-                    for i in turbines:
-                        if i == QR:
-                            turbine_found = 1
-                            mission.mission0(location, drone, turbines[i], QR)
-                            turbines.pop(i) 
-                            if len(turbines) != 0:
-                                mv.move(location, drone, ccw=45)
-                                break
-                            else:
-                                mv.return_path(location, drone)
-                                drone.streamoff()
-                                quit()
-                    if turbine_found == 0:
-                        mv.move(location, drone, ccw=45)
-                    break
+            qrDetection(drone, location, turbines)
         elif area > fbRange[1]:
             # The drone is too close to the target
             location = mv.move(location, drone, back=20)
             return location, detected_object
         elif area < fbRange[0] and area != 0:
             # The drone is too far from the target
-            location = mv.move(location, drone, distance)
-            return location, detected_object
+            location = mv.move(location, drone, fwd=distance)
+            qrDetection(drone, location, turbines)
+            #return location, detected_object
     return location, detected_object
+
+def qrDetection(drone, location, turbines):
+    drone.move_down(50)
+    QR = None 
+    while True:
+        QR, img, info = droneReadQR(drone)
+        img = frame.frame
+        img = cv.resize(img, (w, h))
+        cv.imshow("Output", img)
+        cv.waitKey(1)
+        if len(QR) > 0:
+            print(">>>>>>>>>>>>>>>>QR CODE FOUND: ", QR)
+            print(location[0], location[1])
+            turbine_locations.append([location[0] - 100, location[0] + 100, location[1] - 100, location[1] + 100, QR, location[0], location[1]])
+            turbine_found = 0 # Flag to determine if the correct turbine was found
+            for i in turbines:
+                if i == QR:
+                    turbine_found = 1
+                    location = mv.move(location, drone, up=20)
+                    mission.mission0(location, drone, turbines[i], QR)
+                    turbines.pop(i) 
+                    if len(turbines) != 0:
+                        mv.move(location, drone, ccw=45)
+                        break
+                    else:
+                        #### Return Testing ####
+                        #location = mv.move(location, drone, cw=90)
+                        #location = mv.move(location, drone, fwd=75)
+                        #location = mv.move(location, drone, ccw=90)
+                        #location = mv.move(location, drone, fwd=125)
+                        #location = mv.move(location, drone, ccw=90)
+                        #location = mv.move(location, drone, fwd=75)
+                        #location = mv.move(location, drone, cw=90)
+                        #location = mv.move(location, drone, fwd=50)
+                        ########################
+                        mv.return_path(location, drone, turbine_locations)
+                        drone.streamoff()
+                        quit()
+            if turbine_found == 0:
+                mv.move(location, drone, ccw=45)
+            break
 
 def boundingBox(img, bbox):
     if bbox is not None:
@@ -130,7 +152,6 @@ def test(mission_list, turbine_list):
     sleep(0.5)
     while True:
         frame = drone.get_frame_read()
-        sleep(0.2)
         img = frame.frame
         img = cv.resize(img, (w, h))
         img, info = hc.findTurbine(img)
@@ -141,7 +162,7 @@ def test(mission_list, turbine_list):
         cv.waitKey(1)
 
 if __name__ == "__main__":
-    turbines = {"WindTurbine_1": [0, 1, 0, 1], "WindTurbine_2": [1, 0, 1, 0]}
+    turbines = {"Wind_Turbine_1": [1, 0, 0, 0]}
     drone = Tello()
     drone.connect()
     sleep(0.5)
@@ -151,13 +172,14 @@ if __name__ == "__main__":
     sleep(0.5)
     drone.takeoff()
     sleep(0.5)
+    mv.move(location, drone, up=40)
     while True:
         frame = drone.get_frame_read()
         sleep(0.2)
         img = frame.frame
         img = cv.resize(img, (w, h))
-        #img, info = hc.findTurbine(img)
-        QR, img, info = droneReadQR(drone)
+        img, info = hc.findTurbine(img)
+        #QR, img, info = droneReadQR(drone)
         location, detected_object = trackObject(drone, info, location, turbines, detected_object)
         img = cv.resize(img, None, fx=1, fy=1, interpolation=cv.INTER_AREA)
         cv.imshow("Output", img)

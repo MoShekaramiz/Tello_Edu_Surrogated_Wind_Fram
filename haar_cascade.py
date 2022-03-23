@@ -8,7 +8,7 @@ def findTurbine(img):
     Returns the inupt image with boundaries drawn around the detected object and the x and y values of the center of the target in the image
     as well as the area of the detection boundary.'''
     # Use Haar Cascades to detect objects using the built-in classifier tool
-    cascade = cv.CascadeClassifier("matt_cascade.xml")
+    cascade = cv.CascadeClassifier("fan_cascade_1.xml")
     gray = cv.cvtColor(img, cv.COLOR_BGR2GRAY)
     turbines = cascade.detectMultiScale(gray, 1.2, 8)
 

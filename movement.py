@@ -72,7 +72,7 @@ def return_path(new_location, drone):
     try:
         return_angle = abs(math.degrees(math.atan(x/y)))
     except ZeroDivisionError:
-        pass
+        return_angle = 180
     # cases for rotation based on current cartesian quadrant of the drone
     if (x > 0) and (y > 0):
         drone.rotate_clockwise(int(90 + return_angle))
@@ -128,4 +128,3 @@ if __name__ == "__main__":
         print("Back & ccw step: ", i + 1)
     print("Returning to origin")
     return_path(new_location, drone)
-
