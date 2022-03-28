@@ -2,8 +2,9 @@ from djitellopy import Tello
 import math
 import random
 from time import sleep
+from output_video import LiveFeed
 
-def takeoff(drone):
+def takeoff():
     '''Launches the tello drone and returns a variable pointing to the drone'''
     drone = Tello()
     drone.connect()
@@ -113,18 +114,33 @@ def return_path(new_location, drone):
 if __name__ == "__main__":
     # example of how to use the functions, sending random distances and angles to the drone before calling return.
     new_location = [0, 0, 0]
-    drone = takeoff()
-    for i in range(3):
-        new_location = move(new_location, drone, fwd = random.randint(20, 100), cw = random.randint(0, 359))
+    drone = Tello()
+    drone.connect()
+    sleep(0.2)
+    drone.takeoff()
+    sleep(0.5)
+    print("Current battery remaining: ", drone.get_battery())
+    sleep(0.5)
+    drone.streamon()
+    video = LiveFeed(drone)
+    video.start()
+
+    drone.move_up(100)
+    for i in range(1):
+        new_location = move(new_location, drone, fwd = random.randint(20, 50), cw = random.randint(0, 359))
         print("Fwd & cw step: ", i + 1)
-    for i in range(3):
-        new_location = move(new_location, drone, fwd = random.randint(20, 100), ccw = random.randint(0, 359))
+    for i in range(1):
+        new_location = move(new_location, drone, fwd = random.randint(20, 50), ccw = random.randint(0, 359))
         print("Fwd & ccw step: ", i + 1)
-    for i in range(3):
-        new_location = move(new_location, drone, back = random.randint(20, 100), cw = random.randint(0, 359))
+    for i in range(1):
+        new_location = move(new_location, drone, back = random.randint(20, 50), cw = random.randint(0, 359))
         print("Back & cw step: ", i + 1)
-    for i in range(3):
-        new_location = move(new_location, drone, back = random.randint(20, 100), ccw = random.randint(0, 359))
+    for i in range(1):
+        new_location = move(new_location, drone, back = random.randint(20, 50), ccw = random.randint(0, 359))
         print("Back & ccw step: ", i + 1)
+    
     print("Returning to origin")
     return_path(new_location, drone)
+    
+    video.stop_haar()
+    video.stop_image()
