@@ -124,6 +124,7 @@ if __name__ == "__main__":
     drone.streamon()
     video = LiveFeed(drone)
     video.start()
+    video.stop_haar()
 
     drone.move_up(100)
     for i in range(1):
@@ -142,5 +143,5 @@ if __name__ == "__main__":
     print("Returning to origin")
     return_path(new_location, drone)
     
-    video.stop_haar()
+    video.stop_qr()
     video.stop_image()
