@@ -10,7 +10,8 @@ def boundingBox(img, bbox):
         width = int(bbox[0][1][0] - bbox[0][3][0])
         center = int((bbox[0][1][0] - bbox[0][3][0]) / 2) + int(bbox[0][3][0])
         area = width ** 2
-        info = [[center, 0], area, width]
+        height = bbox[0][0][0]
+        info = [[center, 0], area, width, height]
         return img, info
 
 def droneReadQR(drone):

@@ -25,6 +25,26 @@ class LiveFeed(threading.Thread):
                 cv.waitKey(1)
             while not self.qr.is_set():
                 QR, img, info = droneReadQR(self.drone)
+                if len(QR) > 0:
+                    # font
+                    font = cv.FONT_HERSHEY_PLAIN
+                    
+                    # org
+                    try:
+                        org = (info[0][0], info[3])
+                    except:
+                        pass
+                    # fontScale
+                    fontScale = 1
+                    
+                    # Blue color in BGR
+                    color = (0, 255, 0)
+                    
+                    # Line thickness of 2 px
+                    thickness = 2
+                    
+                    # Using cv2.putText() method
+                    img = cv.putText(img, QR, org, font, fontScale, color, thickness, cv.LINE_AA)
                 cv.imshow("Output", img)
                 cv.waitKey(1)
             frame = self.drone.get_frame_read()

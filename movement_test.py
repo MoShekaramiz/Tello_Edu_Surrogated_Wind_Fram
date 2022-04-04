@@ -44,7 +44,7 @@ def move(new_location, drone, fwd = 0, back = 0, ccw = 0, cw = 0, up = 0, down =
             new_location[2] = abs((new_location[2] - cw)) 
     if fwd != 0:
         # forward takes priority -- returns x and y coordinates after movement
-        drone.move_forward(fwd)
+        drone.move_forward(int(fwd))
         new_location[0] += fwd * math.cos(math.radians(new_location[2]))
         new_location[1] += fwd * math.sin(math.radians(new_location[2]))
         sleep(0.5)
@@ -78,8 +78,8 @@ def return_path(new_location, drone, turbine_locations):
     ##################### collision avoidance section #####################
     possible_collisions = []
     for i in turbine_locations:
-        centerx = i[0] + 100
-        centery = i[2] + 100
+        centerx = i[5]
+        centery = i[6]
         center_distance = int(math.sqrt((x-centerx)**2 + (y-centery)**2))
         if quadrant == 1: # drone in quadrant 1
             print(f"x: {x} y: {y}")
@@ -99,10 +99,20 @@ def return_path(new_location, drone, turbine_locations):
     print(possible_collisions) ##################################### DELETE THIS
     if len(possible_collisions) != 0:
         possible_collisions = sorted(possible_collisions, key=operator.itemgetter(4)) # sort the possible collision list by distance from drone
+        starting_point = new_location
         for i in range(return_distance):
-                starting_point = new_location
-                targetx = x + i * math.cos(math.radians(angle))
-                targety = y + i * math.sin(math.radians(angle))
+                if quadrant == 1:
+                    targetx = (x - i) * math.cos(math.radians(angle))
+                    targety = (y - i) * math.sin(math.radians(angle))
+                elif quadrant == 2:
+                    targetx = (x + i) * -math.cos(math.radians(angle))
+                    targety = (y - i) * math.sin(math.radians(angle))
+                elif quadrant == 3:
+                    targetx = (x + i) * -math.cos(math.radians(angle))
+                    targety = (y + i) * -math.sin(math.radians(angle))
+                elif quadrant == 4:
+                    targetx = (x - i) * math.cos(math.radians(angle))
+                    targety = (y + i) * -math.sin(math.radians(angle))
                 for j in possible_collisions:
                     centerx = j[5]
                     centery = j[6] 
@@ -120,19 +130,19 @@ def return_path(new_location, drone, turbine_locations):
                                 return_angle = abs(math.degrees(math.atan((x-right_corner[0])/(y-right_corner[1]))))
                             except ZeroDivisionError:
                                 pass
-                            new_location = target_angle(new_location, drone, return_angle)
+                            new_location = target_angle(new_location, drone, return_angle, right_corner[0], right_corner[1])
                             new_location = move(new_location, drone, fwd=right_distance)
                         else:
                             try:
                                 return_angle = abs(math.degrees(math.atan((x-left_corner[0])/(y-left_corner[1]))))
                             except ZeroDivisionError:
                                 pass
-                            new_location = target_angle(new_location, drone, return_angle)
+                            new_location = target_angle(new_location, drone, return_angle, left_corner[0], left_corner[1])
                             new_location = move(new_location, drone, fwd=left_distance)
                         return_path(new_location, drone, turbine_locations) # call return path again until there are no possible collisions remaining
                         ######### Work on if the no-go zone overlaps an axis
-                if new_location == starting_point:
-                    straight_path(new_location, drone)
+        if new_location == starting_point:
+            straight_path(new_location, drone)
     else:
        straight_path(new_location, drone)
 
@@ -147,7 +157,7 @@ def straight_path(new_location, drone):# No possible collisions were detected
     except ZeroDivisionError:
         return_angle = 180
     # cases for rotation based on current cartesian quadrant of the drone
-    new_location = target_angle(new_location, drone, return_angle)
+    new_location = target_angle(new_location, drone, return_angle, 0, 0)
     # Travel the full return distance    
     while (return_distance != 0):
         if (return_distance >= 500):
@@ -161,51 +171,65 @@ def straight_path(new_location, drone):# No possible collisions were detected
             sleep(0.5)
             return_distance = 0
     drone.land()
+    drone.streamoff()
+    quit()
 
-def target_angle(new_location, drone, return_angle):
+
+def target_angle(new_location, drone, return_angle, x, y):
+    dronex = new_location[0]
+    droney = new_location[1]
     angle = new_location[2]
+    quadrant = 0
+    if x < dronex and y < droney:
+        quadrant =  1
+    elif x > dronex and y < droney:
+        quadrant = 2
+    elif x > dronex and y > droney:
+        quadrant = 3
+    elif x < dronex and y > droney:
+        quadrant = 4
     # cases for rotation based on current cartesian quadrant of the drone #########FIX THIS SECTION
-    if 180 < return_angle < 270:# quadrant 1
+    if quadrant == 1:# quadrant 1
         relative_angle = 270 - return_angle
         if angle < relative_angle:
             new_location = move(new_location, drone, ccw=int(relative_angle - angle))
         else:
             new_location = move(new_location, drone, cw=int(angle - relative_angle))
-    elif 270 < return_angle < 360:# quadrant 2
+    elif quadrant == 2:# quadrant 2
         relative_angle = 270 + return_angle
         if angle < relative_angle:
             new_location = move(new_location, drone, ccw=int(relative_angle - angle))
         else:
             new_location = move(new_location, drone, cw=int(angle - relative_angle))
-    elif 0 < return_angle < 90:# quadrant 3
+    elif quadrant == 3:# quadrant 3
         relative_angle = 90 - return_angle
         if angle < relative_angle:
             new_location = move(new_location, drone, ccw=int(relative_angle - angle))
         else:
             new_location = move(new_location, drone, cw=int(angle - relative_angle))
-    elif 90 < return_angle < 180:# quadrant 4
+    elif quadrant == 4:# quadrant 4
         relative_angle = 90 + return_angle
         if angle < relative_angle:
             new_location = move(new_location, drone, ccw=int(angle - relative_angle))
         else:
             new_location = move(new_location, drone, cw=int(angle - relative_angle))
-    elif relative_angle == 270:# positive Y axis
+    elif x == dronex and y > droney:# positive Y axis
         if 90 <= angle < 270:
             new_location = move(new_location, drone, cw=int(270 - angle))
         elif 0 <= angle < 90 or 270 <= angle < 360:
             new_location = move(new_location, drone, cw=int(-(270 - angle)))
-    elif relative_angle == 90:# negative Y axis
+    elif x == dronex and y < droney:# negative Y axis
         if 90 <= angle < 270:
             new_location = move(new_location, drone, cw=int(-(270 - angle)))
         elif 0 <= angle < 90 or 270 <= angle < 360:
             new_location = move(new_location, drone, cw=int(270 - angle))
-    elif relative_angle == 180:# positive X axis
+    elif x > dronex and y == droney:# positive X axis
         if 0 < angle <= 180:
             new_location = move(new_location, drone, ccw=int(180 - angle))
         elif 180 < angle <= 360:
             new_location = move(new_location, drone, cw=int(360 - angle))
-    elif relative_angle == 0:# negative X axis
-        if 0 < angle <= 180:
+    elif x < dronex and y == droney:# negative X axis
+        if 0 <= angle <= 180:
             new_location = move(new_location, drone, cw=int(180 - angle))
         elif 180 < angle <= 360:
             new_location = move(new_location, drone, cw=int(360 - angle))
