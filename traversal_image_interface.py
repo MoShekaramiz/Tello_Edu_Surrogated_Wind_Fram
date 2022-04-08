@@ -2,6 +2,7 @@ from djitellopy import Tello
 import cv2 as cv
 from time import sleep
 from qr_reader import droneReadQR
+from check_camera import check_camera
 import movement_test as mv
 from output_video import LiveFeed
 import haar_cascade as hc
@@ -13,7 +14,7 @@ w, h = 720, 480 # display size of the screen
 location = [0, 0, 0, 0] # Initialized list of x, y and angle coordinates for the drone.
 turbine_locations = [] # List containing the locations of found turbines
 
-def trackObject(drone, info, location, turbines):
+def trackObject(drone, info, location, turbines, video):
     '''Take the variable for the drone, the output array from calling findTurbine in haar_cascade.py, and the current drone x,y location and relative angle (initialized as [0, 0, 0]).
     It scans for the target object of findTurbine and approaches the target. Once it is at a pre-determined distance fbRange, it will scan and return the value of the QR code
     and return the drone to the starting point.'''
@@ -22,7 +23,8 @@ def trackObject(drone, info, location, turbines):
     x, y = info[0]
     width = info[2]
     # object detected
-    if(x == 1):
+    print(x)
+    if(x != 0):
         distance = int((650 * 40.64) / width) - 50
         if distance < 20:
             distance = 20
@@ -32,38 +34,41 @@ def trackObject(drone, info, location, turbines):
             if(i[0] < targetx < i[1]) and (i[2] < targety < i[3]):
                 location = mv.move(location, drone, ccw=45)
                 sleep(0.5)
-                trackObject(drone, info, location, turbines)
+                info = check_camera(drone)
+                trackObject(drone, info, location, turbines, video)
         if(0 < x < 300):
             # The drone needs to angle to the left to center the target.
             new_angle = int((x / 360) * 41.3)
-            location = mv.move(location, drone, ccw=new_angle)        
-            trackObject(drone, info, location, turbines)
+            location = mv.move(location, drone, ccw=new_angle)  
+            info = check_camera(drone)      
+            trackObject(drone, info, location, turbines, video)
         elif(x >= 420):
             # The drone needs to angle to the right to center the target.
             new_angle = int(((x - 360) / 360) * 41.3)
-            location = mv.move(location, drone, cw=new_angle)        
-            trackObject(drone, info, location, turbines)
+            location = mv.move(location, drone, cw=new_angle) 
+            info = check_camera(drone)       
+            trackObject(drone, info, location, turbines, video)
         if area > fbRange[0] and area < fbRange[1]:
             # The drone has approached the target and will scan for a QR code
-            qrDetection(drone, location, turbines)
+            qrDetection(drone, location, turbines, video)
         elif area > fbRange[1]:
             # The drone is too close to the target
             location = mv.move(location, drone, back=20)
-            trackObject(drone, info, location, turbines)
+            info = check_camera(drone)
+            trackObject(drone, info, location, turbines, video)
         elif area < fbRange[0] and area != 0:
             # The drone is too far from the target
             location = mv.move(location, drone, fwd=distance)
-            qrDetection(drone, location, turbines)
+            qrDetection(drone, location, turbines, video)
             #return location
     return location
 
-def qrDetection(drone, location, turbines):
+def qrDetection(drone, location, turbines, video):
     drone.move_down(60)
     QR = None 
     video.stop_haar()
     while True:
         QR, img, info = droneReadQR(drone)
-        img = frame.frame
         img = cv.resize(img, (w, h))
         if len(QR) > 0:
             print(">>>>>>>>>>>>>>>>QR CODE FOUND: ", QR)
@@ -132,6 +137,6 @@ if __name__ == "__main__":
         img = cv.resize(img, (w, h))
         img, info = hc.findTurbine(img)
         #QR, img, info = droneReadQR(drone)
-        location = trackObject(drone, info, location, turbines)
+        location = trackObject(drone, info, location, turbines, video)
         img = cv.resize(img, None, fx=1, fy=1, interpolation=cv.INTER_AREA)
         

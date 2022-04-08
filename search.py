@@ -322,7 +322,19 @@ def check_camera(drone, location):
     img = frame.frame
     img = cv.resize(img, (w, h))
     img, info = hc.findTurbine(img)
-    location = trackObject(drone, info, location, turbines)
+    x, y = info[0]
+    if x == 0:
+        for i in range(4):
+            frame = drone.get_frame_read()
+            sleep(0.2)
+            img = frame.frame
+            img = cv.resize(img, (w, h))
+            img, info = hc.findTurbine(img)
+            x, y = info[0]
+            if x != 0:
+                break
+    location = trackObject(drone, info, location, turbines, video)
+    print("escaped")
     return location
     
 
@@ -432,11 +444,9 @@ if __name__ == "__main__":
     drone.streamon()
     sleep(0.5)
     video = LiveFeed(drone)
-    video.stop_haar()
-    video.stop_qr()
     video.start()
     drone.takeoff()
-    sleep(0.5)
+    sleep(1)
     mv.move(location, drone, up=40)
     sleep(0.5)
     # END OF SECTION TO COMMENT OUT
