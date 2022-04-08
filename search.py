@@ -75,7 +75,6 @@ def backForth(drone, location, flyZone, moveIncr, display=False, xgraph=[], ygra
                     xgraph.append(location[0])    
                     ygraph.append(location[1])
             location = mv.move(location, drone, ccw=90)
-            sleep(0.5)
             xNew = location[0] + moveIncr * math.cos(math.radians(location[2]))
             if xNew < xMin:
                 print("Went through whole area")
@@ -92,7 +91,6 @@ def backForth(drone, location, flyZone, moveIncr, display=False, xgraph=[], ygra
                     xgraph.append(location[0])    
                     ygraph.append(location[1])
             location = mv.move(location, drone, cw=91)
-            sleep(0.5)
             xNew = location[0] + moveIncr * math.cos(math.radians(location[2]))
             if xNew < xMin:
                 print("Went through whole area")
@@ -103,14 +101,16 @@ def backForth(drone, location, flyZone, moveIncr, display=False, xgraph=[], ygra
     location = mv.move(location, drone, fwd=moveIncr)
     return location, totalDist, 1
 
-def backForth2(drone, location, flyZone, moveIncr, display=False):
+def backForth2(drone, location, flyZone, searchWidth, moveIncr, display=False):
     '''The drone explores a back and forth path.
+    plt.show() needs to be called after if you want to display a plot of the path
     
     Input:
         drone (Tello) : drone variable
         location : [x, y, angle] Current coordinates and angle of drone
         flyZone : [xMin, yMin, xMax, yMax] four vertices representing area to be explored
-        moveIncr (int) : distance (cm) for drone to move before checking the area, This will also be the 
+        searchWidth (int): distance (cm) between traversals
+        moveIncr (int) : distance (cm) for drone to move before checking the area
         distance between traversals
         display (bool, optional) : default = false. If true a graph of the projected path will be displayed
     Output:
@@ -136,15 +136,16 @@ def backForth2(drone, location, flyZone, moveIncr, display=False):
     xDist = xMax-xMin               # distance needed for next horizontal traverse
     yDist = yMax-yMin               # distance needed for next vertical traverse
     turnDir = 1                     # 0 for clockwise 1 for counter clockwise
-    MovesBeforeTurn = int(xDist/moveIncr)
+    XMovesBeforeTurn = int(xDist/moveIncr)
+    Ytraversals = int(yDist/searchWidth)
+    YMovesBeforeTurn = int(searchWidth/moveIncr)
     y=0
     while True:
         if display:
             xgraph.append(location[0])    
             ygraph.append(location[1])
-        for i in range(MovesBeforeTurn):
+        for i in range(XMovesBeforeTurn):
             mv.move(location, drone, fwd=moveIncr)
-            sleep(0.5)
             # CHECK CAMERA
             location= check_camera(drone, location)
             ###################
@@ -154,7 +155,6 @@ def backForth2(drone, location, flyZone, moveIncr, display=False):
                 ygraph.append(location[1])
         if (xDist % moveIncr) > 20:
             mv.move(location, drone, fwd=xDist%moveIncr)
-            sleep(0.5)
             totalDist += xDist%moveIncr
             # CHECK CAMERA
             location= check_camera(drone, location)
@@ -163,30 +163,29 @@ def backForth2(drone, location, flyZone, moveIncr, display=False):
                 xgraph.append(location[0])    
                 ygraph.append(location[1])
         y += moveIncr
-        if y > yDist:
+        if y >= Ytraversals:
             break
         if turnDir:
             mv.move(location, drone, ccw=90)
         else:
             mv.move(location, drone, cw=90)
-        sleep(0.5)
         # CHECK CAMERA
         location= check_camera(drone, location)
         ###################
-        mv.move(location, drone, fwd=moveIncr)
-        sleep(0.5)
-        # CHECK CAMERA
-        location= check_camera(drone, location)
-        ###################
-        totalDist += moveIncr
-        if display:
-            xgraph.append(location[0])    
-            ygraph.append(location[1])
+        for i in range(YMovesBeforeTurn):
+            mv.move(location, drone, fwd=moveIncr)
+            # CHECK CAMERA
+            location= check_camera(drone, location)
+            ###################
+            totalDist += moveIncr
+            if display:
+                xgraph.append(location[0])    
+                ygraph.append(location[1])
         if turnDir:
             mv.move(location, drone, ccw=90)
         else:
             mv.move(location, drone, cw=90)
-        sleep(0.5)
+        y += 1
         # CHECK CAMERA
         location= check_camera(drone, location)
         ###################
@@ -208,7 +207,7 @@ def backForth2(drone, location, flyZone, moveIncr, display=False):
     return location, totalDist
     
 
-def spiral(drone, location, flyZone, moveIncr, display=False):
+def spiral(drone, location, flyZone, searchWidth, moveIncr, display=False):
     #poly_bound = Polygon(boundary)    
     #cp = poly_bound.centroid
     #poly_bound.exterior.coords
@@ -218,8 +217,8 @@ def spiral(drone, location, flyZone, moveIncr, display=False):
         drone (Tello) : drone variable
         location : [x, y, angle] Current coordinates and angle of drone
         flyZone : [xMin, yMin, xMax, yMax] four vertices representing area to be explored
-        moveIncr (int) : distance (cm) for drone to move before checking the area, This will also be the 
-        distance between traversals
+        searchWidth (int): distance (cm) between traversals
+        moveIncr (int) : distance (cm) for drone to move before checking the area
         display (bool, optional) : default = false. If true a graph of the projected path will be displayed
     Output:
         location : [x, y, angle] updated coordinates and angle of drone
@@ -267,7 +266,7 @@ def spiral(drone, location, flyZone, moveIncr, display=False):
                     totalDist += yDist-yt
                 yt = 0
                 if f != 0:                  # decrease distance to travel each time after first line
-                    yDist -= moveIncr
+                    yDist -= searchWidth
                 location =mv.move(location,drone, ccw=90)
                 f =1  
             else:
@@ -288,7 +287,7 @@ def spiral(drone, location, flyZone, moveIncr, display=False):
                     totalDist += xDist-xt
                 xt = 0
                 if f != 0:
-                    xDist -= moveIncr
+                    xDist -= searchWidth
                 location = mv.move(location,drone, ccw=90)
                 f = 1
             else:
@@ -452,16 +451,14 @@ if __name__ == "__main__":
     # END OF SECTION TO COMMENT OUT
     
     bounds = [0,321, 0, 324]
-
-    #bounds = [0,224, 0, 224]
-    #bounds = [-327,0, 0, 327]
-    #bounds = [-150,0,0,150]
     start_time = time.time()
-    [location,distSpiral] = spiral(drone, location, bounds, 50, display=False)
+    moveIncr = 100
+    searchWidth = 50
+    [location,distSpiral] = spiral(drone, location, bounds, searchWidth, moveIncr)
     #location = [0, 0, 0, 0] # Initialized list of x, y and angle coordinates for the drone.
     #[location,distBF2] = backForth2(drone, location, bounds, 50, display=False)
     end_time = time.time()
-    print("--- %s seconds ---", end_time - start_time)
+    print('--- ', round(end_time - start_time, 2), ' seconds ---', end_time - start_time)
     #location = [0, 0, 0, 0] # Initialized list of x, y and angle coordinates for the drone.
     #bounds = [-328,0, 0, 324]
     #distBF = testBF(location, bounds, display=False)
