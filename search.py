@@ -1,12 +1,11 @@
-from ast import increment_lineno
-from msilib.schema import MoveFile
 from re import X
 from djitellopy import Tello
+from output_video import LiveFeed
 import cv2 as cv
 from time import sleep
-import movement as mv
+import movement_test as mv
+from traversal_image_interface import trackObject
 import haar_cascade as hc
-import mission
 import math
 import matplotlib.pyplot as plt
 from matplotlib.path import Path
@@ -20,10 +19,9 @@ fbRange = [32000, 52000] # preset parameter for detected image boundary size
 w, h = 720, 480 # display size of the screen
 location = [0, 0, 0, 0] # Initialized list of x, y and angle coordinates for the drone.
 turbine_locations = [] # List containing the locations of found turbines
-detected_object = 0 # A flag to determine if the camera detected an object in the previous 5 frames
 
 def backForth(drone, location, flyZone, moveIncr, display=False, xgraph=[], ygraph=[]):
-    '''The drone explores a back and forth path. Currently the funcion ends after each movement to
+    '''The drone explores a back and forth path. Currently the funcion ends after each movement_test to
     allow for an external check of the area.
     
     Input:
@@ -148,6 +146,8 @@ def backForth2(drone, location, flyZone, moveIncr, display=False):
             mv.move(location, drone, fwd=moveIncr)
             sleep(0.5)
             # CHECK CAMERA
+            location= check_camera(drone, location)
+            ###################
             totalDist += moveIncr
             if display:
                 xgraph.append(location[0])    
@@ -157,6 +157,8 @@ def backForth2(drone, location, flyZone, moveIncr, display=False):
             sleep(0.5)
             totalDist += xDist%moveIncr
             # CHECK CAMERA
+            location= check_camera(drone, location)
+            ###################
             if display:
                 xgraph.append(location[0])    
                 ygraph.append(location[1])
@@ -169,9 +171,13 @@ def backForth2(drone, location, flyZone, moveIncr, display=False):
             mv.move(location, drone, cw=90)
         sleep(0.5)
         # CHECK CAMERA
+        location= check_camera(drone, location)
+        ###################
         mv.move(location, drone, fwd=moveIncr)
         sleep(0.5)
         # CHECK CAMERA
+        location= check_camera(drone, location)
+        ###################
         totalDist += moveIncr
         if display:
             xgraph.append(location[0])    
@@ -182,6 +188,8 @@ def backForth2(drone, location, flyZone, moveIncr, display=False):
             mv.move(location, drone, cw=90)
         sleep(0.5)
         # CHECK CAMERA
+        location= check_camera(drone, location)
+        ###################
         turnDir = (turnDir + 1) % 2 
     
     # plot the path
@@ -199,9 +207,6 @@ def backForth2(drone, location, flyZone, moveIncr, display=False):
 
     return location, totalDist
     
-        
-
-
 
 def spiral(drone, location, flyZone, moveIncr, display=False):
     #poly_bound = Polygon(boundary)    
@@ -253,6 +258,8 @@ def spiral(drone, location, flyZone, moveIncr, display=False):
             if yDist < 20:
                 break
             ##### CHECK CAMERA
+            location= check_camera(drone, location)
+            ###################
             #sleep(0.2)    
             if yt + moveIncr > yDist:
                 if yDist-yt>=20:
@@ -271,7 +278,9 @@ def spiral(drone, location, flyZone, moveIncr, display=False):
         elif round(location[2])==0 or round(location[2])==180:
             if xDist < 20:
                 break
-            ##### CHECK CAMERA 
+            ##### CHECK CAMERA
+            location= check_camera(drone, location)
+            ################### 
             #sleep(0.2)
             if xt + moveIncr > xDist:
                 if xDist-xt>=20:
@@ -307,8 +316,14 @@ def spiral(drone, location, flyZone, moveIncr, display=False):
 
     return location, totalDist
 
-
-
+def check_camera(drone, location):
+    frame = drone.get_frame_read()
+    sleep(0.2)
+    img = frame.frame
+    img = cv.resize(img, (w, h))
+    img, info = hc.findTurbine(img)
+    location = trackObject(drone, info, location, turbines)
+    return location
     
 
 def approx_cell_decomp(obstacleList, boundary):
@@ -408,7 +423,7 @@ class obstacle:
 
 if __name__ == "__main__":
     drone = Tello()
-
+    turbines = {"WindTurbine_1": [0, 0, 0, 0]}
      # COMMENT OUT SECTION IF TESTING W/O PHYSICAL DRONE
     drone.connect()
     sleep(0.5)
@@ -416,7 +431,13 @@ if __name__ == "__main__":
     sleep(0.3)
     drone.streamon()
     sleep(0.5)
+    video = LiveFeed(drone)
+    video.stop_haar()
+    video.stop_qr()
+    video.start()
     drone.takeoff()
+    sleep(0.5)
+    mv.move(location, drone, up=40)
     sleep(0.5)
     # END OF SECTION TO COMMENT OUT
     
