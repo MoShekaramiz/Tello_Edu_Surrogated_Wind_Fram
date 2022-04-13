@@ -22,7 +22,6 @@ def trackObject(drone, info, location, turbines, detected_object):
     area = info[1]
     x, y = info[0]
     width = info[2]
-    #print(area)
     # No object detected
     if(x == 0):
         if detected_object == 0:
@@ -40,7 +39,7 @@ def trackObject(drone, info, location, turbines, detected_object):
             sleep(0.1)
     else:
         detected_object = 1
-        distance = int((650 * 40.64) / width) - 40
+        distance = int((650 * 40.64) / width) - 30
         if distance < 20:
             distance = 20
         targetx = location[0] + distance * math.cos(math.radians(location[2]))
@@ -50,12 +49,12 @@ def trackObject(drone, info, location, turbines, detected_object):
                 location = mv.move(location, drone, ccw=45)
                 sleep(0.5)
                 return location, detected_object
-        if(0 < x < 300):
+        if(0 < x < 330):
             # The drone needs to angle to the left to center the target.
             new_angle = int((x / 360) * 41.3)
             location = mv.move(location, drone, ccw=new_angle)        
             return location, detected_object
-        elif(x >= 420):
+        elif(x >= 390):
             # The drone needs to angle to the right to center the target.
             new_angle = int(((x - 360) / 360) * 41.3)
             location = mv.move(location, drone, cw=new_angle)        
@@ -75,7 +74,7 @@ def trackObject(drone, info, location, turbines, detected_object):
     return location, detected_object
 
 def qrDetection(drone, location, turbines):
-    drone.move_down(60)
+    drone.move_down(70)
     QR = None 
     video.stop_haar()
     while True:
@@ -90,14 +89,17 @@ def qrDetection(drone, location, turbines):
             for i in turbines:
                 if i == QR:
                     turbine_found = 1
-                    location = mv.move(location, drone, up=20)
+                    location = mv.move(location, drone, up=30)
                     mission.mission0(location, drone, turbines[i], QR)
                     location = mv.move(location, drone, up=40)
                     turbines.pop(i) 
                     if len(turbines) != 0:
-                        video.start_haar
+                        video.start_haar()
+                        sleep(0.5)
                         video.stop_qr()
-                        video.start_qr
+                        sleep(1)
+                        video.start_qr()
+                        sleep(0.5)
                         mv.move(location, drone, ccw=45)
                         break
                     else:
@@ -116,10 +118,13 @@ def qrDetection(drone, location, turbines):
                         video.stop_image()
                         quit()
             if turbine_found == 0:
-                mv.move(location, drone, up=60)
-                video.start_haar
+                mv.move(location, drone, up=70)
+                video.start_haar()
+                sleep(0.5)
                 video.stop_qr()
-                video.start_qr
+                sleep(1)
+                video.start_qr()
+                sleep(0.5)
                 mv.move(location, drone, ccw=45)
             break
 
@@ -147,7 +152,7 @@ def test(mission_list, turbine_list):
         cv.waitKey(1)
 
 if __name__ == "__main__":
-    turbines = {"WindTurbine_1": [1, 0, 0, 0]}
+    turbines = {"WindTurbine_1": [1,1,1,1]}
     drone = Tello()
     drone.connect()
     sleep(0.5)
@@ -158,7 +163,7 @@ if __name__ == "__main__":
     video = LiveFeed(drone)
     video.start()
     drone.takeoff()
-    sleep(1)
+    sleep(1.5)
     mv.move(location, drone, up=40)
     while True:
         frame = drone.get_frame_read()

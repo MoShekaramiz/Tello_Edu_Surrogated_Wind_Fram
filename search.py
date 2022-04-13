@@ -435,7 +435,7 @@ class obstacle:
 
 if __name__ == "__main__":
     drone = Tello()
-    turbines = {"WindTurbine_1": [0, 0, 0, 0]}
+    turbines = {"WindTurbine_2": [0, 0, 0, 0]}
      # COMMENT OUT SECTION IF TESTING W/O PHYSICAL DRONE
     drone.connect()
     sleep(0.5)
@@ -451,9 +451,9 @@ if __name__ == "__main__":
     sleep(0.5)
     # END OF SECTION TO COMMENT OUT
     
-    bounds = [0,321, 0, 324]
+    #bounds = [0,321, 0, 324]
 
-    #bounds = [0,224, 0, 224]
+    bounds = [0,224, 0, 224]
     #bounds = [-327,0, 0, 327]
     #bounds = [-150,0,0,150]
     start_time = time.time()

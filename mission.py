@@ -25,13 +25,11 @@ def mission0(location, drone, mission, turbine):
         mission3(drone, location, mission, turbine)
     elif mission[2] == 1:
         mission2(drone, location, mission, turbine)
-    else:
-        mv.move(location, drone, down=20)
 
 def mission1(drone, location, mission, turbine):
     '''Film the fan on the right side after rising 20cm'''
     drone.move_right(50)
-    drone.move_forward(50)
+    drone.move_forward(60)
     mv.move(location, drone, ccw=90)
     if location[3] == 0:
         mv.move(location, drone, up=20)
@@ -42,8 +40,7 @@ def mission1(drone, location, mission, turbine):
     elif mission[3] == 1:
         mission3(drone, location, mission, turbine, recent_mission = 1)
     else:
-        mv.move(location, drone, down=20)
-        drone.move_left(50)
+        drone.move_left(60)
         drone.move_forward(50)
         mv.move(location, drone, cw=90)
 
@@ -53,7 +50,7 @@ def mission2(drone, location, mission, turbine, recent_mission = 0):
         mv.move(location, drone, up=50)
     if recent_mission == 0:
         drone.move_right(50)
-        drone.move_forward(100)
+        drone.move_forward(110)
         drone.move_left(50)
         mv.move(location, drone, ccw=180)
     elif recent_mission == 1:
@@ -66,9 +63,8 @@ def mission2(drone, location, mission, turbine, recent_mission = 0):
         mission3(drone, location, mission, turbine, recent_mission = 2)
     else:
         drone.move_right(50)
-        drone.move_forward(100)
+        drone.move_forward(110)
         drone.move_left(50)
-        location = mv.move(location, drone, down=20)
 
 def mission3(drone, location, mission, turbine, recent_mission = 0):
     '''Film the left side of the fan after going up 20cm'''
@@ -76,27 +72,25 @@ def mission3(drone, location, mission, turbine, recent_mission = 0):
         mv.move(location, drone, up=20)
     if recent_mission == 0:
         drone.move_left(50)
-        drone.move_forward(100)
+        drone.move_forward(60)
         mv.move(location, drone, cw=90)
     elif recent_mission == 1:
-        drone.move_left(50)
+        drone.move_left(60)
         drone.move_forward(100)
-        drone.move_right(50)
+        drone.move_right(60)
         mv.move(location, drone, ccw=180)
     elif recent_mission == 2:
         drone.move_right(50)
         drone.move_forward(50)
         mv.move(location, drone, ccw=90)
     recordVideo(drone, turbine, 3)
-    drone.move_down(20)
     mission[3] = 0
     if mission[2] == 1:
         mission2(drone, location, mission, turbine)
     else:
-        drone.move_right(50)
+        drone.move_right(60)
         drone.move_forward(50)
         mv.move(location, drone, ccw=90)
-        mv.move(location, drone, down=20)
 
 def recordVideo(drone, turbine, step):
     count = 0

@@ -25,7 +25,7 @@ def trackObject(drone, info, location, turbines, video):
     # object detected
     print(x)
     if(x != 0):
-        distance = int((650 * 40.64) / width) - 50
+        distance = int((650 * 40.64) / width) - 30
         if distance < 20:
             distance = 20
         targetx = location[0] + distance * math.cos(math.radians(location[2]))
@@ -36,13 +36,13 @@ def trackObject(drone, info, location, turbines, video):
                 sleep(0.5)
                 info = check_camera(drone)
                 trackObject(drone, info, location, turbines, video)
-        if(0 < x < 300):
+        if(0 < x < 330):
             # The drone needs to angle to the left to center the target.
             new_angle = int((x / 360) * 41.3)
             location = mv.move(location, drone, ccw=new_angle)  
             info = check_camera(drone)      
             trackObject(drone, info, location, turbines, video)
-        elif(x >= 420):
+        elif(x >= 390):
             # The drone needs to angle to the right to center the target.
             new_angle = int(((x - 360) / 360) * 41.3)
             location = mv.move(location, drone, cw=new_angle) 
