@@ -3,7 +3,7 @@ from djitellopy import Tello
 from output_video import LiveFeed
 import cv2 as cv
 from time import sleep
-import movement_test as mv
+import movement as mv
 from traversal_image_interface import trackObject
 import haar_cascade as hc
 import math

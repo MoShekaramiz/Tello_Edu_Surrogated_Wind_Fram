@@ -1,12 +1,16 @@
+'''Module to assist with detecting QR codes in OpenCV. By Branden Pinney and Shayne Duncan 2022.'''
+
 import cv2 as cv
 from time import sleep
 
 def boundingBox(img, bbox):
+    '''Creates a bounding box around the detected QR code'''
     if bbox is not None:
         bbox = [bbox[0].astype(int)]
         n = len(bbox[0])
         for i in range(n):
             cv.line(img, tuple(bbox[0][i]), tuple(bbox[0][(i+1) % n]), (0,255,0), 3)
+
         width = int(bbox[0][1][0] - bbox[0][3][0])
         center = int((bbox[0][1][0] - bbox[0][3][0]) / 2) + int(bbox[0][3][0])
         area = width ** 2
@@ -24,4 +28,5 @@ def droneReadQR(drone):
     info = [[0, 0], 0, 0]
     if len(QR) > 0:
         img, info = boundingBox(img, bbox)
+
     return QR, img, info

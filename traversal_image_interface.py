@@ -3,7 +3,7 @@ import cv2 as cv
 from time import sleep
 from qr_reader import droneReadQR
 from check_camera import check_camera
-import movement_test as mv
+import movement as mv
 from output_video import LiveFeed
 import haar_cascade as hc
 import mission

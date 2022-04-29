@@ -109,14 +109,3 @@ def recordVideo(drone, turbine, step):
         sleep(1/60)
         record -= 1
     video.release()
-
-if __name__ == "__main__":
-    drone = Tello()
-    drone.connect()
-    sleep (0.3)
-    location = [0,0,0,0]
-    drone.streamon()
-    #drone.takeoff()
-    #sleep(2)
-    mission = [1, 0, 0, 0]
-    location = mission0(location, drone, mission, 'Turbine 1')

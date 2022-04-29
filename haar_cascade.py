@@ -1,6 +1,5 @@
-#### This code was written following the tutorial located at https://www.youtube.com/watch?v=LmEcyQnfpDA&t=1890s ####
+'''Haar Cascade detection through OpenCV using the OpenCV documentation. By Branden Pinney and Shayne Duncan 2022.'''
 
-import numpy as np
 import cv2 as cv
 
 def findTurbine(img):
@@ -16,15 +15,13 @@ def findTurbine(img):
     turbineListArea = []
 
     for (x,y,w,h) in turbines:
-        # draw a rectangle around the detected face
+        # draw a rectangle around the detected object
         # code for creating a rectangle to see dectection boundaries -- 
         cv.rectangle(img, (x, y), (x + w, y + h), (0, 0, 255), 2)
         # determine the center of the detection boundaries and the area
         centerX = x + w // 2
         centerY = y + h // 2
         area = w * h
-        # draw a circle in the center
-        # cv.circle(img, (centerX, centerY), 5, (0, 255, 0), cv.FILLED)
         turbineListC.append([centerX, centerY])
         turbineListArea.append(area)
     if len(turbineListArea) != 0: 
