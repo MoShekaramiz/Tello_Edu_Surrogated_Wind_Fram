@@ -39,7 +39,7 @@ def trackObject(drone, info, location, turbines, detected_object):
             sleep(0.1)
     else:
         detected_object = 1
-        distance = int((650 * 40.64) / width) - 30
+        distance = int((650 * 40.64) / width) - 40
         if distance < 20:
             distance = 20
         targetx = location[0] + distance * math.cos(math.radians(location[2]))
@@ -49,14 +49,14 @@ def trackObject(drone, info, location, turbines, detected_object):
                 location = mv.move(location, drone, ccw=45)
                 sleep(0.5)
                 return location, detected_object
-        if(0 < x < 330):
+        if(0 < x <= 340):
             # The drone needs to angle to the left to center the target.
-            new_angle = int((x / 360) * 41.3)
+            new_angle = int(round(((360 - x) / 360) * 41.3))
             location = mv.move(location, drone, ccw=new_angle)        
             return location, detected_object
-        elif(x >= 390):
+        elif(x >= 380):
             # The drone needs to angle to the right to center the target.
-            new_angle = int(((x - 360) / 360) * 41.3)
+            new_angle = int(round(((x - 360) / 360) * 41.3))
             location = mv.move(location, drone, cw=new_angle)        
             return location, detected_object
         if area > fbRange[0] and area < fbRange[1]:
@@ -74,9 +74,10 @@ def trackObject(drone, info, location, turbines, detected_object):
     return location, detected_object
 
 def qrDetection(drone, location, turbines):
-    drone.move_down(70)
+    drone.move_down(80)
     QR = None 
     video.stop_haar()
+    img_counter = 0
     while True:
         QR, img, info = droneReadQR(drone)
         img = frame.frame
@@ -86,34 +87,24 @@ def qrDetection(drone, location, turbines):
             print(location[0], location[1])
             turbine_locations.append([location[0] - 60, location[0] + 60, location[1] - 60, location[1] + 60, QR, location[0], location[1]])
             turbine_found = 0 # Flag to determine if the correct turbine was found
+            video.stop_qr()
+            sleep(1)
             for i in turbines:
                 if i == QR:
                     turbine_found = 1
-                    location = mv.move(location, drone, up=30)
+                    location = mv.move(location, drone, up=40)
                     mission.mission0(location, drone, turbines[i], QR)
                     location = mv.move(location, drone, up=40)
                     turbines.pop(i) 
                     if len(turbines) != 0:
                         video.start_haar()
                         sleep(0.5)
-                        video.stop_qr()
-                        sleep(1)
                         video.start_qr()
                         sleep(0.5)
                         mv.move(location, drone, ccw=45)
                         break
                     else:
                         video.stop_qr()
-                        #### Return Testing ####
-                        #location = mv.move(location, drone, cw=90)
-                        #location = mv.move(location, drone, fwd=75)
-                        #location = mv.move(location, drone, ccw=90)
-                        #location = mv.move(location, drone, fwd=125)
-                        #location = mv.move(location, drone, ccw=90)
-                        #location = mv.move(location, drone, fwd=75)
-                        #location = mv.move(location, drone, cw=90)
-                        #location = mv.move(location, drone, fwd=50)
-                        ########################
                         mv.return_path(location, drone, turbine_locations)
                         video.stop_image()
                         quit()
@@ -127,6 +118,15 @@ def qrDetection(drone, location, turbines):
                 sleep(0.5)
                 mv.move(location, drone, ccw=45)
             break
+        else:
+            img_counter += 1
+            if img_counter == 10:
+                drone.move_left(20)
+            elif img_counter == 60:
+                drone.move_right(40)
+            elif img_counter == 90:
+                drone.move_left(20)
+                img_counter = 0
 
 def test(mission_list, turbine_list):
     '''Function called by the GUI. Takes a mission list of selected angles and the name
@@ -152,7 +152,7 @@ def test(mission_list, turbine_list):
         cv.waitKey(1)
 
 if __name__ == "__main__":
-    turbines = {"WindTurbine_1": [1,1,1,1]}
+    turbines = {"WindTurbine_1": [0,0,0,0]}
     drone = Tello()
     drone.connect()
     sleep(0.5)
