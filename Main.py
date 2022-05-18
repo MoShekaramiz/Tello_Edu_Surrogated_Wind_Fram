@@ -125,6 +125,20 @@ def qr_detection(drone, LOCATION, turbines):
 
                     else:
                         video.stop_qr()
+                        #mv.move(LOCATION, drone, cw=90)
+                        #print(LOCATION)
+                        #LOCATION = mv.go_to(LOCATION, drone, TURBINE_LOCATIONS, 180, 150)
+                        #print(LOCATION)
+                        #LOCATION = mv.go_to(LOCATION, drone, TURBINE_LOCATIONS, 100, -50)
+                        #print(LOCATION)
+                        #LOCATION = mv.go_to(LOCATION, drone, TURBINE_LOCATIONS, -100, 50)
+                        #print(LOCATION)
+                        #mv.move(LOCATION, drone, ccw=90)
+                        #mv.move(LOCATION, drone, fwd=120)
+                        #mv.move(LOCATION, drone, ccw=90)
+                        #mv.move(LOCATION, drone, fwd=120)
+                        #mv.move(LOCATION, drone, cw=90)
+                        #mv.move(LOCATION, drone, fwd=75)
                         mv.return_path(LOCATION, drone, TURBINE_LOCATIONS)
                         video.stop_image()
                         quit()
@@ -179,7 +193,7 @@ def gui_interface(turbines):
         
 
 if __name__ == "__main__":
-    turbines = {"WindTurbine_1": [0, 0, 0, 0]} # Target: [front, right, back, left]
+    turbines = {"WindTurbine_2": [1, 0, 0, 0]} # Target: [front, right, back, left]
     drone = Tello()
     drone.connect()
     sleep(0.5)
