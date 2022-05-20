@@ -200,6 +200,7 @@ def target_angle(new_location, drone, return_angle, x, y, quadrant=0):
     dronex = new_location[0]
     droney = new_location[1]
     angle = new_location[2]
+
     #          /|relative angle
     #         / |
     #        /  |
@@ -212,6 +213,7 @@ def target_angle(new_location, drone, return_angle, x, y, quadrant=0):
     # /)return angle
     #___________
     # cases for rotation based on current cartesian quadrant of the drone 
+    
     if quadrant == 1:# quadrant 1
         relative_angle = 90 - return_angle
         if angle < return_angle:
@@ -451,8 +453,8 @@ if __name__ == "__main__":
     drone.takeoff()
     sleep(1.5)
     move(LOCATION, drone, up=40)
-    LOCATION = go_to(LOCATION, drone, TURBINE_LOCATIONS, 127, 127)
-    LOCATION = go_to(LOCATION, drone, TURBINE_LOCATIONS, 32, 64)
-    LOCATION = go_to(LOCATION, drone, TURBINE_LOCATIONS, 52, 128)
+    LOCATION = go_to(LOCATION, drone, TURBINE_LOCATIONS, 60, 90)
+    LOCATION = go_to(LOCATION, drone, TURBINE_LOCATIONS, 72, 101)
+    LOCATION = go_to(LOCATION, drone, TURBINE_LOCATIONS, 58, 103)
     LOCATION = go_to(LOCATION, drone, TURBINE_LOCATIONS, 0, 0, 0)
     drone.land()
