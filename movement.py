@@ -53,15 +53,15 @@ def move(new_location, drone, fwd = 0, back = 0, ccw = 0, cw = 0, up = 0, down =
     if fwd != 0:
         # forward takes priority -- returns x and y coordinates after movement
         drone.move_forward(int(fwd))
-        new_location[0] += round(fwd * math.cos(math.radians(new_location[2])))
-        new_location[1] += round(fwd * math.sin(math.radians(new_location[2])))
+        new_location[0] += fwd * math.cos(math.radians(new_location[2]))
+        new_location[1] += fwd * math.sin(math.radians(new_location[2]))
         sleep(0.5)
 
     elif fwd == 0 and back != 0:
         # returns x and y coordinates after backwards movement
         drone.move_back(back)
-        new_location[0] += round(-(back) * math.cos(math.radians(new_location[2])))
-        new_location[1] += round(-(back) * math.sin(math.radians(new_location[2])))
+        new_location[0] += -(back) * math.cos(math.radians(new_location[2]))
+        new_location[1] += -(back) * math.sin(math.radians(new_location[2]))
         sleep(0.5)
 
     return new_location
@@ -197,8 +197,8 @@ def straight_path(new_location, drone):# No possible collisions were detected
 def target_angle(new_location, drone, return_angle, x, y, quadrant=0):
     '''This function helps the drone move the shortest distance to the correct angle
     by taking the intended angle and the x and y coordinates'''
-    dronex = new_location[0]
-    droney = new_location[1]
+    dronex = round(new_location[0])
+    droney = round(new_location[1])
     angle = new_location[2]
 
     #          /|relative angle
@@ -229,7 +229,7 @@ def target_angle(new_location, drone, return_angle, x, y, quadrant=0):
             new_location = move(new_location, drone, cw=int(angle + abs(return_angle)))
         elif 90 + relative_angle <= angle <= 270 + relative_angle:
             new_location = move(new_location, drone, ccw=int(270 - angle + relative_angle))
-        elif 270 + relative_angle < angle:
+        elif 270 + relative_angle <= angle:
             new_location = move(new_location, drone, cw=int(angle - 270 - relative_angle))
 
     elif quadrant == 3:# quadrant 3
@@ -247,7 +247,7 @@ def target_angle(new_location, drone, return_angle, x, y, quadrant=0):
             new_location = move(new_location, drone, ccw=int(90 - angle + relative_angle))
         elif 90 + relative_angle < angle < 270 + relative_angle:
             new_location = move(new_location, drone, cw=int(angle - relative_angle - 90))
-        elif 270 + relative_angle < angle:
+        elif 270 + relative_angle <= angle:
             new_location = move(new_location, drone, ccw=int(450 - angle + relative_angle))
 
     elif x == dronex and y > droney:# positive Y axis
@@ -257,7 +257,7 @@ def target_angle(new_location, drone, return_angle, x, y, quadrant=0):
             new_location = move(new_location, drone, cw=int(angle - 90))
         elif 180 <= angle < 270:
             new_location = move(new_location, drone, cw=int(90 + angle))
-        elif 270 <= angle < 360:
+        elif 270 <= angle <= 360:
             new_location = move(new_location, drone, cw=int(90 + (360 - angle)))
 
     elif x == dronex and y < droney:# negative Y axis
@@ -269,7 +269,7 @@ def target_angle(new_location, drone, return_angle, x, y, quadrant=0):
     elif x < dronex and y == droney:# positive X axis
         if 0 <= angle <= 180:
             new_location = move(new_location, drone, ccw=int(180 - angle))
-        elif 180 < angle < 360:
+        elif 180 < angle <= 360:
             new_location = move(new_location, drone, cw=int(360 - angle))
 
     elif x > dronex and y == droney:# negative X axis
@@ -281,11 +281,13 @@ def target_angle(new_location, drone, return_angle, x, y, quadrant=0):
     return new_location
 ########################################################################
 
-def go_to(new_location, drone, turbine_locations, target_x=0, target_y=0, ending_angle=None):
+def go_to(new_location, drone, turbine_locations, targetx=0, targety=0, ending_angle=None):
     '''Used to tell the drone to go to a specific cartesian coordinate with a target X and Y value,
     along with the desired ending angle.'''
-    x = new_location[0]
-    y = new_location[1]
+    x = round(new_location[0])
+    y = round(new_location[1])
+    target_x = round(targetx)
+    target_y = round(targety)
     angle = new_location[2]
 
     if(x > target_x) and (y > target_y): # drone in quadrant 1
@@ -327,10 +329,11 @@ def go_to(new_location, drone, turbine_locations, target_x=0, target_y=0, ending
             if (target_x < centerx < x) and (y < centery < target_y):
                 possible_collisions.append([i[0], i[1], i[2], i[3], center_distance, centerx, centery])
 
-        else: # drone in quadrant 4
+        elif quadrant == 4: # drone in quadrant 4
             if (x < centerx < target_x) and (y < centery < target_y):
                 possible_collisions.append([i[0], i[1], i[2], i[3], center_distance, centerx, centery])
-    
+        #FIXME solve for axis
+
     if len(possible_collisions) != 0:
         possible_collisions = sorted(possible_collisions, key=operator.itemgetter(4)) # sort the possible collision list by distance from drone
         starting_point = new_location
@@ -417,7 +420,7 @@ def go_to(new_location, drone, turbine_locations, target_x=0, target_y=0, ending
                 sleep(0.5)
                 point_distance = 0
         if ending_angle is not None: # rotate the shortest distance to the ending angle
-            angle = new_location[2] # current angle has to be updated
+            angle = round(new_location[2]) # current angle has to be updated
             if ending_angle < 0:
                 ending_angle = abs(360 + angle) % 360
             else:

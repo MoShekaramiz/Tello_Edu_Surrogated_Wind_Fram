@@ -1,6 +1,9 @@
-from djitellopy import Tello
-import cv2 as cv
+'''The main object detection and drone flight module. By Branden Pinney 2022'''
+
 from time import sleep
+import math
+import cv2 as cv
+from djitellopy import Tello
 from qr_reader import droneReadQR
 from check_camera import check_camera
 import movement as mv
@@ -14,84 +17,114 @@ w, h = 720, 480 # display size of the screen
 location = [0, 0, 0, 0] # Initialized list of x, y and angle coordinates for the drone.
 turbine_locations = [] # List containing the locations of found turbines
 
-def trackObject(drone, info, location, turbines, video):
+
+def trackObject(drone, info, location, turbines, video, starting_location):
     '''Take the variable for the drone, the output array from calling findTurbine in haar_cascade.py, and the current drone x,y location and relative angle (initialized as [0, 0, 0]).
     It scans for the target object of findTurbine and approaches the target. Once it is at a pre-determined distance fbRange, it will scan and return the value of the QR code
     and return the drone to the starting point.'''
     # Looks for the detected object through Haar Cascades and slowly approaches 
-    area = info[1]
-    x, y = info[0]
-    width = info[2]
+    area = info[1]  # The area of the bounding box
+    x, y = info[0]  # The x and y location of the center of the bounding box
+    width = info[2] # The width of the bounding box
+    img_pass = 0    # Flag to determine if the drone is returning from a target to skip point distance calculations
+
     # object detected
-    print(x)
     if(x != 0):
-        distance = int((650 * 40.64) / width) - 30
+        distance = int((650 * 40.64) / width) - 50 # (Focal length of camera lense * Real-world width of object)/Width of object in pixels  -  50 centimeters to stop short
         if distance < 20:
             distance = 20
         targetx = location[0] + distance * math.cos(math.radians(location[2]))
         targety = location[1] + distance * math.sin(math.radians(location[2]))
         for i in turbine_locations:
             if(i[0] < targetx < i[1]) and (i[2] < targety < i[3]):
-                location = mv.move(location, drone, ccw=45)
-                sleep(0.5)
-                info = check_camera(drone)
-                trackObject(drone, info, location, turbines, video)
-        if(0 < x < 330):
+                location = mv.go_to(location, drone, turbine_locations, starting_location[0], starting_location[1], starting_location[2])
+                return location
+        if(0 < x <= 340):
             # The drone needs to angle to the left to center the target.
-            new_angle = int((x / 360) * 41.3)
+            new_angle = int(round(((360 - x) / 360) * 41.3))
             location = mv.move(location, drone, ccw=new_angle)  
             info = check_camera(drone)      
-            trackObject(drone, info, location, turbines, video)
+            trackObject(drone, info, location, turbines, video, starting_location)
+            img_pass = 1
         elif(x >= 390):
             # The drone needs to angle to the right to center the target.
-            new_angle = int(((x - 360) / 360) * 41.3)
+            new_angle = int(round(((x - 360) / 360) * 41.3))
             location = mv.move(location, drone, cw=new_angle) 
             info = check_camera(drone)       
-            trackObject(drone, info, location, turbines, video)
-        if area > fbRange[0] and area < fbRange[1]:
-            # The drone has approached the target and will scan for a QR code
-            qrDetection(drone, location, turbines, video)
-        elif area > fbRange[1]:
+            trackObject(drone, info, location, turbines, video, starting_location)
+            img_pass = 1
+        if area > fbRange[0] and area < fbRange[1] and img_pass == 0:
+            # The drone has approached the target and will scan for a QR code 
+            qr_detection(drone, location, turbines, video, starting_location)
+        elif area > fbRange[1] and img_pass == 0:
             # The drone is too close to the target
             location = mv.move(location, drone, back=20)
             info = check_camera(drone)
-            trackObject(drone, info, location, turbines, video)
-        elif area < fbRange[0] and area != 0:
+            trackObject(drone, info, location, turbines, video, starting_location)
+        elif area < fbRange[0] and area != 0 and img_pass == 0:
             # The drone is too far from the target
             location = mv.move(location, drone, fwd=distance)
-            qrDetection(drone, location, turbines, video)
+            qr_detection(drone, location, turbines, video, starting_location)
             #return location
+    else:
+        location = mv.go_to(location, drone, turbine_locations, starting_location[0], starting_location[1], starting_location[2])
     return location
 
-def qrDetection(drone, location, turbines, video):
-    drone.move_down(60)
+def qr_detection(drone, location, turbines, video, starting_location):
+    '''Begins searching for a QR code at the current location of the drone'''
+    drone.move_down(80)
     QR = None 
     video.stop_haar()
+    img_counter = 0
     while True:
         QR, img, info = droneReadQR(drone)
         img = cv.resize(img, (w, h))
         if len(QR) > 0:
             print(">>>>>>>>>>>>>>>>QR CODE FOUND: ", QR)
-            print(location[0], location[1])
-            turbine_locations.append([location[0] - 60, location[0] + 60, location[1] - 60, location[1] + 60, QR, location[0], location[1]])
+            turbine_locations.append([location[0] - 40, location[0] + 40, location[1] - 40, location[1] + 40, QR, location[0], location[1]])
             turbine_found = 0 # Flag to determine if the correct turbine was found
+            video.stop_qr()
             for i in turbines:
                 if i == QR:
                     turbine_found = 1
-                    location = mv.move(location, drone, up=20)
+                    location = mv.move(location, drone, up=40)
                     mission.mission0(location, drone, turbines[i], QR)
+                    location = mv.move(location, drone, up=40)
                     turbines.pop(i) 
                     if len(turbines) != 0:
-                        mv.move(location, drone, ccw=45)
+                        video.start_haar()
+                        sleep(0.5)
+                        video.start_qr()
+                        sleep(0.5)
                         break
                     else:
                         video.stop_qr()
-                        mv.return_path(location, drone, turbine_locations)
+                        mv.go_to(location, drone, turbine_locations, 0, 0, 0)
+                        drone.land()
                         video.stop_image()
                         quit()
             if turbine_found == 0:
-                mv.move(location, drone, ccw=45)
+                mv.move(location, drone, up=70)
+                video.start_haar()
+                sleep(0.5)
+                video.stop_qr()
+                sleep(1)
+                video.start_qr()
+                sleep(0.5)
+                location = mv.go_to(location, drone, turbine_locations, starting_location[0], starting_location[1], starting_location[2])
             break
+
+        else:
+            img_counter += 1
+            if img_counter == 10:
+                drone.move_left(20)
+
+            elif img_counter == 60:
+                drone.move_right(40)
+
+            elif img_counter == 90:
+                drone.move_left(20)
+                img_counter = 0
 
 def test(mission_list, turbine_list):
     '''Function called by the GUI. Takes a mission list of selected angles and the name

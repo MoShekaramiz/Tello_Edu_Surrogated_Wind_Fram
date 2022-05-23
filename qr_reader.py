@@ -24,7 +24,6 @@ def droneReadQR(drone):
     img = frame.frame
     qr = cv.QRCodeDetector()
     QR, bbox, s = qr.detectAndDecode(img)
-    sleep(0.5)
     info = [[0, 0], 0, 0]
     if len(QR) > 0:
         img, info = boundingBox(img, bbox)

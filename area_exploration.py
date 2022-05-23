@@ -19,9 +19,10 @@ fbRange = [32000, 52000] # preset parameter for detected image boundary size
 w, h = 720, 480 # display size of the screen
 location = [0, 0, 0, 0] # Initialized list of x, y and angle coordinates for the drone.
 turbine_locations = [] # List containing the locations of found turbines
+detected_object = 0 # A flag to determine if the camera detected an object in the previous 5 frames
 
 def backForth(drone, location, flyZone, moveIncr, display=False, xgraph=[], ygraph=[]):
-    '''The drone explores a back and forth path. Currently the funcion ends after each movement_test to
+    '''The drone explores a back and forth path. Currently the funcion ends after each movement to
     allow for an external check of the area.
     
     Input:
@@ -78,7 +79,7 @@ def backForth(drone, location, flyZone, moveIncr, display=False, xgraph=[], ygra
             xNew = location[0] + moveIncr * math.cos(math.radians(location[2]))
             if xNew < xMin:
                 print("Went through whole area")
-                mv.go_to(location, drone, turbine_locations, 0, 0, 0)
+                mv.return_path(location, drone, turbine_locations)
                 totalDist += int(math.sqrt(location[0]**2 + location[1]**2))
                 return location, totalDist, 0
     # Travel Down
@@ -94,7 +95,7 @@ def backForth(drone, location, flyZone, moveIncr, display=False, xgraph=[], ygra
             xNew = location[0] + moveIncr * math.cos(math.radians(location[2]))
             if xNew < xMin:
                 print("Went through whole area")
-                mv.go_to(location, drone, turbine_locations, 0, 0, 0)
+                mv.return_path(location, drone, turbine_locations)
                 totalDist += int(math.sqrt(location[0]**2 + location[1]**2))
                 return location, totalDist, 0
     totalDist += moveIncr
@@ -102,7 +103,7 @@ def backForth(drone, location, flyZone, moveIncr, display=False, xgraph=[], ygra
     return location, totalDist, 1
 
 def backForth2(drone, location, flyZone, searchWidth, moveIncr, display=False):
-    '''The drone explores a back and forth path.
+    '''The drone explores a back and forth path. This function needs to be modified to check the camera itself.
     plt.show() needs to be called after if you want to display a plot of the path
     
     Input:
@@ -128,7 +129,7 @@ def backForth2(drone, location, flyZone, searchWidth, moveIncr, display=False):
         quit()
 
     totalDist = 0                   # tracks distance traveled
-    turns = 0                       # track number of turns
+    turns = 0                       # track # turns
     xgraph = []
     ygraph = []
     #maxMove = 30                #how much to move at a time;
@@ -142,11 +143,20 @@ def backForth2(drone, location, flyZone, searchWidth, moveIncr, display=False):
     YMovesBeforeTurn = int(searchWidth/moveIncr)
     y=0
     while True:
+        # CHECK CAMERA
+        location= check_camera(drone, location)
+        ###################
         if display:
             xgraph.append(location[0])    
             ygraph.append(location[1])
         for i in range(XMovesBeforeTurn):
-            mv.move(location, drone, fwd=moveIncr)
+            targetx = location[0] + moveIncr * math.cos(math.radians(location[2]))
+            targety = location[1] + moveIncr * math.sin(math.radians(location[2]))
+            if location[2] < 90 or location[2] > 270:
+                location = mv.go_to(location, drone, turbine_locations, targetx, targety, 0)
+            else:
+                location = mv.go_to(location, drone, turbine_locations, targetx, targety, 180)
+            #mv.move(location, drone, fwd=moveIncr)
             # CHECK CAMERA
             location= check_camera(drone, location)
             ###################
@@ -155,8 +165,14 @@ def backForth2(drone, location, flyZone, searchWidth, moveIncr, display=False):
                 xgraph.append(location[0])    
                 ygraph.append(location[1])
         if (xDist % moveIncr) > 20:
-            mv.move(location, drone, fwd=xDist%moveIncr)
-            totalDist += xDist%moveIncr
+            targetx = location[0] + (xDist % moveIncr) * math.cos(math.radians(location[2]))
+            targety = location[1] + (xDist % moveIncr) * math.sin(math.radians(location[2]))
+            if location[2] < 90 or location[2] > 270:
+                location = mv.go_to(location, drone, turbine_locations, targetx, targety, 0)
+            else:
+                location = mv.go_to(location, drone, turbine_locations, targetx, targety, 180)
+            #mv.move(location, drone, fwd=xDist%moveIncr)
+            totalDist += xDist % moveIncr
             # CHECK CAMERA
             location= check_camera(drone, location)
             ###################
@@ -166,16 +182,22 @@ def backForth2(drone, location, flyZone, searchWidth, moveIncr, display=False):
         if y >= Ytraversals:
             break
         if turnDir:
-            mv.move(location, drone, ccw=90)
+            location = mv.move(location, drone, ccw=90)
             turns += 1
         else:
-            mv.move(location, drone, cw=90)
+            location = mv.move(location, drone, cw=90)
             turns += 1
         # CHECK CAMERA
         location= check_camera(drone, location)
         ###################
         for i in range(YMovesBeforeTurn):
-            mv.move(location, drone, fwd=moveIncr)
+            targetx = location[0] + moveIncr * math.cos(math.radians(location[2]))
+            targety = location[1] + moveIncr * math.sin(math.radians(location[2]))
+            if location[2] > 0 and location[2] < 180:
+                location = mv.go_to(location, drone, turbine_locations, targetx, targety, 90)
+            else:
+                location = mv.go_to(location, drone, turbine_locations, targetx, targety, 270)
+            #mv.move(location, drone, fwd=moveIncr)
             # CHECK CAMERA
             location= check_camera(drone, location)
             ###################
@@ -184,17 +206,23 @@ def backForth2(drone, location, flyZone, searchWidth, moveIncr, display=False):
                 xgraph.append(location[0])    
                 ygraph.append(location[1])
         if (searchWidth % moveIncr) > 20:
-            mv.move(location, drone, fwd=searchWidth%moveIncr)
-            totalDist += searchWidth%moveIncr
+            targetx = location[0] + (searchWidth % moveIncr) * math.cos(math.radians(location[2]))
+            targety = location[1] + (searchWidth % moveIncr) * math.sin(math.radians(location[2]))
+            if location[2] > 0 and location[2] < 180:
+                location = mv.go_to(location, drone, turbine_locations, targetx, targety, 90)
+            else:
+                location = mv.go_to(location, drone, turbine_locations, targetx, targety, 270)
+            #mv.move(location, drone, fwd=searchWidth%moveIncr)
+            totalDist += searchWidth % moveIncr
             # CHECK CAMERA
             if display:
                 xgraph.append(location[0])    
                 ygraph.append(location[1])
         if turnDir:
-            mv.move(location, drone, ccw=90)
+            location = mv.move(location, drone, ccw=90)
             turns += 1
         else:
-            mv.move(location, drone, cw=90)
+            location = mv.move(location, drone, cw=90)
             turns += 1
         y += 1
         # CHECK CAMERA
@@ -208,22 +236,24 @@ def backForth2(drone, location, flyZone, searchWidth, moveIncr, display=False):
         ygraph.append(location[1])
         xgraph.append(xgraph[0])
         ygraph.append(ygraph[0])
-        plt.plot(xgraph, ygraph, '-kx', lw=2, label='spiralPath')
-        plt.show()
+        plt.figure()
+        plt.plot(xgraph, ygraph, '-kx', lw=2, label='backforth')
+        
     
     # return to original location and track the distance
-    mv.go_to(location, drone, turbine_locations, 0, 0, 0)
+    location = mv.go_to(location, drone, turbine_locations, 0, 0, 0)
     totalDist += int(math.sqrt(location[0]**2 + location[1]**2))
 
     return location, totalDist
-    
+
 
 def spiral(drone, location, flyZone, searchWidth, moveIncr, display=False):
     #poly_bound = Polygon(boundary)    
     #cp = poly_bound.centroid
     #poly_bound.exterior.coords
     '''The drone explores a spiral path. This function needs to be modified to check the camera itself
-    
+    plt.show() needs to be called after if you want to display a plot of the path
+     
     Input:
         drone (Tello) : drone variable
         location : [x, y, angle] Current coordinates and angle of drone
@@ -240,13 +270,13 @@ def spiral(drone, location, flyZone, searchWidth, moveIncr, display=False):
     xMax = flyZone[1]  
     yMax = flyZone[3] 
     totalDist = 0        #keeps track of path distance
+    turns = 0            #track # of turnsre
 
     # Go to correct location if starting location is not in the lower right corner
     #if yMax - location[1] > location[1] - yMin:
      #  if xMax - location[0] > location[0] - xMin:
       #    if round(location[2]) !=90:
        #       location = mv.move(location, drone, ccw=)
-
     # Ensure that the drone is in the lower right corner and rotated correctly, otherwise quit
     if location[0] != xMin or location[1] != yMin or location[2] != 0:
         print("Needs to be further developed to support this")
@@ -289,10 +319,9 @@ def spiral(drone, location, flyZone, searchWidth, moveIncr, display=False):
         elif round(location[2])==0 or round(location[2])==180:
             if xDist < 20:
                 break
-            ##### CHECK CAMERA
+            ##### CHECK CAMERA 
             location= check_camera(drone, location)
-            ################### 
-            #sleep(0.2)
+            ###################
             if xt + moveIncr > xDist:
                 if xDist-xt>=20:
                     location = mv.move(location,drone,fwd=xDist-xt)
@@ -307,7 +336,7 @@ def spiral(drone, location, flyZone, searchWidth, moveIncr, display=False):
                 xt += moveIncr
                 location = mv.move(location,drone, fwd=moveIncr)
                 totalDist += moveIncr
-        # The code is not developed to work with any drone angle other then 0, 90, 180,n270
+        # The code is not developed to work with any drone angle other then 0, 90, 180, 270
         else:
             print("Should not reach this print statement") 
             quit()
@@ -319,11 +348,12 @@ def spiral(drone, location, flyZone, searchWidth, moveIncr, display=False):
         ygraph.append(location[1])
         xgraph.append(xgraph[0])
         ygraph.append(ygraph[0])
+        f = plt.figure()
         plt.plot(xgraph, ygraph, '-kx', lw=2, label='spiralPath')
-        plt.show()
+        
     
     # return to original location and track the distance
-    mv.go_to(location, drone, turbine_locations, 0, 0, 0)
+    mv.return_path(location, drone, turbine_locations)
     totalDist += int(math.sqrt(location[0]**2 + location[1]**2))
 
     return location, totalDist
@@ -345,11 +375,9 @@ def check_camera(drone, location):
             x, y = info[0]
             if x != 0:
                 break
-    location = trackObject(drone, info, location, turbines, video)
-    print("escaped")
+    location = trackObject(drone, info, location, turbines, video, [location[0], location[1], location[2]])
     return location
     
-
 def approx_cell_decomp(obstacleList, boundary):
     '''input: array of obstactles, array of boundary coordinates
     Decomposes the area into cells 
@@ -404,10 +432,7 @@ def approx_cell_decomp(obstacleList, boundary):
          
         
 def testBF(location, bounds, display=False):
-    '''Tests back and for search function given the current location of the drone.
-        bounds =  [-275,0, 0, 275] works well for the drone cage'''
-    mission_list = [1, 1, 1, 1]
-    turbine_list = ["WindTurbine_2"]
+    '''Tests back and for search function given the current location of the drone.'''
     drone = Tello()
     valid = 1
     dist = 0
@@ -447,11 +472,12 @@ class obstacle:
 
 if __name__ == "__main__":
     drone = Tello()
-    turbines = {"WindTurbine_2": [0, 0, 0, 0]}
+    turbines = {"WindTurbine_1": [0, 0, 0, 0]}
      # COMMENT OUT SECTION IF TESTING W/O PHYSICAL DRONE
     drone.connect()
     sleep(0.5)
-    print("Current battery remaining: ", drone.get_battery())
+    BatteryStart = drone.get_battery()
+    print("Current battery remaining: ", BatteryStart)
     sleep(0.3)
     drone.streamon()
     sleep(0.5)
@@ -459,25 +485,63 @@ if __name__ == "__main__":
     video.start()
     drone.takeoff()
     sleep(1)
-    mv.move(location, drone, up=40)
-    sleep(0.5)
     # END OF SECTION TO COMMENT OUT
-    
-    #bounds = [0,321, 0, 324]
     location = mv.move(location, drone, up=40)
-    bounds = [0,160, 0, 221]
-    #bounds = [-327,0, 0, 327]
-    #bounds = [-150,0,0,150]
+    bounds = [0,221, 0, 221]#161
+    #bounds = [0, 328, 0, 324]    #actual size of path in drone cage
     start_time = time.time()
-    moveIncr = 100
     searchWidth = 50
-    [location,distSpiral] = spiral(drone, location, bounds, searchWidth, moveIncr)
-    #location = [0, 0, 0, 0] # Initialized list of x, y and angle coordinates for the drone.
-    #[location,distBF2] = backForth2(drone, location, bounds, 50, display=False)
+    moveIncr = 75
+    [location,dist] = backForth2(drone, location, bounds, searchWidth, moveIncr)
+    #plt.xlabel('x (cm)')
+    #plt.ylabel('y (cm)')
+    #plt.show()
     end_time = time.time()
-    print('--- ', round(end_time - start_time, 2), ' seconds ---', end_time - start_time)
-    #location = [0, 0, 0, 0] # Initialized list of x, y and angle coordinates for the drone.
-    #bounds = [-328,0, 0, 324]
-    #distBF = testBF(location, bounds, display=False)
-    #print(distBF, distBF2)
-    #test_cellDecomp(location)
+    print('--- ', round(end_time - start_time, 2), ' seconds ---')
+    BatteryEnd = drone.get_battery()
+    print("Current battery remaining: ", BatteryEnd)
+    print("Total battery used: ", BatteryStart - BatteryEnd)
+    drone.land()
+    quit()
+
+    # #location = [0, 0, 0, 0] # Initialized list of x, y and angle coordinates for the drone.
+    # #bounds = [-328,0, 0, 324]
+    # #distBF = testBF(location, bounds, display=False)
+    # print(distBF2, distSpiral)
+    # plt.show()
+    # #test_cellDecomp(location)
+
+    # GRAPHS DISTANCES FOR DIFFERENT SIZES OF SEARCH AREA
+
+    # y_len = 100
+    # area = []
+    # dSpiral = []
+    # dBF = []
+    # tSpiral = []
+    # tBF = []
+
+    # for i in range(20):
+    #     x_len = 100
+    #     for j in range(20):
+    #         area.append(x_len*y_len)
+    #         bounds = [0, x_len, 0, y_len]
+    #         location = [0, 0, 0, 0]
+    #         [location,distSpiral,turnSpiral] = spiral(drone, location, bounds, 50, display=True)
+    #         location = [0, 0, 0, 0]
+    #         [location,distBF2, turnBF] = backForth2(drone, location, bounds, 50, display=True)
+    #         dSpiral.append(distSpiral)
+    #         dBF.append(distBF2)
+    #         tSpiral.append(turnSpiral)
+    #         tBF.append(turnBF)
+    #         x_len += 100
+    # y_len += 100
+
+    # plt.figure()
+    # # plt.plot(area, dSpiral, 'r.', label='Spiral')
+    # # plt.plot(area, dBF, 'b.', label='Back-and-Forth')
+    # plt.plot(area, tSpiral, 'r.', label='Spiral')
+    # plt.plot(area, tBF, 'b.', label='Back-and-Forth')
+    # plt.xlabel("Area (cm)")
+    # plt.ylabel("Turns")
+    # plt.legend()
+    # plt.show()

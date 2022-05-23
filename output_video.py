@@ -21,7 +21,6 @@ class LiveFeed(threading.Thread):
         while not self.stop.is_set():
             while not self.haar.is_set():
                 frame = self.drone.get_frame_read()
-                sleep(0.2)
                 img = frame.frame
                 img, info = hc.findTurbine(img)
                 cv.imshow("Output", img)
@@ -45,7 +44,6 @@ class LiveFeed(threading.Thread):
                 cv.imshow("Output", img)
                 cv.waitKey(1)
             frame = self.drone.get_frame_read()
-            sleep(0.2)
             img = frame.frame
             cv.imshow("Output", img)
             cv.waitKey(1)
