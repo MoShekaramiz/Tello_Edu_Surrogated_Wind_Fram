@@ -193,7 +193,7 @@ def gui_interface(turbines):
         
 
 if __name__ == "__main__":
-    turbines = {"WindTurbine_2": [1, 0, 0, 0]} # Target: [front, right, back, left]
+    turbines = {"WindTurbine_2": [0, 1, 0, 0]} # Target: [front, right, back, left]
     drone = Tello()
     drone.connect()
     sleep(0.5)

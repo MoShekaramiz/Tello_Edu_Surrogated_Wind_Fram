@@ -21,88 +21,8 @@ location = [0, 0, 0, 0] # Initialized list of x, y and angle coordinates for the
 turbine_locations = [] # List containing the locations of found turbines
 detected_object = 0 # A flag to determine if the camera detected an object in the previous 5 frames
 
-def backForth(drone, location, flyZone, moveIncr, display=False, xgraph=[], ygraph=[]):
-    '''The drone explores a back and forth path. Currently the funcion ends after each movement to
-    allow for an external check of the area.
-    
-    Input:
-        drone (Tello) : drone variable
-        location : [x, y, angle] Current coordinates and angle of drone
-        flyZone : [xMin, yMin, xMax, yMax] four vertices representing area to be explored
-        moveIncr (int) : distance (cm) for drone to move before checking the area, This will also be the 
-        distance between traversals
-        display (bool, optional) : default = false. If true a graph of the projected path will be displayed
-    Output:
-        location : [x, y, angle] updated coordinates and angle of drone
-        totalDist (int) : total distance (cm) traveled by the drone 
-        valid (int) : returns 1 if not end of path, returns 0 if end of path'''
 
-    xMin = flyZone[0] 
-    yMin = flyZone[2] 
-    xMax = flyZone[1]  
-    yMax = flyZone[3] 
-
-    totalDist = 0                   # tracks distance traveled
-
-    #maxMove = 30                #how much to move at a time;
-    #shortLen = 30               #how far to move on short edge;
-
-    yNew = location[1] + moveIncr * math.sin(math.radians(location[2]))
-    #print(location[0], location[1], location[2])
- 
-    #straighten out with horizontal closest to angle  <180=90 (left)       else=270 (right)
-    if location[2]<90:
-        location = mv.move(location, drone, ccw=90-location[2])
-    elif location[2]<180:
-        location = mv.move(location, drone, cw=location[2]-90)
-    elif location[2]<270:
-        location = mv.move(location, drone, ccw=270-location[2])
-    else: 
-        location = mv.move(location, drone, cw=location[2]-270)
-
-
-    if display:
-        xgraph.append(location[0])    
-        ygraph.append(location[1])
-
-
-    # Travel Up
-    if location[2]<180:
-        if yNew > yMax:
-            if round(yMax-location[1])>20:
-                totalDist += round(yMax-location[1])
-                location = mv.move(location, drone, fwd=round(yMax-location[1]))
-                if display:
-                    xgraph.append(location[0])    
-                    ygraph.append(location[1])
-            location = mv.move(location, drone, ccw=90)
-            xNew = location[0] + moveIncr * math.cos(math.radians(location[2]))
-            if xNew < xMin:
-                print("Went through whole area")
-                mv.return_path(location, drone, turbine_locations)
-                totalDist += int(math.sqrt(location[0]**2 + location[1]**2))
-                return location, totalDist, 0
-    # Travel Down
-    else:
-        if yNew < yMin:
-            if round(location[1]-yMin)>20:
-                totalDist += round(location[1]-yMin)
-                location = mv.move(location, drone, fwd=round(location[1]-yMin))
-                if display:
-                    xgraph.append(location[0])    
-                    ygraph.append(location[1])
-            location = mv.move(location, drone, cw=91)
-            xNew = location[0] + moveIncr * math.cos(math.radians(location[2]))
-            if xNew < xMin:
-                print("Went through whole area")
-                mv.return_path(location, drone, turbine_locations)
-                totalDist += int(math.sqrt(location[0]**2 + location[1]**2))
-                return location, totalDist, 0
-    totalDist += moveIncr
-    location = mv.move(location, drone, fwd=moveIncr)
-    return location, totalDist, 1
-
-def backForth2(drone, location, flyZone, searchWidth, moveIncr, display=False):
+def snaking_exploration(drone, location, flyZone, searchWidth, moveIncr, display=False):
     '''The drone explores a back and forth path. This function needs to be modified to check the camera itself.
     plt.show() needs to be called after if you want to display a plot of the path
     
@@ -247,11 +167,11 @@ def backForth2(drone, location, flyZone, searchWidth, moveIncr, display=False):
     return location, totalDist
 
 
-def spiral(drone, location, flyZone, searchWidth, moveIncr, display=False):
+def spiral_exploration(drone, location, flyZone, searchWidth, moveIncr, display=False):
     #poly_bound = Polygon(boundary)    
     #cp = poly_bound.centroid
     #poly_bound.exterior.coords
-    '''The drone explores a spiral path. This function needs to be modified to check the camera itself
+    '''The drone explores a spiral_exploration path. This function needs to be modified to check the camera itself
     plt.show() needs to be called after if you want to display a plot of the path
      
     Input:
@@ -349,7 +269,7 @@ def spiral(drone, location, flyZone, searchWidth, moveIncr, display=False):
         xgraph.append(xgraph[0])
         ygraph.append(ygraph[0])
         f = plt.figure()
-        plt.plot(xgraph, ygraph, '-kx', lw=2, label='spiralPath')
+        plt.plot(xgraph, ygraph, '-kx', lw=2, label='spiral_explorationPath')
         
     
     # return to original location and track the distance
@@ -430,25 +350,6 @@ def approx_cell_decomp(obstacleList, boundary):
     plt.show()
     return waypoints
          
-        
-def testBF(location, bounds, display=False):
-    '''Tests back and for search function given the current location of the drone.'''
-    drone = Tello()
-    valid = 1
-    dist = 0
-    ygraph = []
-    xgraph = []
-    while valid:
-        [location, totalDist, valid] = backForth(drone, location, bounds, 50, display, xgraph, ygraph)
-        dist += totalDist
-        sleep(0.5)
-    if display:
-        xgraph.append(xgraph[0])
-        ygraph.append(ygraph[0])
-        plt.figure()
-        plt.plot(xgraph, ygraph, '-kx', lw=2, label='spiralPath')
-    return dist
-
 def test_cellDecomp():
     '''Example tests of approximate cell decomposition'''
     boundary =  [[0,0],[0,305],[305,305],[305,0]]
@@ -472,7 +373,7 @@ class obstacle:
 
 if __name__ == "__main__":
     drone = Tello()
-    turbines = {"WindTurbine_1": [0, 0, 0, 0]}
+    turbines = {"WindTurbine_2": [0, 1, 0, 0], "WindTurbine_3": [0, 0, 0, 1]}
      # COMMENT OUT SECTION IF TESTING W/O PHYSICAL DRONE
     drone.connect()
     sleep(0.5)
@@ -487,12 +388,12 @@ if __name__ == "__main__":
     sleep(1)
     # END OF SECTION TO COMMENT OUT
     location = mv.move(location, drone, up=40)
-    bounds = [0,221, 0, 221]#161
+    bounds = [0,161, 0, 221]#161
     #bounds = [0, 328, 0, 324]    #actual size of path in drone cage
     start_time = time.time()
     searchWidth = 50
     moveIncr = 75
-    [location,dist] = backForth2(drone, location, bounds, searchWidth, moveIncr)
+    [location,dist] = snaking_exploration(drone, location, bounds, searchWidth, moveIncr)
     #plt.xlabel('x (cm)')
     #plt.ylabel('y (cm)')
     #plt.show()
@@ -507,7 +408,7 @@ if __name__ == "__main__":
     # #location = [0, 0, 0, 0] # Initialized list of x, y and angle coordinates for the drone.
     # #bounds = [-328,0, 0, 324]
     # #distBF = testBF(location, bounds, display=False)
-    # print(distBF2, distSpiral)
+    # print(distBF2, distspiral_exploration)
     # plt.show()
     # #test_cellDecomp(location)
 
@@ -515,9 +416,9 @@ if __name__ == "__main__":
 
     # y_len = 100
     # area = []
-    # dSpiral = []
+    # dspiral_exploration = []
     # dBF = []
-    # tSpiral = []
+    # tspiral_exploration = []
     # tBF = []
 
     # for i in range(20):
@@ -526,20 +427,20 @@ if __name__ == "__main__":
     #         area.append(x_len*y_len)
     #         bounds = [0, x_len, 0, y_len]
     #         location = [0, 0, 0, 0]
-    #         [location,distSpiral,turnSpiral] = spiral(drone, location, bounds, 50, display=True)
+    #         [location,distspiral_exploration,turnspiral_exploration] = spiral_exploration(drone, location, bounds, 50, display=True)
     #         location = [0, 0, 0, 0]
-    #         [location,distBF2, turnBF] = backForth2(drone, location, bounds, 50, display=True)
-    #         dSpiral.append(distSpiral)
+    #         [location,distBF2, turnBF] = snaking_exploration(drone, location, bounds, 50, display=True)
+    #         dspiral_exploration.append(distspiral_exploration)
     #         dBF.append(distBF2)
-    #         tSpiral.append(turnSpiral)
+    #         tspiral_exploration.append(turnspiral_exploration)
     #         tBF.append(turnBF)
     #         x_len += 100
     # y_len += 100
 
     # plt.figure()
-    # # plt.plot(area, dSpiral, 'r.', label='Spiral')
+    # # plt.plot(area, dspiral_exploration, 'r.', label='spiral_exploration')
     # # plt.plot(area, dBF, 'b.', label='Back-and-Forth')
-    # plt.plot(area, tSpiral, 'r.', label='Spiral')
+    # plt.plot(area, tspiral_exploration, 'r.', label='spiral_exploration')
     # plt.plot(area, tBF, 'b.', label='Back-and-Forth')
     # plt.xlabel("Area (cm)")
     # plt.ylabel("Turns")

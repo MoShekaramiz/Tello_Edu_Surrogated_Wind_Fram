@@ -12,25 +12,31 @@ import haar_cascade as hc
 import mission
 import math
 
-fbRange = [62000,82000]#[32000, 52000] # preset parameter for detected image boundary size
-w, h = 720, 480 # display size of the screen
+fbRange = [62000,82000] # [32000, 52000] # preset parameter for detected image boundary size
+w, h = 720, 480         # display size of the screen
 location = [0, 0, 0, 0] # Initialized list of x, y and angle coordinates for the drone.
-turbine_locations = [] # List containing the locations of found turbines
+turbine_locations = []  # List containing the locations of found turbines
 
 
 def trackObject(drone, info, location, turbines, video, starting_location):
     '''Take the variable for the drone, the output array from calling findTurbine in haar_cascade.py, and the current drone x,y location and relative angle (initialized as [0, 0, 0]).
     It scans for the target object of findTurbine and approaches the target. Once it is at a pre-determined distance fbRange, it will scan and return the value of the QR code
     and return the drone to the starting point.'''
-    # Looks for the detected object through Haar Cascades and slowly approaches 
+    # if the object is no longer detected, attempt to find it with one more frame
+    if info[0][0] == 0:
+        frame = drone.get_frame_read()
+        img = frame.frame
+        img = cv.resize(img, (w, h))
+        img, info = hc.findTurbine(img)
+    
     area = info[1]  # The area of the bounding box
-    x, y = info[0]  # The x and y location of the center of the bounding box
+    x, y = info[0]  # The x and y location of the center of the bounding box in the frame
     width = info[2] # The width of the bounding box
     img_pass = 0    # Flag to determine if the drone is returning from a target to skip point distance calculations
 
     # object detected
     if(x != 0):
-        distance = int((650 * 40.64) / width) - 50 # (Focal length of camera lense * Real-world width of object)/Width of object in pixels  -  50 centimeters to stop short
+        distance = int((650 * 40.64) / width) - 20 # (Focal length of camera lense * Real-world width of object)/Width of object in pixels  -  50 centimeters to stop short
         if distance < 20:
             distance = 20
         targetx = location[0] + distance * math.cos(math.radians(location[2]))
@@ -46,7 +52,7 @@ def trackObject(drone, info, location, turbines, video, starting_location):
             info = check_camera(drone)      
             trackObject(drone, info, location, turbines, video, starting_location)
             img_pass = 1
-        elif(x >= 390):
+        elif(x >= 380):
             # The drone needs to angle to the right to center the target.
             new_angle = int(round(((x - 360) / 360) * 41.3))
             location = mv.move(location, drone, cw=new_angle) 
@@ -89,13 +95,14 @@ def qr_detection(drone, location, turbines, video, starting_location):
                     turbine_found = 1
                     location = mv.move(location, drone, up=40)
                     mission.mission0(location, drone, turbines[i], QR)
-                    location = mv.move(location, drone, up=40)
+                    #location = mv.move(location, drone, up=40)
                     turbines.pop(i) 
                     if len(turbines) != 0:
                         video.start_haar()
                         sleep(0.5)
                         video.start_qr()
                         sleep(0.5)
+                        location = mv.go_to(location, drone, turbine_locations, starting_location[0], starting_location[1], starting_location[2])
                         break
                     else:
                         video.stop_qr()
@@ -169,7 +176,6 @@ if __name__ == "__main__":
         img = frame.frame
         img = cv.resize(img, (w, h))
         img, info = hc.findTurbine(img)
-        #QR, img, info = droneReadQR(drone)
         location = trackObject(drone, info, location, turbines, video)
         img = cv.resize(img, None, fx=1, fy=1, interpolation=cv.INTER_AREA)
         
