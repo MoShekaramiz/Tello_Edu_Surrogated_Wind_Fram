@@ -221,7 +221,7 @@ def target_angle(new_location, drone, return_angle, x, y, quadrant=0):
         elif return_angle <= angle < 180 + return_angle:
             new_location = move(new_location, drone, ccw=int(180 + return_angle - angle))
         elif 180 + return_angle <= angle:
-            new_location = move(new_location, drone, cw=int(angle - 180 + return_angle))
+            new_location = move(new_location, drone, cw=int(angle - (180 + return_angle)))
 
     elif quadrant == 2:# quadrant 2
         relative_angle = 90 + return_angle
@@ -433,7 +433,7 @@ def go_to(new_location, drone, turbine_locations, targetx=0, targety=0, ending_a
                 else:
                     new_location = move(new_location, drone, ccw=(360 - alpha))
             elif alpha < 180:
-                new_location = move(new_location, drone, cw=(round(alpha)))
+                new_location = move(new_location, drone, ccw=(round(alpha)))
             else:
                 new_location = move(new_location, drone, ccw=(round(360 - alpha)))
     print(f"\nCURRENT LOCATION >>>>>>>>>>{new_location}\n")
@@ -456,8 +456,6 @@ if __name__ == "__main__":
     drone.takeoff()
     sleep(1.5)
     move(LOCATION, drone, up=40)
-    LOCATION = go_to(LOCATION, drone, TURBINE_LOCATIONS, 60, 90)
-    LOCATION = go_to(LOCATION, drone, TURBINE_LOCATIONS, 72, 101)
-    LOCATION = go_to(LOCATION, drone, TURBINE_LOCATIONS, 58, 103)
+    LOCATION = go_to(LOCATION, drone, TURBINE_LOCATIONS, 100, 121, 180)
     LOCATION = go_to(LOCATION, drone, TURBINE_LOCATIONS, 0, 0, 0)
     drone.land()

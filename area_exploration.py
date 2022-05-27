@@ -1,4 +1,3 @@
-from re import X
 from djitellopy import Tello
 from output_video import LiveFeed
 import cv2 as cv
@@ -22,8 +21,8 @@ turbine_locations = [] # List containing the locations of found turbines
 detected_object = 0 # A flag to determine if the camera detected an object in the previous 5 frames
 
 
-def snaking_exploration(drone, location, flyZone, searchWidth, moveIncr, display=False):
-    '''The drone explores a back and forth path. This function needs to be modified to check the camera itself.
+def snake_exploration(drone, location, flyZone, searchWidth, moveIncr, display=False):
+    '''The drone explores a snaking.
     plt.show() needs to be called after if you want to display a plot of the path
     
     Input:
@@ -44,9 +43,8 @@ def snaking_exploration(drone, location, flyZone, searchWidth, moveIncr, display
     yMax = flyZone[3] 
 
     # Ensure that the drone is in the lower right corner and rotated correctly, otherwise quit
-    if location[0] != xMin or location[1] != yMin or location[2] != 0:
-        print("Needs to be further developed to support this")
-        quit()
+    if round(location[0]) != xMin or round(location[1]) != yMin or location[2] != 0:
+        location = mv.go_to(location, drone, turbine_locations, xMin, yMin, 0)
 
     totalDist = 0                   # tracks distance traveled
     turns = 0                       # track # turns
@@ -193,19 +191,13 @@ def spiral_exploration(drone, location, flyZone, searchWidth, moveIncr, display=
     turns = 0            #track # of turnsre
 
     # Go to correct location if starting location is not in the lower right corner
-    #if yMax - location[1] > location[1] - yMin:
-     #  if xMax - location[0] > location[0] - xMin:
-      #    if round(location[2]) !=90:
-       #       location = mv.move(location, drone, ccw=)
-    # Ensure that the drone is in the lower right corner and rotated correctly, otherwise quit
-    if location[0] != xMin or location[1] != yMin or location[2] != 0:
-        print("Needs to be further developed to support this")
-        quit()
+    if round(location[0]) != xMin or round(location[1]) != yMin or location[2] != 0:
+        location = mv.go_to(location, drone, turbine_locations, xMin, yMin, 0)
 
     xDist = xMax-xMin               # distance needed for next horizontal traverse
     yDist = yMax-yMin               # distance needed for next vertical traverse
-    xt = 0                          # xtraversed
-    yt = 0                          # ytraversed
+    x_traversed = 0                          # x_traversed
+    y_traversed = 0                          # y_traversed
     ygraph = []
     xgraph = []
     f = 0                           # zero until the drone has gone in one straight line
@@ -221,19 +213,23 @@ def spiral_exploration(drone, location, flyZone, searchWidth, moveIncr, display=
             location= check_camera(drone, location)
             ###################
             #sleep(0.2)    
-            if yt + moveIncr > yDist:
-                if yDist-yt>=20:
-                    location = mv.move(location,drone,fwd=yDist-yt)
-                    totalDist += yDist-yt
-                yt = 0
+            if y_traversed + moveIncr > yDist:
+                if yDist-y_traversed>=20:
+                    target_x = location[0] + (yDist - y_traversed) * math.cos(math.radians(location[2]))
+                    target_y = location[1] + (yDist - y_traversed) * math.sin(math.radians(location[2]))
+                    location = mv.go_to(location, drone, turbine_locations, target_x, target_y, location[2])
+                    totalDist += yDist - y_traversed
+                y_traversed = 0
                 if f != 0:                  # decrease distance to travel each time after first line
                     yDist -= searchWidth
                 location =mv.move(location,drone, ccw=90)
                 turns += 1
-                f =1  
+                f = 1  
             else:
-                yt += moveIncr
-                location = mv.move(location, drone, fwd=moveIncr)
+                y_traversed += moveIncr
+                target_x = location[0] + moveIncr * math.cos(math.radians(location[2]))
+                target_y = location[1] + moveIncr * math.sin(math.radians(location[2]))
+                location = mv.go_to(location, drone, turbine_locations, target_x, target_y, location[2])
                 totalDist += moveIncr
         # Travel the xDist
         elif round(location[2])==0 or round(location[2])==180:
@@ -242,25 +238,24 @@ def spiral_exploration(drone, location, flyZone, searchWidth, moveIncr, display=
             ##### CHECK CAMERA 
             location= check_camera(drone, location)
             ###################
-            if xt + moveIncr > xDist:
-                if xDist-xt>=20:
-                    location = mv.move(location,drone,fwd=xDist-xt)
-                    totalDist += xDist-xt
-                xt = 0
+            if x_traversed + moveIncr > xDist:
+                if xDist-x_traversed>=20:
+                    target_x = location[0] + (xDist - x_traversed) * math.cos(math.radians(location[2]))
+                    target_y = location[1] + (xDist - x_traversed) * math.sin(math.radians(location[2]))
+                    location = mv.go_to(location, drone, turbine_locations, target_x, target_y, location[2])
+                    totalDist += xDist - x_traversed
+                x_traversed = 0
                 if f != 0:
                     xDist -= searchWidth
-                location = mv.move(location,drone, ccw=90)
+                location = mv.move(location, drone, ccw=90)
                 turns +=1
                 f = 1
             else:
-                xt += moveIncr
-                location = mv.move(location,drone, fwd=moveIncr)
+                x_traversed += moveIncr
+                target_x = location[0] + moveIncr * math.cos(math.radians(location[2]))
+                target_y = location[1] + moveIncr * math.sin(math.radians(location[2]))
+                location = mv.go_to(location, drone, turbine_locations, target_x, target_y, location[2])
                 totalDist += moveIncr
-        # The code is not developed to work with any drone angle other then 0, 90, 180, 270
-        else:
-            print("Should not reach this print statement") 
-            quit()
-    
 
     # plot the path
     if display:
@@ -273,7 +268,7 @@ def spiral_exploration(drone, location, flyZone, searchWidth, moveIncr, display=
         
     
     # return to original location and track the distance
-    mv.return_path(location, drone, turbine_locations)
+    mv.go_to(location, drone, turbine_locations, 0, 0, 0)
     totalDist += int(math.sqrt(location[0]**2 + location[1]**2))
 
     return location, totalDist
@@ -312,6 +307,7 @@ def approx_cell_decomp(obstacleList, boundary):
     cells_y = np.arange(ymin, ymax, w)
     cells = []
     waypoints = []
+
     for x in cells_x:
         for y in cells_y:
             cells =  np.append(cells, [x,y])
@@ -373,7 +369,7 @@ class obstacle:
 
 if __name__ == "__main__":
     drone = Tello()
-    turbines = {"WindTurbine_2": [0, 1, 0, 0], "WindTurbine_3": [0, 0, 0, 1]}
+    turbines = {"WindTurbine_2": [0, 0, 0, 0]}
      # COMMENT OUT SECTION IF TESTING W/O PHYSICAL DRONE
     drone.connect()
     sleep(0.5)
@@ -388,12 +384,12 @@ if __name__ == "__main__":
     sleep(1)
     # END OF SECTION TO COMMENT OUT
     location = mv.move(location, drone, up=40)
-    bounds = [0,161, 0, 221]#161
+    bounds = [0, 4000, 0, 221]#161
     #bounds = [0, 328, 0, 324]    #actual size of path in drone cage
     start_time = time.time()
     searchWidth = 50
-    moveIncr = 75
-    [location,dist] = snaking_exploration(drone, location, bounds, searchWidth, moveIncr)
+    moveIncr = 500
+    [location,dist] = snake_exploration(drone, location, bounds, searchWidth, moveIncr)
     #plt.xlabel('x (cm)')
     #plt.ylabel('y (cm)')
     #plt.show()
@@ -429,7 +425,7 @@ if __name__ == "__main__":
     #         location = [0, 0, 0, 0]
     #         [location,distspiral_exploration,turnspiral_exploration] = spiral_exploration(drone, location, bounds, 50, display=True)
     #         location = [0, 0, 0, 0]
-    #         [location,distBF2, turnBF] = snaking_exploration(drone, location, bounds, 50, display=True)
+    #         [location,distBF2, turnBF] = snake_exploration(drone, location, bounds, 50, display=True)
     #         dspiral_exploration.append(distspiral_exploration)
     #         dBF.append(distBF2)
     #         tspiral_exploration.append(turnspiral_exploration)
