@@ -7,15 +7,6 @@ import operator
 import math
 from time import sleep
 
-def takeoff(drone):
-    '''Launches the tello drone and returns a variable pointing to the drone'''
-    drone = Tello()
-    drone.connect()
-    sleep(0.5)
-    drone.takeoff()
-    sleep(0.5)
-    return drone
-
 def move(new_location, drone, fwd = 0, back = 0, ccw = 0, cw = 0, up = 0, down = 0):
     '''Takes a list holding the x, y cartesian coordinates of the drone and the angle relative to takeoff [x, y, angle] (initialized as [0, 0, 0]).
     The variable for the drone being used is also required.
@@ -66,100 +57,38 @@ def move(new_location, drone, fwd = 0, back = 0, ccw = 0, cw = 0, up = 0, down =
 
     return new_location
 
-def return_path(new_location, drone, turbine_locations):
-    '''Takes a list with length 3 of the current x, y coordinates and angle relative to takeoff of the drone [x, y, angle].
-    The variable for the drone being used is also required.
-    This function will first angle the drone back to zero degrees, rotate towards the origin, then move forward the calculated distance'''
-    x = new_location[0]
-    y = new_location[1]
-    angle = new_location[2]
-    if(0 < x) and (0 < y): # drone in quadrant 1
-        quadrant = 1
-
-    elif (x < 0) and (0 < y): # drone in quadrant 2
-        quadrant = 2
-
-    elif (x < 0) and (y < 0): # drone in quadrant 3
-        quadrant = 3
-
-    elif (x > 0) and (y < 0): # drone in quadrant 4
-        quadrant = 4
-
-    else: # drone on a cartesian axis point
-        quadrant = 0
-
-    # calculate return vector distance and break it up into pieces if over 500 centimeters or land if under 20 centimeters.
-    return_distance = int(round(math.sqrt(x**2 + y**2)))
-    vector_angle = int(round(math.degrees(math.atan(y/x))))
-
-    ##################### collision avoidance section #####################
-    possible_collisions = []
-
-    for i in turbine_locations:
-        centerx = i[5]
-        centery = i[6]
-        center_distance = int(math.sqrt((x-centerx)**2 + (y-centery)**2))
-
-        if quadrant == 1: # drone in quadrant 1
-            if (0 < centerx < x) and (0 < centery < y):
-                possible_collisions.append([i[0], i[1], i[2], i[3], center_distance, centerx, centery])
-
-        elif quadrant == 2: # drone in quadrant 2
-            if (x < centerx < 0) and (0 < centery < y):
-                possible_collisions.append([i[0], i[1], i[2], i[3], center_distance, centerx, centery])
-
-        elif quadrant == 3: # drone in quadrant 3
-            if (0 < centerx < x) and (y < centery < 0):
-                possible_collisions.append([i[0], i[1], i[2], i[3], center_distance, centerx, centery])
-
-        else: # drone in quadrant 4
-            if (x < centerx < 0) and (y < centery < 0):
-                possible_collisions.append([i[0], i[1], i[2], i[3], center_distance, centerx, centery])
-    
-    if len(possible_collisions) != 0:
-        possible_collisions = sorted(possible_collisions, key=operator.itemgetter(4)) # sort the possible collision list by distance from drone
-        starting_point = new_location
-        for i in range(return_distance): 
-                targetx = i * math.cos(vector_angle)
-                targety = i * math.sin(vector_angle)
-
-                for j in possible_collisions:
-                    centerx = j[5]
-                    centery = j[6] 
-                    if(j[0] < targetx < j[1]) and (j[2] < targety < j[3]): # if the drone will pass near the turbine
-                        if(quadrant == 1) or (quadrant == 3): # if in quadrant 1 or 3
-                            right_corner = [j[1], j[2]] # bottom right corner of the no-go zone
-                            left_corner = [j[0], j[3]] # top left corner of the no-go zone
-
-                        else: # if in quadrant 2 or 4
-                            right_corner = [j[1], j[3]] # top right corner of the no-go zone
-                            left_corner =[j[0], j[2]] # bottom left corner of the no-go zone
-
-                        right_distance = math.sqrt((right_corner[0] - new_location[0])**2 + (right_corner[1] - new_location[1])**2) # point-distance to the bottom right corner
-                        left_distance = math.sqrt((left_corner[0] - new_location[0])**2 + (left_corner[1] - new_location[1])**2) # point-distance to the bottom left corner
-
-                        if right_distance < left_distance:
-                            try:
-                                return_angle = abs(math.degrees(math.atan((x-right_corner[0])/(y-right_corner[1]))))
-                            except ZeroDivisionError:
-                                pass
-                            new_location = target_angle(new_location, drone, return_angle, right_corner[0], right_corner[1], quadrant)
-                            new_location = move(new_location, drone, fwd=right_distance)
-
-                        else:
-                            try:
-                                return_angle = abs(math.degrees(math.atan((x-left_corner[0])/(y-left_corner[1]))))
-                            except ZeroDivisionError:
-                                pass
-                            new_location = target_angle(new_location, drone, return_angle, left_corner[0], left_corner[1], quadrant)
-                            new_location = move(new_location, drone, fwd=left_distance)
-
-                        return_path(new_location, drone, turbine_locations) # call return path again until there are no possible collisions remaining
-                        ######### Work on if the no-go zone overlaps an axis
-        if new_location == starting_point:
-            straight_path(new_location, drone)
-    else:
-        straight_path(new_location, drone)
+def curve(new_location, drone, radius = 50, left_right = 0):
+    '''Curve a quarter circle left or right. Currently developed for a radius of 50cm.'''
+    velocity = round(1.5 * ((radius * math.pi * 18)/180))
+    if left_right == 0: # 0 is to curve left
+        drone.send_rc_control(0, velocity, 0, -36)
+        sleep(4.05)
+        drone.send_rc_control(0, 0, 0, -36)
+        sleep(0.2)
+        drone.send_rc_control(0, 0, 0, 0)
+        sleep(5)
+        new_location[0] += (2 * radius * math.sin(math.radians(90/2))) * math.cos(math.radians((new_location[2] + 45) % 360))
+        new_location[1] += (2 * radius * math.sin(math.radians(90/2))) * math.sin(math.radians((new_location[2] + 45) % 360))
+        new_location[2] = (new_location[2] + 90) % 360
+        return new_location
+    else: # any other input will curve right
+        drone.send_rc_control(0, -velocity, 0, 36)
+        sleep(4.05)
+        drone.send_rc_control(0, 0, 0, 36)
+        sleep(0.2)
+        drone.send_rc_control(0, 0, 0, 0)
+        sleep(3)
+        if new_location[2] < 45:
+            new_location[0] += (2 * radius * math.sin(math.radians(90/2))) * math.cos(math.radians((new_location[2] - 45) + 360))
+            new_location[1] += (2 * radius * math.sin(math.radians(90/2))) * math.sin(math.radians((new_location[2] - 45) + 360))
+        else:
+            new_location[0] += (2 * radius * math.sin(math.radians(90/2))) * math.cos(math.radians(new_location[2] - 45))
+            new_location[1] += (2 * radius * math.sin(math.radians(90/2))) * math.sin(math.radians(new_location[2] - 45))
+        if new_location[2] < 90:
+            new_location[2] = (new_location[2] - 90) + 360
+        else:
+            new_location[2] = new_location[2] - 90
+        return new_location
 
 def straight_path(new_location, drone):# No possible collisions were detected
     '''Takes the location list and drone and flies directly back to the origin making the smallest rotation possible'''
@@ -455,7 +384,15 @@ if __name__ == "__main__":
     sleep(0.5)
     drone.takeoff()
     sleep(1.5)
-    move(LOCATION, drone, up=40)
-    LOCATION = go_to(LOCATION, drone, TURBINE_LOCATIONS, 100, 121, 180)
-    LOCATION = go_to(LOCATION, drone, TURBINE_LOCATIONS, 0, 0, 0)
+    #move(LOCATION, drone, up=40)
+    LOCATION = curve(LOCATION, drone, 50)
+    print(LOCATION)
+    LOCATION = curve(LOCATION, drone, 50)
+    print(LOCATION)
+    LOCATION = curve(LOCATION, drone, 50)
+    print(LOCATION)
+    LOCATION = curve(LOCATION, drone, 50)
+    print(LOCATION)
+    #LOCATION = go_to(LOCATION, drone, TURBINE_LOCATIONS, 100, 121, 180)
+    #LOCATION = go_to(LOCATION, drone, TURBINE_LOCATIONS, 0, 0, 0)
     drone.land()

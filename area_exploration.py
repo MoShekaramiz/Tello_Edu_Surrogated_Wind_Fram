@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 from matplotlib.path import Path
 import numpy as np
 import matplotlib.patches as patches
-from shapely.geometry import box, Polygon
+from shapely.geometry import Polygon
 import time
 
 
@@ -21,7 +21,7 @@ turbine_locations = [] # List containing the locations of found turbines
 detected_object = 0 # A flag to determine if the camera detected an object in the previous 5 frames
 
 
-def snake_exploration(drone, location, flyZone, searchWidth, moveIncr, display=False):
+def snake_exploration(drone, location, flyZone, searchWidth, moveIncr, display=False, curve=0):
     '''The drone explores a snaking.
     plt.show() needs to be called after if you want to display a plot of the path
     
@@ -384,12 +384,12 @@ if __name__ == "__main__":
     sleep(1)
     # END OF SECTION TO COMMENT OUT
     location = mv.move(location, drone, up=40)
-    bounds = [0, 4000, 0, 221]#161
+    bounds = [0, 221, 0, 221]#161
     #bounds = [0, 328, 0, 324]    #actual size of path in drone cage
     start_time = time.time()
     searchWidth = 50
-    moveIncr = 500
-    [location,dist] = snake_exploration(drone, location, bounds, searchWidth, moveIncr)
+    moveIncr = 75
+    [location,dist] = spiral_exploration(drone, location, bounds, searchWidth, moveIncr)
     #plt.xlabel('x (cm)')
     #plt.ylabel('y (cm)')
     #plt.show()
