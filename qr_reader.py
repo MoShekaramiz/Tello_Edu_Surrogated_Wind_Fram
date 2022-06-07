@@ -1,7 +1,6 @@
 '''Module to assist with detecting QR codes in OpenCV. By Branden Pinney and Shayne Duncan 2022.'''
 
 import cv2 as cv
-from time import sleep
 
 def boundingBox(img, bbox):
     '''Creates a bounding box around the detected QR code'''

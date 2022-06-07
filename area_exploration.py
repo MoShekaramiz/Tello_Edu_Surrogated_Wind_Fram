@@ -1,288 +1,229 @@
-from djitellopy import Tello
-from output_video import LiveFeed
+
 import cv2 as cv
 from time import sleep
-import movement as mv
+import movement as mov
 from traversal_image_interface import trackObject
 import haar_cascade as hc
 import math
-import matplotlib.pyplot as plt
-from matplotlib.path import Path
-import numpy as np
-import matplotlib.patches as patches
-from shapely.geometry import Polygon
-import time
 
-
-fbRange = [32000, 52000] # preset parameter for detected image boundary size
-w, h = 720, 480 # display size of the screen
-location = [0, 0, 0, 0] # Initialized list of x, y and angle coordinates for the drone.
-turbine_locations = [] # List containing the locations of found turbines
-detected_object = 0 # A flag to determine if the camera detected an object in the previous 5 frames
-
-
-def snake_exploration(drone, location, flyZone, searchWidth, moveIncr, display=False, curve=0):
+def snake_exploration(drone, fly_zone, search_width, move_increment, curve=0):
     '''The drone explores a snaking.
     plt.show() needs to be called after if you want to display a plot of the path
     
     Input:
-        drone (Tello) : drone variable
-        location : [x, y, angle] Current coordinates and angle of drone
-        flyZone : [xMin, yMin, xMax, yMax] four vertices representing area to be explored
-        searchWidth (int): distance (cm) between traversals
-        moveIncr (int) : distance (cm) for drone to move before checking the area
-        distance between traversals
-        display (bool, optional) : default = false. If true a graph of the projected path will be displayed
+        drone : movement class initialized from movement.py
+        fly_zone : [x_min, y_min, x_max, y_max] four vertices representing area to be explored
+        search_width (int): distance (cm) between traversals
+        move_increment (int) : distance (cm) for drone to move before checking the area distance between traversals
+        curve (1 or 0) : use the curve algorithm or 90 degree angles to turn
     Output:
-        location : [x, y, angle] updated coordinates and angle of drone
-        totalDist (int) : total distance (cm) traveled by the drone '''
+        total_distance (int) : total distance (cm) traveled by the drone '''
 
-    xMin = flyZone[0] 
-    yMin = flyZone[2] 
-    xMax = flyZone[1]  
-    yMax = flyZone[3] 
+    x_min = fly_zone[0] 
+    y_min = fly_zone[2] 
+    x_max = fly_zone[1]  
+    y_max = fly_zone[3] 
 
-    # Ensure that the drone is in the lower right corner and rotated correctly, otherwise quit
-    if round(location[0]) != xMin or round(location[1]) != yMin or location[2] != 0:
-        location = mv.go_to(location, drone, turbine_locations, xMin, yMin, 0)
+    # Ensure that the drone is in the lower right corner and rotated correctly
+    if round(drone.get_x_location()) != x_min or round(drone.get_y_location()) != y_min or drone.get_angle() != 0:
+        drone.go_to(x_min, y_min, 0)
 
-    totalDist = 0                   # tracks distance traveled
-    turns = 0                       # track # turns
-    xgraph = []
-    ygraph = []
-    #maxMove = 30                #how much to move at a time;
-    #shortLen = 30               #how far to move on short edge;
-
-    xDist = xMax-xMin               # distance needed for next horizontal traverse
-    yDist = yMax-yMin               # distance needed for next vertical traverse
-    turnDir = 1                     # 0 for clockwise 1 for counter clockwise
-    XMovesBeforeTurn = int(xDist/moveIncr)
-    Ytraversals = int(yDist/searchWidth)
-    YMovesBeforeTurn = int(searchWidth/moveIncr)
-    y=0
+    total_distance = 0                                       # tracks distance traveled
+    turns = 0                                                # track number of turns
+    x_distance = x_max-x_min                                   # distance needed for next horizontal traversal
+    y_distance = y_max-y_min                                   # distance needed for next vertical traversal
+    turn_direction = 1                                       # 0 for clockwise 1 for counter-clockwise
+    x_moves_before_turn = int(x_distance/move_increment)     # number of times the drone will move on the x-axis before turning
+    y_traversals = int(y_distance/search_width)              # total number of times the drone will travel in the y-axis
+    y_moves_before_turn = int(search_width/move_increment)   # number of times the drone will move on the y-axis before turning
+    y = 0
+    
     while True:
         # CHECK CAMERA
-        location= check_camera(drone, location)
+        check_camera(drone)
         ###################
-        if display:
-            xgraph.append(location[0])    
-            ygraph.append(location[1])
-        for i in range(XMovesBeforeTurn):
-            targetx = location[0] + moveIncr * math.cos(math.radians(location[2]))
-            targety = location[1] + moveIncr * math.sin(math.radians(location[2]))
-            if location[2] < 90 or location[2] > 270:
-                location = mv.go_to(location, drone, turbine_locations, targetx, targety, 0)
+        for i in range(x_moves_before_turn):
+            targetx = drone.get_x_location() + move_increment * math.cos(math.radians(drone.get_angle()))
+            targety = drone.get_y_location() + move_increment * math.sin(math.radians(drone.get_angle()))
+            if drone.get_angle() < 90 or drone.get_angle() > 270:
+                drone.go_to(targetx, targety, 0)
             else:
-                location = mv.go_to(location, drone, turbine_locations, targetx, targety, 180)
-            #mv.move(location, drone, fwd=moveIncr)
+                drone.go_to(targetx, targety, 180)
             # CHECK CAMERA
-            location= check_camera(drone, location)
+            check_camera(drone)
             ###################
-            totalDist += moveIncr
-            if display:
-                xgraph.append(location[0])    
-                ygraph.append(location[1])
-        if (xDist % moveIncr) > 20:
-            targetx = location[0] + (xDist % moveIncr) * math.cos(math.radians(location[2]))
-            targety = location[1] + (xDist % moveIncr) * math.sin(math.radians(location[2]))
-            if location[2] < 90 or location[2] > 270:
-                location = mv.go_to(location, drone, turbine_locations, targetx, targety, 0)
+            total_distance += move_increment
+
+        if (x_distance % move_increment) > 20:
+            targetx = drone.get_x_location() + (x_distance % move_increment) * math.cos(math.radians(drone.get_angle()))
+            targety = drone.get_y_location() + (x_distance % move_increment) * math.sin(math.radians(drone.get_angle()))
+            if drone.get_angle() < 90 or drone.get_angle() > 270:
+                drone.go_to(targetx, targety, 0)
             else:
-                location = mv.go_to(location, drone, turbine_locations, targetx, targety, 180)
-            #mv.move(location, drone, fwd=xDist%moveIncr)
-            totalDist += xDist % moveIncr
+                drone.go_to(targetx, targety, 180)
+            #drone.move(fwd=x_distance%move_increment)
+            total_distance += x_distance % move_increment
             # CHECK CAMERA
-            location= check_camera(drone, location)
+            check_camera(drone)
             ###################
-            if display:
-                xgraph.append(location[0])    
-                ygraph.append(location[1])
-        if y >= Ytraversals:
+
+        if y >= y_traversals:
             break
-        if turnDir:
-            location = mv.move(location, drone, ccw=90)
+        if turn_direction:
+            drone.move(ccw=90)
             turns += 1
         else:
-            location = mv.move(location, drone, cw=90)
+            drone.move(cw=90)
             turns += 1
         # CHECK CAMERA
-        location= check_camera(drone, location)
+        check_camera(drone)
         ###################
-        for i in range(YMovesBeforeTurn):
-            targetx = location[0] + moveIncr * math.cos(math.radians(location[2]))
-            targety = location[1] + moveIncr * math.sin(math.radians(location[2]))
-            if location[2] > 0 and location[2] < 180:
-                location = mv.go_to(location, drone, turbine_locations, targetx, targety, 90)
+        for i in range(y_moves_before_turn):
+            targetx = drone.get_x_location() + move_increment * math.cos(math.radians(drone.get_angle()))
+            targety = drone.get_y_location() + move_increment * math.sin(math.radians(drone.get_angle()))
+            if drone.get_angle() > 0 and drone.get_angle() < 180:
+                drone.go_to(targetx, targety, 90)
             else:
-                location = mv.go_to(location, drone, turbine_locations, targetx, targety, 270)
-            #mv.move(location, drone, fwd=moveIncr)
+                drone.go_to(targetx, targety, 270)
+            #drone.move(fwd=move_increment)
             # CHECK CAMERA
-            location= check_camera(drone, location)
+            check_camera(drone)
             ###################
-            totalDist += moveIncr
-            if display:
-                xgraph.append(location[0])    
-                ygraph.append(location[1])
-        if (searchWidth % moveIncr) > 20:
-            targetx = location[0] + (searchWidth % moveIncr) * math.cos(math.radians(location[2]))
-            targety = location[1] + (searchWidth % moveIncr) * math.sin(math.radians(location[2]))
-            if location[2] > 0 and location[2] < 180:
-                location = mv.go_to(location, drone, turbine_locations, targetx, targety, 90)
+            total_distance += move_increment
+
+        if (search_width % move_increment) > 20:
+            targetx = drone.get_x_location() + (search_width % move_increment) * math.cos(math.radians(drone.get_angle()))
+            targety = drone.get_y_location() + (search_width % move_increment) * math.sin(math.radians(drone.get_angle()))
+            if drone.get_angle() > 0 and drone.get_angle() < 180:
+                drone.go_to(targetx, targety, 90)
             else:
-                location = mv.go_to(location, drone, turbine_locations, targetx, targety, 270)
-            #mv.move(location, drone, fwd=searchWidth%moveIncr)
-            totalDist += searchWidth % moveIncr
+                drone.go_to(targetx, targety, 270)
+            #drone.move(fwd=search_width%move_increment)
+            total_distance += search_width % move_increment
             # CHECK CAMERA
-            if display:
-                xgraph.append(location[0])    
-                ygraph.append(location[1])
-        if turnDir:
-            location = mv.move(location, drone, ccw=90)
+            check_camera(drone)
+            ###################
+
+        if turn_direction:
+            drone.move(ccw=90)
             turns += 1
         else:
-            location = mv.move(location, drone, cw=90)
+            drone.move(cw=90)
             turns += 1
         y += 1
         # CHECK CAMERA
-        location= check_camera(drone, location)
+        check_camera(drone)
         ###################
-        turnDir = (turnDir + 1) % 2 
-    
-    # plot the path
-    if display:
-        xgraph.append(location[0])    
-        ygraph.append(location[1])
-        xgraph.append(xgraph[0])
-        ygraph.append(ygraph[0])
-        plt.figure()
-        plt.plot(xgraph, ygraph, '-kx', lw=2, label='backforth')
-        
+        turn_direction = (turn_direction + 1) % 2 
     
     # return to original location and track the distance
-    location = mv.go_to(location, drone, turbine_locations, 0, 0, 0)
-    totalDist += int(math.sqrt(location[0]**2 + location[1]**2))
+    drone.go_to(0, 0, 0)
+    total_distance += int(math.sqrt(drone.get_x_location()**2 + drone.get_y_location()**2))
 
-    return location, totalDist
+    return total_distance
 
 
-def spiral_exploration(drone, location, flyZone, searchWidth, moveIncr, display=False):
-    #poly_bound = Polygon(boundary)    
-    #cp = poly_bound.centroid
-    #poly_bound.exterior.coords
+def spiral_exploration(drone, fly_zone, search_width, move_increment):
     '''The drone explores a spiral_exploration path. This function needs to be modified to check the camera itself
     plt.show() needs to be called after if you want to display a plot of the path
      
     Input:
-        drone (Tello) : drone variable
-        location : [x, y, angle] Current coordinates and angle of drone
-        flyZone : [xMin, yMin, xMax, yMax] four vertices representing area to be explored
-        searchWidth (int): distance (cm) between traversals
-        moveIncr (int) : distance (cm) for drone to move before checking the area
-        display (bool, optional) : default = false. If true a graph of the projected path will be displayed
+        fly_zone : [x_min, y_min, x_max, y_max] four vertices representing area to be explored
+        search_width (int): distance (cm) between traversals
+        move_increment (int) : distance (cm) for drone to move before checking the area
     Output:
-        location : [x, y, angle] updated coordinates and angle of drone
-        totalDist (int) : total distance (cm) traveled by the drone '''
+        total_distance (int) : total distance (cm) traveled by the drone '''
 
-    xMin = flyZone[0]
-    yMin = flyZone[2] 
-    xMax = flyZone[1]  
-    yMax = flyZone[3] 
-    totalDist = 0        #keeps track of path distance
+    x_min = fly_zone[0]
+    y_min = fly_zone[2] 
+    x_max = fly_zone[1]  
+    y_max = fly_zone[3] 
+    total_distance = 0        #keeps track of path distance
     turns = 0            #track # of turnsre
 
     # Go to correct location if starting location is not in the lower right corner
-    if round(location[0]) != xMin or round(location[1]) != yMin or location[2] != 0:
-        location = mv.go_to(location, drone, turbine_locations, xMin, yMin, 0)
+    if round(drone.get_x_location()) != x_min or round(drone.get_x_location()) != y_min or drone.get_angle() != 0:
+        drone.go_to(x_min, y_min, 0)
 
-    xDist = xMax-xMin               # distance needed for next horizontal traverse
-    yDist = yMax-yMin               # distance needed for next vertical traverse
+    x_distance = x_max-x_min                 # distance needed for next horizontal traverse
+    y_distance = y_max-y_min                 # distance needed for next vertical traverse
     x_traversed = 0                          # x_traversed
     y_traversed = 0                          # y_traversed
-    ygraph = []
-    xgraph = []
-    f = 0                           # zero until the drone has gone in one straight line
+    f = 0                                    # zero until the drone has gone in one straight line
+
     while True: # Drone cannot travel less than 20 cm
-        if display:
-                xgraph.append(location[0])    
-                ygraph.append(location[1])
-        # travel the yDist 
-        if round(location[2])==90 or round(location[2])==270:
-            if yDist < 20:
+        # travel the y_distance 
+        if round(drone.get_angle())==90 or round(drone.get_angle())==270:
+            if y_distance < 20:
                 break
             ##### CHECK CAMERA
-            location= check_camera(drone, location)
+            check_camera(drone)
             ###################
             #sleep(0.2)    
-            if y_traversed + moveIncr > yDist:
-                if yDist-y_traversed>=20:
-                    target_x = location[0] + (yDist - y_traversed) * math.cos(math.radians(location[2]))
-                    target_y = location[1] + (yDist - y_traversed) * math.sin(math.radians(location[2]))
-                    location = mv.go_to(location, drone, turbine_locations, target_x, target_y, location[2])
-                    totalDist += yDist - y_traversed
+            if y_traversed + move_increment > y_distance:
+                if y_distance-y_traversed>=20:
+                    target_x = drone.get_x_location() + (y_distance - y_traversed) * math.cos(math.radians(drone.get_angle()))
+                    target_y = drone.get_y_location() + (y_distance - y_traversed) * math.sin(math.radians(drone.get_angle()))
+                    drone.go_to(target_x, target_y, drone.get_angle())
+                    total_distance += y_distance - y_traversed
                 y_traversed = 0
+
                 if f != 0:                  # decrease distance to travel each time after first line
-                    yDist -= searchWidth
-                location =mv.move(location,drone, ccw=90)
+                    y_distance -= search_width
+                location =drone.move(location,drone, ccw=90)
                 turns += 1
-                f = 1  
+                f = 1 
+
             else:
-                y_traversed += moveIncr
-                target_x = location[0] + moveIncr * math.cos(math.radians(location[2]))
-                target_y = location[1] + moveIncr * math.sin(math.radians(location[2]))
-                location = mv.go_to(location, drone, turbine_locations, target_x, target_y, location[2])
-                totalDist += moveIncr
-        # Travel the xDist
-        elif round(location[2])==0 or round(location[2])==180:
-            if xDist < 20:
+                y_traversed += move_increment
+                target_x = drone.get_x_location() + move_increment * math.cos(math.radians(drone.get_angle()))
+                target_y = drone.get_y_location() + move_increment * math.sin(math.radians(drone.get_angle()))
+                drone.go_to(target_x, target_y, drone.get_angle())
+                total_distance += move_increment
+
+        # Travel the x_distance
+        elif round(drone.get_angle())==0 or round(drone.get_angle())==180:
+            if x_distance < 20:
                 break
             ##### CHECK CAMERA 
-            location= check_camera(drone, location)
+            check_camera(drone)
             ###################
-            if x_traversed + moveIncr > xDist:
-                if xDist-x_traversed>=20:
-                    target_x = location[0] + (xDist - x_traversed) * math.cos(math.radians(location[2]))
-                    target_y = location[1] + (xDist - x_traversed) * math.sin(math.radians(location[2]))
-                    location = mv.go_to(location, drone, turbine_locations, target_x, target_y, location[2])
-                    totalDist += xDist - x_traversed
+            if x_traversed + move_increment > x_distance:
+                if x_distance-x_traversed>=20:
+                    target_x = drone.get_x_location() + (x_distance - x_traversed) * math.cos(math.radians(drone.get_angle()))
+                    target_y = drone.get_y_location() + (x_distance - x_traversed) * math.sin(math.radians(drone.get_angle()))
+                    drone.go_to(target_x, target_y, drone.get_angle())
+                    total_distance += x_distance - x_traversed
                 x_traversed = 0
                 if f != 0:
-                    xDist -= searchWidth
-                location = mv.move(location, drone, ccw=90)
+                    x_distance -= search_width
+                drone.move(ccw=90)
                 turns +=1
                 f = 1
             else:
-                x_traversed += moveIncr
-                target_x = location[0] + moveIncr * math.cos(math.radians(location[2]))
-                target_y = location[1] + moveIncr * math.sin(math.radians(location[2]))
-                location = mv.go_to(location, drone, turbine_locations, target_x, target_y, location[2])
-                totalDist += moveIncr
-
-    # plot the path
-    if display:
-        xgraph.append(location[0])    
-        ygraph.append(location[1])
-        xgraph.append(xgraph[0])
-        ygraph.append(ygraph[0])
-        f = plt.figure()
-        plt.plot(xgraph, ygraph, '-kx', lw=2, label='spiral_explorationPath')
-        
+                x_traversed += move_increment
+                target_x = drone.get_x_location() + move_increment * math.cos(math.radians(drone.get_angle()))
+                target_y = drone.get_y_location() + move_increment * math.sin(math.radians(drone.get_angle()))
+                drone.go_to(target_x, target_y, drone.get_angle())
+                total_distance += move_increment
     
     # return to original location and track the distance
-    mv.go_to(location, drone, turbine_locations, 0, 0, 0)
-    totalDist += int(math.sqrt(location[0]**2 + location[1]**2))
+    drone.go_to(0, 0, 0)
+    total_distance += int(math.sqrt(drone.get_x_location()**2 + drone.get_y_location()**2))
 
-    return location, totalDist
+    return total_distance
 
-def check_camera(drone, location):
-    frame = drone.get_frame_read()
-    sleep(0.2)
+def check_camera(drone):
+    w, h = 720, 480 # display size of the screen
+    image = drone.get_drone()
+    frame = image.get_frame_read()
     img = frame.frame
     img = cv.resize(img, (w, h))
     img, info = hc.findTurbine(img)
     x, y = info[0]
     if x == 0:
         for i in range(4):
-            frame = drone.get_frame_read()
+            frame = image.get_frame_read()
             sleep(0.2)
             img = frame.frame
             img = cv.resize(img, (w, h))
@@ -290,155 +231,14 @@ def check_camera(drone, location):
             x, y = info[0]
             if x != 0:
                 break
-    location = trackObject(drone, info, location, turbines, video, [location[0], location[1], location[2]])
-    return location
-    
-def approx_cell_decomp(obstacleList, boundary):
-    '''input: array of obstactles, array of boundary coordinates
-    Decomposes the area into cells 
-    output: waypoints that are in the safe to fly zone.'''
-    boundary = np.append(boundary, [boundary[0]], 0)
-    w = 30
-    xmin = np.amin(boundary[:,0]) + (w/2)
-    xmax = np.amax(boundary[:,0]) - (w/2)
-    ymin = np.amin(boundary[:,1]) + (w/2)
-    ymax = np.amax(boundary[:,1]) - (w/2)
-    cells_x = np.arange(xmin, xmax, w)
-    cells_y = np.arange(ymin, ymax, w)
-    cells = []
-    waypoints = []
+    trackObject(drone, info, turbines, [drone.get_x_location(), drone.get_y_location(), drone.get_angle()])
 
-    for x in cells_x:
-        for y in cells_y:
-            cells =  np.append(cells, [x,y])
-    cells = cells.reshape(-1,2)
-    fig, ax = plt.subplots()
-    
-    for c in cells:
-        xmin = c[0] - w/2
-        xmax = c[0] + w/2
-        ymin = c[1] - w/2
-        ymax = c[1] + w/2
-        pts = [[xmin, ymin],[xmax,ymin],[xmax, ymax],[xmin, ymax]]
-        poly_cell = Polygon(pts)
-        p_cell = Path(pts)
-        isInside = []
-        for ob in obstacleList:
-            # This section is used for plotting for now
-            codes = [Path.MOVETO]
-            for i in range(len(ob.coords)-1):
-                codes.append(Path.LINETO)
-            codes.append(Path.CLOSEPOLY)
-            poly_obst = Polygon(ob.coords)
-            ob.coords = np.append(ob.coords, [ob.coords[0]], 0)
-            p_obst = Path(ob.coords, codes)
-            patch = patches.PathPatch(p_obst, facecolor='blue')
-            ax.add_patch(patch)
-            #isInside = np.append(isInside, p_obst.contains_points(pts))
-            isInside = np.append(isInside, poly_cell.intersects(poly_obst))
-        if not(isInside.any()):
-            waypoints = np.append(waypoints, c)
-            waypoints = waypoints.reshape(-1,2)
-    plt.plot(boundary[:,0], boundary[:,1], color='black', lw=3, label='boundary')
-    plt.scatter(cells[:,0], cells[:,1], marker='o', color='red', label='cells containing objects')
-    plt.scatter(waypoints[:,0], waypoints[:,1], marker='o', color='green', label='waypoints')
-    plt.legend(loc='lower center', bbox_to_anchor=(0.5, 0.95))
-    plt.show()
-    return waypoints
-         
-def test_cellDecomp():
-    '''Example tests of approximate cell decomposition'''
-    boundary =  [[0,0],[0,305],[305,305],[305,0]]
-    #boundary = [[-270, 0], [-270,270], [0, 270], [0,0]] 
-
-    obstacles = np.array([obstacle('wind_turbine1', [[50,50],[150,50],[100,100],[75,120],[50,100]]),
-                          obstacle('wind_turbine1', [[150,200],[300,200],[300,300],[200,250]])])
-    approx_cell_decomp(drone, location, obstacles, boundary)
-
-    obstacles = np.array([obstacle('wind_turbine1', [[50,50],[30,130],[80,120],[120,80],[60,40]]),
-                          obstacle('wind_turbine1', [[150,200],[300,175],[275,300],[200,250]]),
-                          obstacle('wind_tubine3', [[270, 78], [250,20], [280,50]])])
-    approx_cell_decomp(obstacles, boundary)
-
-class obstacle: 
-    def __init__(self, name, coords): 
-        self.name = name 
-        self.coords = coords
-
- 
-
+#bounds = [0, 328, 0, 324]    #actual size of path in drone cage
 if __name__ == "__main__":
-    drone = Tello()
-    turbines = {"WindTurbine_2": [0, 0, 0, 0]}
-     # COMMENT OUT SECTION IF TESTING W/O PHYSICAL DRONE
-    drone.connect()
-    sleep(0.5)
-    BatteryStart = drone.get_battery()
-    print("Current battery remaining: ", BatteryStart)
-    sleep(0.3)
-    drone.streamon()
-    sleep(0.5)
-    video = LiveFeed(drone)
-    video.start()
-    drone.takeoff()
-    sleep(1)
-    # END OF SECTION TO COMMENT OUT
-    location = mv.move(location, drone, up=40)
-    bounds = [0, 221, 0, 221]#161
-    #bounds = [0, 328, 0, 324]    #actual size of path in drone cage
-    start_time = time.time()
-    searchWidth = 50
-    moveIncr = 75
-    [location,dist] = spiral_exploration(drone, location, bounds, searchWidth, moveIncr)
-    #plt.xlabel('x (cm)')
-    #plt.ylabel('y (cm)')
-    #plt.show()
-    end_time = time.time()
-    print('--- ', round(end_time - start_time, 2), ' seconds ---')
-    BatteryEnd = drone.get_battery()
-    print("Current battery remaining: ", BatteryEnd)
-    print("Total battery used: ", BatteryStart - BatteryEnd)
+    turbines = {"WindTurbine_2": [1, 0, 0, 0]}
+    drone = mov.movement()
+    bounds = [0, 161, 0, 221]#161
+    search_width = 50
+    move_increment = 75
+    dist = snake_exploration(drone, bounds, search_width, move_increment)
     drone.land()
-    quit()
-
-    # #location = [0, 0, 0, 0] # Initialized list of x, y and angle coordinates for the drone.
-    # #bounds = [-328,0, 0, 324]
-    # #distBF = testBF(location, bounds, display=False)
-    # print(distBF2, distspiral_exploration)
-    # plt.show()
-    # #test_cellDecomp(location)
-
-    # GRAPHS DISTANCES FOR DIFFERENT SIZES OF SEARCH AREA
-
-    # y_len = 100
-    # area = []
-    # dspiral_exploration = []
-    # dBF = []
-    # tspiral_exploration = []
-    # tBF = []
-
-    # for i in range(20):
-    #     x_len = 100
-    #     for j in range(20):
-    #         area.append(x_len*y_len)
-    #         bounds = [0, x_len, 0, y_len]
-    #         location = [0, 0, 0, 0]
-    #         [location,distspiral_exploration,turnspiral_exploration] = spiral_exploration(drone, location, bounds, 50, display=True)
-    #         location = [0, 0, 0, 0]
-    #         [location,distBF2, turnBF] = snake_exploration(drone, location, bounds, 50, display=True)
-    #         dspiral_exploration.append(distspiral_exploration)
-    #         dBF.append(distBF2)
-    #         tspiral_exploration.append(turnspiral_exploration)
-    #         tBF.append(turnBF)
-    #         x_len += 100
-    # y_len += 100
-
-    # plt.figure()
-    # # plt.plot(area, dspiral_exploration, 'r.', label='spiral_exploration')
-    # # plt.plot(area, dBF, 'b.', label='Back-and-Forth')
-    # plt.plot(area, tspiral_exploration, 'r.', label='spiral_exploration')
-    # plt.plot(area, tBF, 'b.', label='Back-and-Forth')
-    # plt.xlabel("Area (cm)")
-    # plt.ylabel("Turns")
-    # plt.legend()
-    # plt.show()

@@ -4,7 +4,6 @@ import cv2 as cv
 import haar_cascade as hc
 from qr_reader import droneReadQR
 import threading
-from time import sleep
 
 class LiveFeed(threading.Thread):
     '''Multithreaded class for providing live video to the user.
