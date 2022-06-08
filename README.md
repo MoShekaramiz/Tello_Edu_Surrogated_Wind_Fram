@@ -107,7 +107,7 @@ The following is a comprehensive list of functions available to the user and the
 | get_z_location | none                                      | Returns the drone's current z coordinate             |
 | get_angle      | none                                      | Returns the drone's current angle                    |
 | get_drone      | none                                      | Returns the class interfacing the drone with the SDK |
-| get_video      | none                                      | Returns the variable controlliing the livestream     |
+| get_video      | none                                      | Returns the variable controlling the livestream      |
 
 #### land() <a name="land()"></a>
 Lands the drone after turning off the video stream and printing a message directing the user to the directory any collected data has been stored in. The action then exits the program.
@@ -277,8 +277,10 @@ video = drone.get_video()
 
 # Disable the QR detection
 video.stop_qr()
+
 # Disable the Haar cascade
 video.stop_haar()
+
 # Stop the livestream
 video.stop_image()
 ```
