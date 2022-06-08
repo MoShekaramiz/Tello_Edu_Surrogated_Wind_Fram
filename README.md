@@ -15,8 +15,8 @@ This work is supported by the Office of the Commissioner of Utah System of Highe
     1. [User Commands](#User-Commands)
         1. [Initialization](#Initialization)
         2. [move()](#move())
-        3. [curve()](#curve())
-        4. [go_to()](#go_to())
+        3. [go_to()](#go_to())
+        4. [curve()](#curve())
         5. [video()](#video())
         6. [get_location()](#get_location())
         7. [get_x_location()](#get_x_location())
@@ -66,8 +66,10 @@ The drone will then fly the pre-selected mission which is default to filming the
 After finding the correct target and completing the mission, the drone will fly back to the starting point and land itself.
 <br />
 <br />
+
 ## movement.py Instructions <a name="movement.py-Instructions"></a>
 The following instructions are for the use of our movement.py class for other automated drone purposes:
+
 ### Initialization <a name="Initialization"></a>
 To initialize the drone, the movment class in movement.py will handle most of the required intitialization steps.<br />
 The intialization has 2 optional parameters, the altitude adjustment of the drone after takeoff (default to 40cm for a total of 90cm above the ground), and a boolean stream variable that will control if the user wants the live video feed (default to True, see the section on output_video.py for more details).<br />
@@ -96,8 +98,8 @@ The following is a comprehensive list of functions available to the user and the
 | ---------------|:----------------------------------------- | :----------------------------------------------------|
 | land           | none                                      | Lands the drone                                      |
 | move           | fwd, back, up, down, left, right, ccw, cw | Moves the drone and tracks location                  |
+| go_to          | targetx, targety, ending_angle, targetz   | Moves the drone to the chosen coordinates            |
 | curve          | radius, left_right                        | Curves the drone left or right 90°                   |
-| go_to          | targetx, targety, ending_angle            | Moves the drone to the chosen coordinates            |
 | video          | none                                      | Starts the Livestream                                |
 | get_location   | none                                      | Returns a list of the x, y, z coordinates and angle  |
 | get_x_location | none                                      | Returns the drone's current x coordinate             |
@@ -112,6 +114,7 @@ Lands the drone after turning off the video stream and printing a message direct
 ```
 drone.land()
 ```
+
 #### move() <a name="move()"></a>
 Moves the drone according to the direction or angle given by the user. Movement must been in cm between 20cm and 500cm. The angle movement is in degrees from 0 to 359. Keywords for movement are: fwd(forward), back, up, down, left, right, ccw(counter clock-wise rotation), cw(clock-wise rotation).
 ```
@@ -119,6 +122,15 @@ Moves the drone according to the direction or angle given by the user. Movement 
 
 drone.move(fwd=50)
 ```
+
+#### go_to() <a name="go_to()"></a>
+Tells the drone to go to a specific set of cartesian coordinates with a desired ending angle. The drone's coordinates after movement are printed for the user. The reason why the z-axis location is last in the parameters is because it is the least used of all 3 in our current development.
+```
+# Go to xyz coordinates (100,150,300) with an ending angle of 141°
+
+drone.go_to(100, 150, 141, 300)
+```
+
 #### curve() <a name="curve()"></a>
 Rotates the drone 90° in a curved path with a given radius and left/right flag to curve to the left or right. The default is 50cm curve to the left. This function is still in work and may not always work as expected.
 ```
@@ -127,13 +139,7 @@ Rotates the drone 90° in a curved path with a given radius and left/right flag 
 
 drone.curve(radius=100, left_right=1) 
 ```
-#### go_to() <a name="go_to()"></a>
-Tells the drone to go to a specific set of cartesian coordinates with a desired ending angle. The drone's coordinates after movement are printed for the user. 
-```
-# Go to (100,150) with an ending angle of 141°
 
-drone.go_to(100, 150, 141)
-```
 #### video() <a name="video()"></a>
 Initializes a live video stream for the user. This function is called during the intialization process by default. If the user doesn't want a video stream, the stream parameter during initialization should be set to false. See the section on using [output.py](#output.py-Instructions) for more information.
 ```
@@ -141,6 +147,7 @@ Initializes a live video stream for the user. This function is called during the
 
 drone.video()
 ```
+
 #### get_location() <a name="get_location()"></a>
 Returns the full list of the drone's location formatted as [x_location, y_location, z_location, angle]. 
 ```
@@ -151,26 +158,31 @@ Returns only the x location of the drone.
 ```
 x_location = drone.get_x_location()
 ```
+
 #### get_y_location() <a name="get_y_location()"></a>
 Returns only the y location of the drone.
 ```
 y_location = drone.get_y_location()
 ```
+
 #### get_z_location() <a name="get_z_location()"></a>
 Returns only the z location of the drone.
 ```
 z_location = drone.get_z_location()
 ```
+
 #### get_angle() <a name="get_angle()"></a>
 Returns only the angle of the drone.
 ```
 angle = drone.get_angle()
 ```
+
 #### get_drone() <a name="get_drone()"></a>
 Returns the class controlling the SDK for the drone should the user need it.
 ```
 drone = drone.get_drone()
 ```
+
 #### get_video() <a name="get_video()"></a>
 Returns the variable controlling the video stream for the drone.
 ```
