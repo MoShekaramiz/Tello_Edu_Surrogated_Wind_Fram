@@ -8,9 +8,10 @@ This work is supported by the Office of the Commissioner of Utah System of Highe
 ![alt text](https://github.com/BrandenPinney/Tello-Drone-Project/blob/main/USHE-logo.png "USHE Logo")
 
 ## Table of Contents
-1. [Installations](#Installations)
-2. [Usage](#Usage)
-3. [movement.py Instructions](#movement.py-Instructions)
+1. [Purpose](#Purpose)
+2. [Installations](#Installations)
+3. [Usage](#Usage)
+4. [movement.py Instructions](#movement.py-Instructions)
     1. [User Commands](#User-Commands)
         1. [Initialization](#Initialization)
         2. [move()](#move())
@@ -34,6 +35,14 @@ This work is supported by the Office of the Commissioner of Utah System of Highe
     3. [stop_qr()](#stop_qr())
     4. [start_qr()](#start_qr())
     5. [stop_image()](#stop_image())
+6. [area_exploration.py Instructions](#area_exploration.py-Instructions)
+    1. [snake_exploration()](#snake_exploration())
+    2. [spiral_exploration()](#spiral_exploration())
+
+## Purpose <a name="Purpose"></a>
+This case study shows the initial results of aiming for reducing the cost, man-hours, and safety risks involved with the external structural inspection process of wind turbines using a fully automated drone-based system. The end goal is to use object detection and path planning algorithms to automate the process of identifying a specific wind turbine in the field via a drone, safely approaching the wind turbine, and capturing the images necessary for analysis and inspection. Our case study here serves as a small-scale proof of concept for the path planning solutions using pedestal fans in the place of wind turbines and a Tello EDU drone. Our study demonstrates the success of the drone to autonomously explore the region of interest, detect the desired fan, safely approach the fan, verify the fan via scanning the associated QR code, capture video and images from multiple angles, and safely fly back to the starting point and land.
+
+[![UVU Drone Path Planning Capstone](http://img.youtube.com/vi/POtHoBgGE8U/0.jpg)](http://www.youtube.com/watch?v=POtHoBgGE8U)
 
 ## Intallations <a name="Installations"></a>
 This application uses:<br />
@@ -260,4 +269,53 @@ video.stop_qr()
 video.stop_haar()
 # Stop the livestream
 video.stop_image()
+```
+
+## area_exploration.py Instructions <a name="area_exploration.py-Instructions"></a>
+This file provides area exploration functionality to search for targets over an area of a preset size. Starting at coordinates (0,0) the drone will explore the area in either a snaking or spiral pattern chosen by the user.
+
+#### snake_exploration() <a name="snake_exploration()"></a>
+Have the drone explore an area of a preset size in a snaking pattern. If the drone doesn't find the target by the end of the spiral pattern the drone returns to the launch point and lands.
+```
+# Initialize the drone
+import movement as mov
+drone = mov.movement()
+
+# Set the search boundaries as [minimum_x_value, maximum_x_value, minimum_y_value, maximum_y_value]
+bounds = [0, 161, 0, 221]
+
+# Set the search width between turns on the y-axis in centimeters
+search_width = 50
+
+# Set the movement increment on the x-axis in centimeters when the drone will stop and check the camera for a target
+move_increment = 75
+
+# Initiate the snake exploration pattern
+snake_exploration(drone, bounds, search_width, move_increment)
+
+# Land and exit the program
+drone.land()
+```
+
+#### spiral_exploration() <a name="spiral_exploration()"></a>
+Have the drone explore an area of a preset size in a spiral pattern. If the drone doesn't find the target by the end of the spiral pattern the drone returns to the launch point and lands.
+```
+# Initialize the drone
+import movement as mov
+drone = mov.movement()
+
+# Set the search boundaries as [minimum_x_value, maximum_x_value, minimum_y_value, maximum_y_value]
+bounds = [0, 161, 0, 221]
+
+# Set the search width between turns on the y-axis in centimeters
+search_width = 50
+
+# Set the movement increment on the x-axis in centimeters when the drone will stop and check the camera for a target
+move_increment = 75
+
+# Initiate the spiral exploration pattern
+apiral_exploration(drone, bounds, search_width, move_increment)
+
+# Land and exit the program
+drone.land()
 ```
