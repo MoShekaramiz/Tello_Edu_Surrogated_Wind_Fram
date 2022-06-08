@@ -1,12 +1,16 @@
 # Tello-Drone-Project
-Current python files related to drone flight path planning and object detection for the engineering department at Utah Valley University<br />
+Current python files related to drone flight path planning and object detection for the College of Engineering and Technology at Utah Valley University<br />
+
+![alt text](https://github.com/BrandenPinney/Tello-Drone-Project/blob/main/UVU_engineering.png "UVU Logo")
 
 This work is supported by the Office of the Commissioner of Utah System of Higher Education (USHE)-Deep Technology Initiative Grant 20210016UT
+
+![alt text](https://github.com/BrandenPinney/Tello-Drone-Project/blob/main/USHE-logo.png "USHE Logo")
 
 ## Table of Contents
 1. [Installations](#Installations)
 2. [Usage](#Usage)
-3. [movment.py Instructions](#movment.py-Instructions)
+3. [movement.py Instructions](#movement.py-Instructions)
     1. [User Commands](#User-Commands)
         1. [Initialization](#Initialization)
         2. [move()](#move())
@@ -53,7 +57,7 @@ The drone will then fly the pre-selected mission which is default to filming the
 After finding the correct target and completing the mission, the drone will fly back to the starting point and land itself.
 <br />
 <br />
-## movement.py Instructions <a name="movment.py-Instructions"></a>
+## movement.py Instructions <a name="movement.py-Instructions"></a>
 The following instructions are for the use of our movement.py class for other automated drone purposes:
 ### Initialization <a name="Initialization"></a>
 To initialize the drone, the movment class in movement.py will handle most of the required intitialization steps.<br />
@@ -74,7 +78,7 @@ drone = mv.movement(100, False)
 ```
 The user must first power on the Tello EDU and connect to the drone via wi-fi. 
 Instantiating the drone this way will begin the live video stream, launch the drone, raise the altitude of the drone (set to a default of 90cm, to choose a different height pass in an integer value), and prepare the drone for further commands.<br />
-The drone's initial location is also initialized at the cartesian point (0,0), the current angle of the drone being 0 degrees, and the altitude after takeoff using one of the drone's onboard atitude sensors.
+The drone's initial location is also initialized at the cartesian point (0,0), the current angle of the drone being 0°, and the altitude after takeoff using one of the drone's onboard atitude sensors.
 
 ---------------------------------------------------------------------------------------------------------------------
 ### Commands from the user: <a name="User-Commands"></a>
@@ -95,7 +99,7 @@ The following is a comprehensive list of functions available to the user and the
 | get_video      | none                                      | Returns the variable controlliing the livestream     |
 
 #### land() <a name="land()"></a>
-Lands the drone after turning off the video stream and printing a message directing the user to the directory any collected data has been stored in.
+Lands the drone after turning off the video stream and printing a message directing the user to the directory any collected data has been stored in. The action then exits the program.
 ```
 drone.land()
 ```
@@ -117,12 +121,12 @@ drone.curve(radius=100, left_right=1)
 #### go_to() <a name="go_to()"></a>
 Tells the drone to go to a specific set of cartesian coordinates with a desired ending angle. The drone's coordinates after movement are printed for the user. 
 ```
-# Go to (100,150) with an ending angle of 141 degrees
+# Go to (100,150) with an ending angle of 141°
 
 drone.go_to(100, 150, 141)
 ```
 #### video() <a name="video()"></a>
-Initializes a live video stream for the user. This function is called during the intialization process by default. If the user doesn't want a video stream, the stream parameter during initialization should be set to false. See the section on using output.py for more information.
+Initializes a live video stream for the user. This function is called during the intialization process by default. If the user doesn't want a video stream, the stream parameter during initialization should be set to false. See the section on using [output.py](#output.py-Instructions) for more information.
 ```
 # Start the livestream
 
@@ -194,7 +198,7 @@ drone.target_angle(45, 0, 0, 1)
 ```
 
 ## output.py Instructions <a name="output.py-Instructions"></a>
-A livestream video is created during initialization of the drone unless manually set to False. The algorithm creates the Livestream class found in output.py The video stream can be started later by using the video() command found under the movement.py instructions. The video stream is initialized to operate the Haar cascade detection algorithm and can also scan for QR codes in the frame. The easiest was to currently interact with the Livestream class in output.py is to use the get_video() command seen in the movment.py instructions which returns the Livestream class. Use the commands below to interact with the Livestream:
+A livestream video is created during initialization of the drone unless manually set to False. The algorithm creates the Livestream class found in output.py The video stream can be started later by using the [video()](#video()) command found under the [movement.py instructions](#movement.py-Instructions). The video stream is initialized to operate the Haar cascade detection algorithm and can also scan for QR codes in the frame. The easiest was to currently interact with the Livestream class in output.py is to use the [get_video()](#get_video()) command seen in the [movement.py instructions](#movement.py-Instructions) which returns the Livestream class. Use the commands below to interact with the Livestream:
 
 | Function        | Inputs     | Result                            |
 | --------------- |:---------- | :-------------------------------- |
@@ -225,7 +229,7 @@ video.start_haar()
 ```
 
 #### stop_qr() <a name="stop_qr()"></a>
-Stops the QR code detection. Stopping both the Haar cascade and QR detection will result in a regular livestream video. It is reccomended to use 64-bit python when using QR code detection.
+Stops the QR code detection. Stopping both the Haar cascade and QR detection will result in a regular livestream video. _It is reccomended to use 64-bit python when using QR code detection._
 ```
 # Assign the class to a variable
 video = drone.get_video()
@@ -245,7 +249,7 @@ video.start_qr()
 ```
 
 #### stop_image() <a name="stop_image()"></a>
-Turns off the livestream image. The Haar cascade and QR detection must also be turned off to fully stop the livestream. This is done automatically when land() is used from movement.py.
+Turns off the livestream image. The Haar cascade and QR detection must also be turned off to fully stop the livestream. This is done automatically when [land()](#land()) is used from [movement.py](#movement.py-Instructions).
 ```
 # Assign the class to a variable
 video = drone.get_video()
