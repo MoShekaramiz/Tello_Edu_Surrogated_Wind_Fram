@@ -36,7 +36,7 @@ def trackObject(drone, info, turbines, starting_location):
 
     # object detected
     if(x != 0):
-        distance = int((650 * 40.64) / width) - 40 # (Focal length of camera lense * Real-world width of object)/Width of object in pixels  -  40 centimeters to stop short
+        distance = int((650 * 40.64) / width) - 30 # (Focal length of camera lense * Real-world width of object)/Width of object in pixels  -  40 centimeters to stop short
         if distance < 20:
             distance = 20
 
@@ -77,7 +77,16 @@ def trackObject(drone, info, turbines, starting_location):
 
         elif area < fbRange[0] and area != 0 and img_pass == 0:
             # The drone is too far from the target
-            drone.move(fwd=distance)
+            if distance <= 500:
+                drone.move(fwd=distance)
+            else:
+                while distance != 0:
+                    if distance > 500:
+                        drone.move(fwd=500)
+                        distance -= 500
+                    else:
+                        drone.move(fwd=distance)
+                        distance -= distance
             qr_detection(drone, turbines, starting_location)
             #return location
     else:
@@ -86,9 +95,9 @@ def trackObject(drone, info, turbines, starting_location):
 
 def qr_detection(drone, turbines, starting_location):
     '''Begins searching for a QR code at the current location of the drone'''
-    drone.move(down=80)
+    drone.move(down=110)
     QR = None 
-    video = drone.video()
+    video = drone.get_video()
     video.stop_haar()
     img_counter = 0
     while True:
@@ -96,43 +105,47 @@ def qr_detection(drone, turbines, starting_location):
         img = cv.resize(img, (w, h))
 
         if len(QR) > 0:
+            drone_var = drone.get_drone()
+            print(">>>>>>>>>>>>>>>>CURRENT FLIGHT TIME: ", drone_var.get_flight_time())
             print(">>>>>>>>>>>>>>>>QR CODE FOUND: ", QR)
             drone.append_turbine_locations(QR)
             turbine_found = 0 # Flag to determine if the correct turbine was found
             video.stop_qr()
 
-            for i in turbines:
-                if i == QR:
-                    turbine_found = 1
-                    drone.move(up=60)
-                    mission.mission0(drone, turbines[i], QR)
-                    turbines.pop(i) 
+            try: 
+                for i in turbines:
+                    if i == QR:
+                        turbine_found = 1
+                        drone.move(up=90)
+                        mission.mission0(drone, turbines[i], QR)
+                        turbines.pop(i) 
 
-                    if len(turbines) != 0:
-                        video.start_haar()
-                        sleep(0.5)
-                        video.start_qr()
-                        sleep(0.5)
-                        drone.go_to(starting_location[0], starting_location[1], starting_location[2])
-                        break
+                        if len(turbines) != 0:
+                            video.start_haar()
+                            sleep(0.5)
+                            video.start_qr()
+                            sleep(0.5)
+                            drone.go_to(starting_location[0], starting_location[1], starting_location[2])
+                            break
 
-                    else:
-                        video.stop_qr()
-                        drone.go_to(0, 0, 0)
-                        drone.land()
-                        video.stop_image()
-                        quit()
+                        else:
+                            video.stop_qr()
+                            drone.go_to(0, 0, 0)
+                            drone.land()
 
-            if turbine_found == 0:
-                drone.move(location, drone, up=70)
-                video.start_haar()
-                sleep(0.5)
-                video.stop_qr()
-                sleep(1)
-                video.start_qr()
-                sleep(0.5)
-                location = drone.go_to(starting_location[0], starting_location[1], starting_location[2])
-            break
+                if turbine_found == 0:
+                    drone.move(up=110)
+                    video.start_haar()
+                    sleep(0.5)
+                    video.stop_qr()
+                    sleep(1)
+                    video.start_qr()
+                    sleep(0.5)
+                    drone.go_to(starting_location[0], starting_location[1], starting_location[2])
+                break
+
+            except:
+                break
 
         else:
             img_counter += 1

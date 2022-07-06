@@ -12,32 +12,38 @@ import os
 CWD = os.getcwd()
 
 class movement():
-    def __init__(self):
+    def __init__(self, height=70, stream=True):
         self.drone = Tello()               # Drone class initialized by calling: drone = Tello()
         self.new_location = [0, 0, 0, 0]   # [x location, y location, z location, angle]
         self.turbine_locations = []        # List of all known turbine locations
         self.video_stream = None
-        self.takeoff()
+        self.takeoff(height, stream)
     
-    def takeoff(self, height=40):
+    def takeoff(self, height=70, stream=True): 
         '''Initializes and launches the drone and rises 40 cm as a default.'''
         self.drone.connect()
         sleep(1)
         self.drone.streamon()
         sleep(1)
-        self.video_stream = LiveFeed(self.drone)
-        self.video_stream.start()
-        sleep(1)
+        if stream:
+            self.video()
+            sleep(1)
         self.drone.takeoff()
         print("Current battery remaining: ", self.drone.get_battery())
         self.new_location[2] = self.drone.get_height()
         self.move(up=height)
-        
+    
+    def video(self):
+        self.video_stream = LiveFeed(self.drone)
+        self.video_stream.start()
     
     def land(self):
         '''Lands the drone at the end of flight.'''
         print("Battery remaining >>>>>> ", self.drone.get_battery())
+        print(">>>>>>>>>>>>>>>>ENDING FLIGHT TIME: ", self.drone.get_flight_time())
         self.drone.land()
+        self.video_stream.stop_haar()
+        self.video_stream.stop_qr()
         self.video_stream.stop_image()
         self.drone.streamoff()
         print("\nThe drone has succesfully landed. See directory " + CWD + " to view collected data.\n")
@@ -45,8 +51,8 @@ class movement():
 
     def append_turbine_locations(self, QR):
         '''Add the location of a found turbine to the list and create the no-fly zone around it.'''
-        self.turbine_locations.append([self.new_location[0] - 40, self.new_location[0] + 40, self.new_location[1] - 40, 
-                                       self.new_location[1] + 40, QR, self.new_location[0], self.new_location[1]])
+        self.turbine_locations.append([self.new_location[0] - 30, self.new_location[0] + 30, self.new_location[1] - 30, 
+                                       self.new_location[1] + 30, QR, self.new_location[0], self.new_location[1]])
 
     def get_turbine_locations(self):
         '''Returns the list of all known turbines locatoins, their no-fly zones, and their QR code data.'''
@@ -76,7 +82,7 @@ class movement():
         '''Returns the class controlling the SDK for the drone.'''
         return self.drone
     
-    def video(self):
+    def get_video(self):
         '''Returns the live stream video'''
         return self.video_stream
 
@@ -273,7 +279,7 @@ class movement():
                 self.move(ccw=int(360 - angle))
     ########################################################################
 
-    def go_to(self, targetx=0, targety=0, ending_angle=None):
+    def go_to(self, targetx=0, targety=0, ending_angle=None, targetz=None):
         '''Used to tell the drone to go to a specific cartesian coordinate with a target X and Y value,
         along with the desired ending angle.'''
         x = round(self.new_location[0])
@@ -428,5 +434,13 @@ class movement():
                     self.move(ccw=(round(alpha)))
                 else:
                     self.move(ccw=(round(360 - alpha)))
+        if targetz is not None:
+            if targetz > self.get_z_location():
+                if (targetz - self.get_z_location()) >= 20:
+                    self.move(up=targetz - self.get_z_location())
+            elif targetz < self.get_z_location():
+                if (self.get_z_location() - targetz) >= 20:
+                    self.move(down=self.get_z_location() - targetz)
+                    
         print(f"\nCURRENT LOCATION >>>>>>>>>>{self.new_location}\n")
 

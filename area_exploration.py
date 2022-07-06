@@ -61,11 +61,10 @@ def snake_exploration(drone, fly_zone, search_width, move_increment, curve=0):
                 drone.go_to(targetx, targety, 0)
             else:
                 drone.go_to(targetx, targety, 180)
-            #drone.move(fwd=x_distance%move_increment)
-            total_distance += x_distance % move_increment
             # CHECK CAMERA
             check_camera(drone)
             ###################
+            total_distance += x_distance % move_increment
 
         if y >= y_traversals:
             break
@@ -170,7 +169,7 @@ def spiral_exploration(drone, fly_zone, search_width, move_increment):
 
                 if f != 0:                  # decrease distance to travel each time after first line
                     y_distance -= search_width
-                location =drone.move(location,drone, ccw=90)
+                drone.move(ccw=90)
                 turns += 1
                 f = 1 
 
@@ -235,10 +234,13 @@ def check_camera(drone):
 
 #bounds = [0, 328, 0, 324]    #actual size of path in drone cage
 if __name__ == "__main__":
-    turbines = {"WindTurbine_2": [1, 0, 0, 0]}
+    turbines = {"WindTurbine_1": [0, 0, 0, 0], "WindTurbine_2": [0, 0, 0, 0], "WindTurbine_3": [0, 0, 0, 0]}
     drone = mov.movement()
-    bounds = [0, 161, 0, 221]#161
-    search_width = 50
-    move_increment = 75
+    drone_var = drone.get_drone()
+    print(">>>>>>>>>>>>>>>>BEGINNING FLIGHT TIME: ", drone_var.get_flight_time())
+    bounds = [0, 720, 0, 540]#[0, 160, 0 ,160]
+    search_width = 180
+    move_increment = 90
     dist = snake_exploration(drone, bounds, search_width, move_increment)
+    print(">>>>>>>>>>>>>>>>ENDING FLIGHT TIME: ", drone_var.get_flight_time())
     drone.land()

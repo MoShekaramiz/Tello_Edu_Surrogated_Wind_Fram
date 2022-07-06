@@ -22,6 +22,8 @@ def mission0(mv, mission, turbine):
         mission3(mv, mission, turbine)
     elif mission[2] == 1:
         mission2(mv, mission, turbine)
+    else:
+        mv.move(up=20)
 
 def mission1(mv, mission, turbine):
     '''Film the fan on the right side'''

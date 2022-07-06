@@ -11,6 +11,17 @@ def findTurbine(img):
     as well as the area of the detection boundary.'''
     # Use Haar Cascades to detect objects using the built-in classifier tool
     cascade = cv.CascadeClassifier(CWD + "\outdoor_cascade.xml")
+    # clahe = cv.createCLAHE(clipLimit=3., tileGridSize=(8,8))
+
+    # lab = cv.cvtColor(img, cv.COLOR_BGR2LAB)  # convert from BGR to LAB color space
+    # l, a, b = cv.split(lab)  # split on 3 different channels
+
+    # l2 = clahe.apply(l)  # apply CLAHE to the L-channel
+
+    # lab = cv.merge((l2,a,b))  # merge channels
+    # img = cv.cvtColor(lab, cv.COLOR_LAB2BGR)  # convert from LAB to BGR
+    # img = cv.normalize(img, None, alpha=-1.5*255, beta=1.5*255, norm_type=cv.NORM_MINMAX, dtype=cv.CV_8U)
+
     gray = cv.cvtColor(img, cv.COLOR_BGR2GRAY)
     turbines = cascade.detectMultiScale(gray, 1.2, 8)
 
