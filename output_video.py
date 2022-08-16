@@ -65,4 +65,6 @@ class LiveFeed(threading.Thread):
 
     def stop_image(self):
         '''Stop the video feed'''
+        self.qr.set()
+        self.haar.set()
         self.stop.set()

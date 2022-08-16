@@ -30,6 +30,7 @@ class movement():
             sleep(1)
         self.drone.takeoff()
         print("Current battery remaining: ", self.drone.get_battery())
+        self.drone.send_command_with_return("downvision 0")
         self.new_location[2] = self.drone.get_height()
         self.move(up=height)
     
@@ -39,8 +40,8 @@ class movement():
     
     def land(self):
         '''Lands the drone at the end of flight.'''
-        print("Battery remaining >>>>>> ", self.drone.get_battery())
-        print(">>>>>>>>>>>>>>>>ENDING FLIGHT TIME: ", self.drone.get_flight_time())
+        print(">>>>>>>>>>>>>>>> BATTERY REMAINING: ", self.drone.get_battery())
+        print(">>>>>>>>>>>>>>>> ENDING FLIGHT TIME: ", self.drone.get_flight_time())
         self.drone.land()
         self.video_stream.stop_haar()
         self.video_stream.stop_qr()
@@ -49,7 +50,7 @@ class movement():
         print("\nThe drone has succesfully landed. See directory " + CWD + " to view collected data.\n")
         sys.exit(0)
 
-    def append_turbine_locations(self, QR):
+    def append_turbine_locations(self, QR, known_locations=None):
         '''Add the location of a found turbine to the list and create the no-fly zone around it.'''
         self.turbine_locations.append([self.new_location[0] - 30, self.new_location[0] + 30, self.new_location[1] - 30, 
                                        self.new_location[1] + 30, QR, self.new_location[0], self.new_location[1]])
@@ -86,6 +87,16 @@ class movement():
         '''Returns the live stream video'''
         return self.video_stream
 
+    def set_coordinates(self, x_location=None, y_location=None, z_location=None, angle=None):
+        '''Sets the coordinates of the drone'''
+        if x_location != None:
+            self.new_location[0] = x_location
+        if y_location != None:
+            self.new_location[1] = y_location
+        if z_location != None:
+            self.new_location[2] = z_location
+        if angle != None:
+            self.new_location[3] = angle
 
     def move(self, fwd=0, back=0, ccw=0, cw=0, up=0, down=0, left=0, right=0):
         '''Takes a list holding the x, y cartesian coordinates of the drone and the angle relative to takeoff [x, y, angle] (initialized as [0, 0, 0]).
@@ -279,7 +290,7 @@ class movement():
                 self.move(ccw=int(360 - angle))
     ########################################################################
 
-    def go_to(self, targetx=0, targety=0, ending_angle=None, targetz=None):
+    def go_to(self, targetx=0, targety=0, ending_angle=None, targetz=None, rotate_only=False, half_travel=False):
         '''Used to tell the drone to go to a specific cartesian coordinate with a target X and Y value,
         along with the desired ending angle.'''
         x = round(self.new_location[0])
@@ -287,6 +298,7 @@ class movement():
         target_x = round(targetx)
         target_y = round(targety)
         angle = self.new_location[3]
+        self.new_location[2] = self.drone.get_height()
 
         if(x > target_x) and (y > target_y): # drone in quadrant 1
             quadrant = 1
@@ -304,6 +316,8 @@ class movement():
             quadrant = 0
 
         point_distance = int(round(math.sqrt((x-target_x)**2 + (y-target_y)**2)))
+        if half_travel is True:
+            point_distance = point_distance-30
         try:
             vector_angle = int(round(math.degrees(math.atan((y-target_y)/(x-target_x)))))
         except ZeroDivisionError:
@@ -330,6 +344,10 @@ class movement():
             elif quadrant == 4: # drone in quadrant 4
                 if (x < centerx < target_x) and (y < centery < target_y):
                     possible_collisions.append([i[0], i[1], i[2], i[3], center_distance, centerx, centery])
+
+        if rotate_only is True:
+            self.target_angle(vector_angle, target_x, target_y, quadrant)
+            return
 
         if len(possible_collisions) != 0:
             possible_collisions = sorted(possible_collisions, key=operator.itemgetter(4)) # sort the possible collision list by distance from drone
@@ -443,4 +461,5 @@ class movement():
                     self.move(down=self.get_z_location() - targetz)
                     
         print(f"\nCURRENT LOCATION >>>>>>>>>>{self.new_location}\n")
+
 
