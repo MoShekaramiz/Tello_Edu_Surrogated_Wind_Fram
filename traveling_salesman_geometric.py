@@ -9,11 +9,12 @@ import time
 import movement as mov
 start = time.time()
 
-# xpos = np.array([0, 489, 832, 217, 613, 801, 58, 531, 371, 99, 471])
-# xpos = np.append(xpos, xpos[0])
-# ypos = np.array([0, 78, 619, 340, 753, 124, 189, 227, 848, 687, 638])
-# ypos = np.append(ypos, ypos[0])
-# data = np.array([xpos, ypos], np.int32)
+# Array of 10 test points
+xpos = np.array([0, 1000, 0, 1000, 489, 832, 217, 613, 801, 58, 531, 371, 99, 471])
+xpos = np.append(xpos, xpos[0])
+ypos = np.array([0, 0, 1000, 1000, 78, 619, 340, 753, 124, 189, 227, 848, 687, 638])
+ypos = np.append(ypos, ypos[0])
+data = np.array([xpos, ypos], np.int32)
 
 # xpos = np.array([0, 489, 918, 217, 613, 801, 58, 531, 368, 143, 474])
 # xpos = np.append(xpos, xpos[0])
@@ -27,11 +28,12 @@ start = time.time()
 # ypos = np.append(ypos, ypos[0])
 # data = np.array([xpos, ypos], np.int32)
 
-xpos = np.array([0, 220, 100, 365])
-xpos = np.append(xpos, xpos[0])
-ypos = np.array([0, 200, 78, 20])
-ypos = np.append(ypos, ypos[0])
-data = np.array([xpos, ypos], np.int32)
+# Lab Test Points
+# xpos = np.array([0, 220, 100, 365])
+# xpos = np.append(xpos, xpos[0])
+# ypos = np.array([0, 200, 78, 20])
+# ypos = np.append(ypos, ypos[0])
+# data = np.array([xpos, ypos], np.int32)
 
 class TravelingSalesman():
     def __init__(self):
@@ -46,7 +48,6 @@ class TravelingSalesman():
         T = 2000
 
         while T > 1:
-            
             for i in range(400):
                 if e1 < e_min:
                     e_min = e1
@@ -87,7 +88,7 @@ class TravelingSalesman():
         # plt.axis([0, 285, 0, 285])
         for i, j in zip(data[0], data[1]):
             axis[0].text(i, j+20, '({}, {})'.format(i, j), fontsize='small')
-        axis[0].text(10, 900, 'Total Energy: 6385.7', fontsize='small')
+        axis[0].text(10, 900, 'Total Energy: 10358.9', fontsize='small')
         axis[0].plot(data[0], data[1], '-o', markersize=4)
         axis[0].quiver(data[0][:-1], data[1][:-1], data[0][1:]-data[0][:-1], 
                    data[1][1:]-data[1][:-1],scale_units='xy', angles='xy', scale=1, color='teal', width=0.005)
@@ -99,7 +100,7 @@ class TravelingSalesman():
         # plt.axis([0, 285, 0, 285])
         for i, j in zip(self.path_min[0], self.path_min[1]):
             axis[1].text(i, j+20, '({}, {})'.format(i, j), fontsize='small')
-        axis[1].text(10, 900, 'Total Energy: 3206.6', fontsize='small')
+        axis[1].text(10, 900, 'Total Energy: 4618.4', fontsize='small')
         axis[1].plot(self.path_min[0], self.path_min[1], '-o', markersize=4)
         axis[1].quiver(self.path_min[0][:-1], self.path_min[1][:-1], self.path_min[0][1:]-self.path_min[0][:-1], 
                    self.path_min[1][1:]-self.path_min[1][:-1],scale_units='xy', angles='xy', scale=1, color='teal', width=0.005)
@@ -127,24 +128,26 @@ if __name__ == "__main__":
     coordinates = np.delete(coordinates, 0, axis=1)
     coordinates = np.delete(coordinates, -1, axis=1)
     for location in range(int(coordinates.size/2)):
-        # Rotate the drone to face the next location
-        drone.go_to(coordinates[0][location], coordinates[1][location], rotate_only=True) 
+        if coordinates[0][location] == 0 or coordinates[0][location] == 400: # second number to be changed to whatever the boundary size is
+            calibrate(drone, False, coordinates[0][location], coordinates[1][location])
+        else:
+            # Rotate the drone to face the next location
+            drone.go_to(coordinates[0][location], coordinates[1][location], rotate_only=True) 
 
-        # Take 10 images to find the location of the target and do the mission if it is found
-        info = check_camera(camera)      
-        found = trackObject(drone, info, turbines, [drone.get_x_location(), drone.get_y_location(), drone.get_angle()])
-        
-        # If it is not seen move towards the target
-        img_counter = 0
-        while found == False:
-            dist = math.sqrt((drone.get_x_location() - coordinates[0][location])**2 + (drone.get_y_location() - coordinates[1][location])**2)
-            if dist > 35:
-                drone.go_to(coordinates[0][location], coordinates[1][location], half_travel=True)
-                found = trackObject(drone, info, turbines, [drone.get_x_location(), drone.get_y_location(), drone.get_angle()])
-            else:
-                qr_detection(drone, turbines, [drone.get_x_location(), drone.get_y_location(), drone.get_z_location()])
-                found = True
-        calibrate(drone)
+            # Take 10 images to find the location of the target and do the mission if it is found
+            info = check_camera(camera)      
+            found = trackObject(drone, info, turbines, [drone.get_x_location(), drone.get_y_location(), drone.get_angle()])
+            
+            # If it is not seen move towards the target
+            img_counter = 0
+            while found == False:
+                dist = math.sqrt((drone.get_x_location() - coordinates[0][location])**2 + (drone.get_y_location() - coordinates[1][location])**2)
+                if dist > 35:
+                    drone.go_to(coordinates[0][location], coordinates[1][location], half_travel=True)
+                    found = trackObject(drone, info, turbines, [drone.get_x_location(), drone.get_y_location(), drone.get_angle()])
+                else:
+                    qr_detection(drone, turbines, [drone.get_x_location(), drone.get_y_location(), drone.get_z_location()])
+                    found = True
 
 
     drone.go_to(ending_angle=0)
