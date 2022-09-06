@@ -38,6 +38,13 @@ This work is supported by the Office of the Commissioner of Utah System of Highe
 6. [area_exploration.py Instructions](#area_exploration.py-Instructions)
     1. [snake_exploration()](#snake_exploration())
     2. [spiral_exploration()](#spiral_exploration())
+7. [downvision_calibration.py Instructions](#downvision_calibration.py-Instructions)
+    1. [calibrate()](#calibrate())
+8. [traveling_salesman_geometric.py Instructions](#traveling_salesman_geometric.py-Instructions)
+    1. [TravelingSalesman()](#TravelingSalesman())
+        1. [plot()](#plot())
+        2. [get_path()](#get_path())
+        3. [energy_calc()](#energy_calc())
 
 ## Purpose <a name="Purpose"></a>
 This case study shows the initial results of aiming for reducing the cost, man-hours, and safety risks involved with the external structural inspection process of wind turbines using a fully automated drone-based system. The end goal is to use object detection and path planning algorithms to automate the process of identifying a specific wind turbine in the field via a drone, safely approaching the wind turbine, and capturing the images necessary for analysis and inspection. Our case study here serves as a small-scale proof of concept for the path planning solutions using pedestal fans in the place of wind turbines and a Tello EDU drone. Our study demonstrates the success of the drone to autonomously explore the region of interest, detect the desired fan, safely approach the fan, verify the fan via scanning the associated QR code, capture video and images from multiple angles, and safely fly back to the starting point and land.
@@ -332,4 +339,45 @@ apiral_exploration(drone, bounds, search_width, move_increment)
 
 # Land and exit the program
 drone.land()
+```
+
+## downvision_calibration.py Instructions<a name="downvision_calibration.py-Instructions"></a>
+This file allows the user to re-calibrate the location and angle of the drone by positioning the drone first over a STARTRC UAV landing pad as seen in the video below. 
+
+### calibrate() <a name="calibrate()"></a>
+This function takes the drone class, a boolean value indicating if the drone is to land after the calibration, the new x_coordinate (default to x = 0), and the new y_coordinate (default to y = 0).
+The drone will then lower to 30cm off the ground and use RC motor controls and Hough transforms to center over the helipad and recalibrate the location and angle of the drone.
+```
+drone.go_to(0, 0, 0)
+calibrate(drone, land=True, x_coordinate=0, y_coordinate=0)
+```
+
+[![Drone Location Calibration Test](http://img.youtube.com/vi/H2kWhc6m8rA/0.jpg)](http://www.youtube.com/watch?v=H2kWhc6m8rA)
+
+## traveling_salesman_geometric.py Instructions<a name="traveling_salesman_geometric.py-Instructions"></a>
+This file contains the simulated annealing process for the traveling salesman problem using a numpy array of the x and y positions of all the targets in the area (in centimeters). 
+
+### TravelingSalesman()<a name="TravelingSalesman()"></a>
+A class that uses the numpy array of locations and a simulated annealing algorithm to attempt to optimize the shortest possible path to all the target locations.
+
+#### plot()<a name="plot()"></a>
+Plots the beginning path and optimized path for visual comparison and validation.
+
+#### get_path()<a name="get_path()"></a>
+Returns the optimized path in the form of a numpy array.
+
+#### energy_calc()<a name="energy_calc()"></a>
+Returns the total energy of the numpy array using the point-distance formula.
+
+```
+xpos = np.array([0, 220, 100, 365])
+xpos = np.append(xpos, xpos[0]) # X and Y arrays should begin and end with 0 to ensure a loop
+ypos = np.array([0, 200, 78, 20])
+ypos = np.append(ypos, ypos[0])
+data = np.array([xpos, ypos], np.int32)
+
+path = TravelingSalesman()
+path.plot()
+shortest_path = path.get_path()
+path_energy = path.energy_calc(shortest_path)
 ```
