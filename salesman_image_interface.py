@@ -180,7 +180,8 @@ def qr_detection(drone, turbines, starting_location):
         else:
             img_counter += 1
             if img_counter == 195:
-                drone.go_to(starting_location[0], starting_location[1], starting_location[2])
+                # drone.go_to(starting_location[0], starting_location[1], starting_location[2])
+                img_counter = 0
             elif (img_counter%30) == 0:
                 drone.move(ccw=45)
                 drone.move(right=30)

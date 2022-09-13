@@ -1,4 +1,5 @@
 import math
+from turtle import goto
 import numpy as np
 import matplotlib.pyplot as plt
 import random
@@ -10,21 +11,58 @@ import movement as mov
 start = time.time()
 
 # Array of 10 test points
-xpos = np.array([0, 1000, 0, 1000, 489, 832, 217, 613, 801, 58, 531, 371, 99, 471])
+xpos = np.array([0, 1000, 0, 500, 489, 832, 217, 613, 801, 58, 531, 371, 99, 471])
 xpos = np.append(xpos, xpos[0])
-ypos = np.array([0, 0, 1000, 1000, 78, 619, 340, 753, 124, 189, 227, 848, 687, 638])
+ypos = np.array([0, 0, 1000, 600, 78, 619, 340, 753, 124, 189, 227, 848, 687, 638])
 ypos = np.append(ypos, ypos[0])
 data = np.array([xpos, ypos], np.int32)
 
-# xpos = np.array([0, 489, 918, 217, 613, 801, 58, 531, 368, 143, 474])
+# Array of 9 test points
+# xpos = np.array([0, 1000, 0, 1000, 489, 832, 217, 613, 801, 58, 531, 371, 99])
 # xpos = np.append(xpos, xpos[0])
-# ypos = np.array([0, 78, 413, 340, 453, 124, 189, 227, 489, 466, 305])
+# ypos = np.array([0, 0, 1000, 1000, 78, 619, 340, 753, 124, 189, 227, 848, 687])
 # ypos = np.append(ypos, ypos[0])
 # data = np.array([xpos, ypos], np.int32)
 
-# xpos = np.array([0, 100, 220, 235, 137, 200, 51, 16, 280, 143, 100])
+# Array of 8 test points
+# xpos = np.array([0, 1000, 0, 1000, 489, 832, 217, 613, 801, 58, 531, 371])
 # xpos = np.append(xpos, xpos[0])
-# ypos = np.array([0, 78, 200, 20, 250, 124, 189, 227, 89, 166, 205])
+# ypos = np.array([0, 0, 1000, 1000, 78, 619, 340, 753, 124, 189, 227, 848])
+# ypos = np.append(ypos, ypos[0])
+# data = np.array([xpos, ypos], np.int32)
+
+# Array of 7 test points
+# xpos = np.array([0, 1000, 0, 1000, 489, 832, 217, 613, 801, 58, 531])
+# xpos = np.append(xpos, xpos[0])
+# ypos = np.array([0, 0, 1000, 1000, 78, 619, 340, 753, 124, 189, 227])
+# ypos = np.append(ypos, ypos[0])
+# data = np.array([xpos, ypos], np.int32)
+
+# Array of 6 test points
+# xpos = np.array([0, 1000, 0, 1000, 489, 832, 217, 613, 801, 58])
+# xpos = np.append(xpos, xpos[0])
+# ypos = np.array([0, 0, 1000, 1000, 78, 619, 340, 753, 124, 189])
+# ypos = np.append(ypos, ypos[0])
+# data = np.array([xpos, ypos], np.int32)
+
+# Array of 5 test points
+# xpos = np.array([0, 1000, 0, 1000, 489, 832, 217, 613, 801])
+# xpos = np.append(xpos, xpos[0])
+# ypos = np.array([0, 0, 1000, 1000, 78, 619, 340, 753, 124])
+# ypos = np.append(ypos, ypos[0])
+# data = np.array([xpos, ypos], np.int32)
+
+# Array of 4 test points
+# xpos = np.array([0, 1000, 0, 1000, 489, 832, 217, 613])
+# xpos = np.append(xpos, xpos[0])
+# ypos = np.array([0, 0, 1000, 1000, 78, 619, 340, 753])
+# ypos = np.append(ypos, ypos[0])
+# data = np.array([xpos, ypos], np.int32)
+
+# Array of 3 test points
+# xpos = np.array([0, 1000, 0, 1000, 489, 832, 217])
+# xpos = np.append(xpos, xpos[0])
+# ypos = np.array([0, 0, 1000, 1000, 78, 619, 340])
 # ypos = np.append(ypos, ypos[0])
 # data = np.array([xpos, ypos], np.int32)
 
@@ -88,7 +126,7 @@ class TravelingSalesman():
         # plt.axis([0, 285, 0, 285])
         for i, j in zip(data[0], data[1]):
             axis[0].text(i, j+20, '({}, {})'.format(i, j), fontsize='small')
-        axis[0].text(10, 900, 'Total Energy: 10358.9', fontsize='small')
+        axis[0].text(10, 900, f'Total Energy: {int(self.energy_calc(data))}', fontsize='small')
         axis[0].plot(data[0], data[1], '-o', markersize=4)
         axis[0].quiver(data[0][:-1], data[1][:-1], data[0][1:]-data[0][:-1], 
                    data[1][1:]-data[1][:-1],scale_units='xy', angles='xy', scale=1, color='teal', width=0.005)
@@ -100,7 +138,7 @@ class TravelingSalesman():
         # plt.axis([0, 285, 0, 285])
         for i, j in zip(self.path_min[0], self.path_min[1]):
             axis[1].text(i, j+20, '({}, {})'.format(i, j), fontsize='small')
-        axis[1].text(10, 900, 'Total Energy: 4618.4', fontsize='small')
+        axis[1].text(10, 900, f'Total Energy: {int(self.energy_calc(self.path_min))}', fontsize='small')
         axis[1].plot(self.path_min[0], self.path_min[1], '-o', markersize=4)
         axis[1].quiver(self.path_min[0][:-1], self.path_min[1][:-1], self.path_min[0][1:]-self.path_min[0][:-1], 
                    self.path_min[1][1:]-self.path_min[1][:-1],scale_units='xy', angles='xy', scale=1, color='teal', width=0.005)
@@ -148,7 +186,8 @@ if __name__ == "__main__":
                 else:
                     qr_detection(drone, turbines, [drone.get_x_location(), drone.get_y_location(), drone.get_z_location()])
                     found = True
-
+        drone.go_to(0, 0, 0)
+        calibrate(drone, False, 0, 0)
 
     drone.go_to(ending_angle=0)
     print(">>>>>>>>>>>>>>>> TOTAL FLIGHT TIME: ", time.time() - start_time)
