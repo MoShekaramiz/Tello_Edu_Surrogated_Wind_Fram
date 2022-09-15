@@ -10,30 +10,28 @@
 
 //apparently the library uses a newer version of c++, which is not super compatible with our board
 
+//this is for the Arduino MKR1000 Wifi board and the GT-U7 GPS module
+
 #include <Arduino.h>
-
-#include <Wire.h>
-#include <wiring_private.h>
-
-//SERCOM sercom5(sercom5);
-//TwoWire myWire(&sercom5, 0, 1);
 TinyGPSPlus gps;
 
 void setup() {
-  // initialize digital pin LED_BUILTIN as an output.
-  pinMode(LED_BUILTIN, OUTPUT);
+  //Serial1 is pins 13 and 14 on the MKR1000
   Serial1.begin(9600);
+  //start COM over USB for debug data
   Serial.begin(115200);
 }
 
 // the loop function runs over and over again forever
 void loop() {
+  //recieve the GPS packet
   while(Serial1.available() > 0)
   {
-    //gps.encode(Serial1.read());
-   gps.encode(Serial1.read());
+    //parse the packet
+    gps.encode(Serial1.read());
   }
 
+  //print to COM when location and satilite count is updated
   if (gps.location.isUpdated())
   {
     Serial.print("Lat: "); Serial.println(gps.location.lat(), 9);
