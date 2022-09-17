@@ -3,9 +3,13 @@ import cv2 as cv
 import haar_cascade as hc
 from qr_reader import droneReadQR
 import movement as mov
-from time import sleep
+from time import sleep, time
     
 def calibrate(drone_class, land=False, x_coordinate=0, y_coordinate=0):
+    with open('OutputLog.csv', 'r') as outFile:
+                start = int(outFile.readline())
+    with open('OutputLog.csv', 'a') as outFile:
+                outFile.write(f"Calibration at ({x_coordinate, y_coordinate}) started at: {round(time()-start)}\n")
     drone = drone_class.get_drone()
     drone_class.go_to(x_coordinate, y_coordinate, 0)
     print("><><><><><><><><><><><><><>", drone.get_height())
@@ -116,6 +120,9 @@ def calibrate(drone_class, land=False, x_coordinate=0, y_coordinate=0):
             if frames_since_positive == 30:
                 frames_since_positive = 0
                 drone.send_rc_control(0, 0, 0, 20)
+    
+    with open('OutputLog.csv', 'a') as outFile:
+                outFile.write(f"Calibration at ({x_coordinate, y_coordinate}) finished at: {round(time()-start)}\n")
         
             
 

@@ -8,6 +8,7 @@ from salesman_image_interface import trackObject, qr_detection
 from downvision_calibration import calibrate
 import time
 import movement as mov
+
 start = time.time()
 
 # Array of 10 test points
@@ -156,17 +157,32 @@ class TravelingSalesman():
         return energy
 
 if __name__ == "__main__":
-    turbines = {"WindTurbine_1": [[0, 0, 0, 0], [100, 78]], "WindTurbine_2": [[0, 0, 0, 0], [220, 200]], "WindTurbine_3": [[0, 0, 0, 0], [235, 20]]}
+    with open('OutputLog.csv', 'w') as outFile:
+        outFile.write(f"{round(start)}\n")
+    turbines = {"WindTurbine_1": [[0, 0, 0, 0], [489, 78]], "WindTurbine_2": [[0, 0, 0, 0], [832, 619]], "WindTurbine_3": [[0, 0, 0, 0], [217, 340]],
+                "WindTurbine_4": [[0, 0, 0, 0], [613, 753]], "WindTurbine_5": [[0, 0, 0, 0], [801, 124]], "WindTurbine_6": [[0, 0, 0, 0], [58, 189]],
+                "WindTurbine_7": [[0, 0, 0, 0], [531, 227]], "WindTurbine_8": [[0, 0, 0, 0], [371, 848]], "WindTurbine_9": [[0, 0, 0, 0], [99, 687]],
+                "WindTurbine_10": [[0, 0, 0, 0], [471, 638]]}
+    # Uncomment to get positions of each target in inches
+    # with open('Positions.csv', 'w') as outFile: 
+    #     for item in turbines:
+    #         positionx = turbines[item][1][0]/2.54
+    #         positiony = turbines[item][1][1]/2.54
+    #         outFile.write(f"{item}: ({positionx}, {positiony})\n")
     path = TravelingSalesman() 
+    with open('OutputLog.csv', 'a') as outFile:
+        outFile.write(f"Annealing finished at {round(time.time()-start)}\n")
     path.plot()
     drone = mov.movement()
     start_time = time.time()
     coordinates = path.get_path()
     camera = drone.get_drone()
+    with open('OutputLog.csv', 'a') as outFile:
+        outFile.write(f"Starting battery: {camera.get_battery()}\n")
     coordinates = np.delete(coordinates, 0, axis=1)
     coordinates = np.delete(coordinates, -1, axis=1)
     for location in range(int(coordinates.size/2)):
-        if coordinates[0][location] == 0 or coordinates[0][location] == 400: # second number to be changed to whatever the boundary size is
+        if coordinates[0][location] == 0 or coordinates[0][location] == 1000: # second number to be changed to whatever the boundary size is
             calibrate(drone, False, coordinates[0][location], coordinates[1][location])
         else:
             # Rotate the drone to face the next location
@@ -186,11 +202,12 @@ if __name__ == "__main__":
                 else:
                     qr_detection(drone, turbines, [drone.get_x_location(), drone.get_y_location(), drone.get_z_location()])
                     found = True
-        drone.go_to(0, 0, 0)
-        calibrate(drone, False, 0, 0)
 
     drone.go_to(ending_angle=0)
     print(">>>>>>>>>>>>>>>> TOTAL FLIGHT TIME: ", time.time() - start_time)
+    with open('OutputLog.csv', 'a') as outFile:
+                outFile.write(f"Ended at: {round(time.time()-start)}\n")
+                outFile.write(f"Ending battery: {camera.get_battery()}\n")
     calibrate(drone, land=True)
     drone.land()
 
