@@ -1,6 +1,6 @@
 '''The main object detection and drone flight module. By Branden Pinney 2022'''
 
-from time import sleep
+from time import sleep, time
 import math
 import cv2 as cv
 from djitellopy import Tello
@@ -122,6 +122,8 @@ def trackObject(drone, info, turbines, starting_location):
 
 def qr_detection(drone, turbines, starting_location):
     '''Begins searching for a QR code at the current location of the drone'''
+    with open('OutputLog.csv', 'r') as outFile:
+                start = int(outFile.readline())
     drone_lower = drone.get_drone()
     drone.move(down=110)
     if drone_lower.get_height() > 50:
@@ -138,6 +140,8 @@ def qr_detection(drone, turbines, starting_location):
             drone_var = drone.get_drone()
             # print(">>>>>>>>>>>>>>>>CURRENT FLIGHT TIME: ", drone_var.get_flight_time())
             print(">>>>>>>>>>>>>>>>QR CODE FOUND: ", QR)
+            with open('OutputLog.csv', 'a') as outFile:
+                outFile.write(f"Found QR code:{QR} at {round(time()-start)}\n")
             drone.append_turbine_locations(QR)
             turbine_found = 0 # Flag to determine if the correct turbine was found
             video.stop_qr()

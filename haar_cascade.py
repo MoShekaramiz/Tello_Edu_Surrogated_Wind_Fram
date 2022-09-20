@@ -94,21 +94,21 @@ def find_circles(img, down=True):
         return output, circles
 
 if __name__ == "__main__":
-    # cap = cv.VideoCapture(0)
-    # while True:
-    #     _, img = cap.read()
-    #     img, circles = find_circles(img, False)
-    #     #img = cv.resize(img, None, fx=1, fy=1, interpolation=cv.INTER_AREA)
-    #     cv.imshow("Output", img)
-    #     cv.waitKey(1)
-
-    drone = Tello()
-    drone.connect()
-
-    drone.streamon()
+    cap = cv.VideoCapture(0)
     while True:
-        frame = drone.get_frame_read()
-        img = frame.frame
-        img, info = find_circles(img, down=False)
+        _, img = cap.read()
+        img, circles = find_circles(img, False)
+        #img = cv.resize(img, None, fx=1, fy=1, interpolation=cv.INTER_AREA)
         cv.imshow("Output", img)
         cv.waitKey(1)
+
+    # drone = Tello()
+    # drone.connect()
+
+    # drone.streamon()
+    # while True:
+    #     frame = drone.get_frame_read()
+    #     img = frame.frame
+    #     img, info = find_circles(img, down=False)
+    #     cv.imshow("Output", img)
+    #     cv.waitKey(1)

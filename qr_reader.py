@@ -1,6 +1,14 @@
 '''Module to assist with detecting QR codes in OpenCV. By Branden Pinney and Shayne Duncan 2022.'''
 
 import cv2 as cv
+import pyqrcode
+import png
+from pyqrcode import QRCode
+  
+def make_QR(names):
+    for name in names:
+        code = pyqrcode.create(name)
+        code.png(name + '.png', scale=12)
 
 def boundingBox(img, bbox):
     '''Creates a bounding box around the detected QR code'''
@@ -28,3 +36,7 @@ def droneReadQR(drone):
         img, info = boundingBox(img, bbox)
 
     return QR, img, info
+
+if __name__ == "__main__":
+    make_QR(["WindTurbine_1", "WindTurbine_2", "WindTurbine_3", "WindTurbine_4", "WindTurbine_5",
+             "WindTurbine_6", "WindTurbine_7", "WindTurbine_8", "WindTurbine_9", "WindTurbine_10"])
