@@ -68,10 +68,10 @@ def find_circles(img, down=True):
                 cv.circle(img,(i[0],i[1]),2,(0,0,255),3)
         return img, circles
     else:
-        # greenLower = (29, 86, 6)
-        # greenUpper = (64, 255, 255)
-        greenLower = (40, 97, 20)
+        greenLower = (29, 86, 6)
         greenUpper = (64, 255, 255)
+        # greenLower = (40, 97, 20)
+        # greenUpper = (64, 255, 255)
         blurred = cv.GaussianBlur(img, (11, 11), 0)
         hsv = cv.cvtColor(blurred, cv.COLOR_BGR2HSV)
         mask = cv.inRange(hsv, greenLower, greenUpper)

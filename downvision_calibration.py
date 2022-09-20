@@ -6,10 +6,10 @@ import movement as mov
 from time import sleep, time
     
 def calibrate(drone_class, land=False, x_coordinate=0, y_coordinate=0):
-    with open('OutputLog.csv', 'r') as outFile:
-                start = int(outFile.readline())
-    with open('OutputLog.csv', 'a') as outFile:
-                outFile.write(f"Calibration at ({x_coordinate, y_coordinate}) started at: {round(time()-start)}\n")
+    # with open('OutputLog.csv', 'r') as outFile:
+    #             start = int(outFile.readline())
+    # with open('OutputLog.csv', 'a') as outFile:
+    #             outFile.write(f"Calibration at ({x_coordinate, y_coordinate}) started at: {round(time()-start)}\n")
     drone = drone_class.get_drone()
     drone_class.go_to(x_coordinate, y_coordinate, 0)
     print("><><><><><><><><><><><><><>", drone.get_height())
@@ -71,17 +71,17 @@ def calibrate(drone_class, land=False, x_coordinate=0, y_coordinate=0):
                 frames_since_positive = 0
                 img_counter += 1
                 if img_counter == 30:
-                    drone_class.move(fwd=30)
+                    drone_class.move(fwd=60)
                 elif img_counter == 60:
-                    drone_class.move(left=30)
+                    drone_class.move(left=60)
                 elif img_counter == 90 or img_counter == 120:
-                    drone_class.move(back=30)
+                    drone_class.move(back=60)
                 elif img_counter == 150 or img_counter == 180:
-                    drone_class.move(right=30)
+                    drone_class.move(right=60)
                 elif img_counter == 210 or img_counter == 240:
-                    drone_class.move(fwd=30)
+                    drone_class.move(fwd=60)
                 elif img_counter == 270:
-                    drone_class.move(back=30, left=30, down=20)
+                    drone_class.move(back=60, left=60, down=20)
                     img_counter = 0
 
     frames_since_positive = 0
@@ -121,8 +121,8 @@ def calibrate(drone_class, land=False, x_coordinate=0, y_coordinate=0):
                 frames_since_positive = 0
                 drone.send_rc_control(0, 0, 0, 20)
     
-    with open('OutputLog.csv', 'a') as outFile:
-                outFile.write(f"Calibration at ({x_coordinate, y_coordinate}) finished at: {round(time()-start)}\n")
+    # with open('OutputLog.csv', 'a') as outFile:
+    #             outFile.write(f"Calibration at ({x_coordinate, y_coordinate}) finished at: {round(time()-start)}\n")
         
             
 
