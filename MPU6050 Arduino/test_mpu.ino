@@ -1,111 +1,68 @@
-#include <Arduino.h>
+#line 1 "G:\\My Drive\\2022 UVU Fall\\Senior Design Project\\Tello Project\\MPU6050 Arduino\\test_mpu.ino"
+
+/*
+    MPU6050 Triple Axis Gyroscope & Accelerometer. Pitch & Roll & Yaw Gyroscope Example.
+    Read more: http://www.jarzebski.pl/arduino/czujniki-i-sensory/3-osiowy-zyroskop-i-akcelerometr-mpu6050.html
+    GIT: https://github.com/jarzebski/Arduino-MPU6050
+    Web: http://www.jarzebski.pl
+    (c) 2014 by Korneliusz Jarzebski
+*/
+
 #include <Wire.h>
-//this program is to test the MPU6050 IMU with the Arduino MKR1000
+#include <Arduino.h>
+#include "MPU6050.h"
 
-//test program modified from code from MinukaThesathYapa
-//https://create.arduino.cc/projecthub/MinukaThesathYapa/arduino-mpu6050-accelerometer-f92d8b
+MPU6050 mpu;
 
-const int MPU = 0x68;
-float AccX, AccY, AccZ;
-float GyroX, GyroY, GyroZ;
-float accAngleX, accAngleY, gyroAngleX, gyroAngleY, gyroAngleZ;
-float roll, pitch, yaw;
-float AccErrorX, AccErrorY, GyroErrorX, GyroErrorY, GyroErrorZ;
-float elapsedTime, currentTime, previousTime;
-int c = 0;
+// Timers
+unsigned long timer = 0;
+float timeStep = 0.01;
+
+// Pitch, Roll and Yaw values
+float pitch = 0;
+float roll = 0;
+float yaw = 0;
 
 void setup() 
 {
-  Serial.begin(19200);
-  Wire.begin();                    
-  Wire.beginTransmission(MPU);   
-  Wire.write(0x6B);               
-  Wire.write(0x00);             
-  Wire.endTransmission(true);    
-  calculate_IMU_error();
-  delay(20);
+  Serial.begin(115200);
 
+  // Initialize MPU6050
+  while(!mpu.begin(MPU6050_SCALE_2000DPS, MPU6050_RANGE_2G))
+  {
+    Serial.println("Could not find a valid MPU6050 sensor, check wiring!");
+    delay(500);
+  }
+  
+  // Calibrate gyroscope. The calibration must be at rest.
+  // If you don't want calibrate, comment this line.
+  mpu.calibrateGyro();
+
+  // Set threshold sensivty. Default 3.
+  // If you don't want use threshold, comment this line or set 0.
+  mpu.setThreshold(3);
 }
 
-void loop() 
+void loop()
 {
-  Wire.beginTransmission(MPU);
-  Wire.write(0x3B); 
-  Wire.endTransmission(false);
-  Wire.requestFrom(MPU, 6, true);
-  AccX = (Wire.read() << 8 | Wire.read()) / 16384.0;
-  AccY = (Wire.read() << 8 | Wire.read()) / 16384.0;
-  AccZ = (Wire.read() << 8 | Wire.read()) / 16384.0;
-  accAngleX = (atan(AccY / sqrt(pow(AccX, 2) + pow(AccZ, 2))) * 180 / PI) - 0.58; 
-  accAngleY = (atan(-1 * AccX / sqrt(pow(AccY, 2) + pow(AccZ, 2))) * 180 / PI) + 1.58; 
-  previousTime = currentTime;       
-  currentTime = millis(); 
-  elapsedTime = (currentTime - previousTime) / 1000; 
-  Wire.beginTransmission(MPU);
-  Wire.write(0x43);
-  Wire.endTransmission(false);
-  Wire.requestFrom(MPU, 6, true); 
-  GyroX = (Wire.read() << 8 | Wire.read()) / 131.0; 
-  GyroY = (Wire.read() << 8 | Wire.read()) / 131.0;
-  GyroZ = (Wire.read() << 8 | Wire.read()) / 131.0;
-  GyroX = GyroX + 0.56; 
-  GyroY = GyroY - 2;
-  GyroZ = GyroZ + 0.79; 
-  gyroAngleX = gyroAngleX + GyroX * elapsedTime;
-  gyroAngleY = gyroAngleY + GyroY * elapsedTime;
-  yaw =  yaw + GyroZ * elapsedTime;
-  roll = 0.96 * gyroAngleX + 0.04 * accAngleX;
-  pitch = 0.96 * gyroAngleY + 0.04 * accAngleY;
-  Serial.print(roll);
-  Serial.print("/");
+  timer = millis();
+
+  // Read normalized values
+  Vector norm = mpu.readNormalizeGyro();
+
+  // Calculate Pitch, Roll and Yaw
+  pitch = pitch + norm.YAxis * timeStep;
+  roll = roll + norm.XAxis * timeStep;
+  yaw = yaw + norm.ZAxis * timeStep;
+
+  // Output raw
+  Serial.print(" Pitch = ");
   Serial.print(pitch);
-  Serial.print("/");
+  Serial.print(" Roll = ");
+  Serial.print(roll);  
+  Serial.print(" Yaw = ");
   Serial.println(yaw);
-}
 
-
-void calculate_IMU_error() 
-{
-  while (c < 200) {
-    Wire.beginTransmission(MPU);
-    Wire.write(0x3B);
-    Wire.endTransmission(false);
-    Wire.requestFrom(MPU, 6, true);
-    AccX = (Wire.read() << 8 | Wire.read()) / 16384.0 ;
-    AccY = (Wire.read() << 8 | Wire.read()) / 16384.0 ;
-    AccZ = (Wire.read() << 8 | Wire.read()) / 16384.0 ;
-    AccErrorX = AccErrorX + ((atan((AccY) / sqrt(pow((AccX), 2) + pow((AccZ), 2))) * 180 / PI));
-    AccErrorY = AccErrorY + ((atan(-1 * (AccX) / sqrt(pow((AccY), 2) + pow((AccZ), 2))) * 180 / PI));
-    c++;
-  }
-  AccErrorX = AccErrorX / 200;
-  AccErrorY = AccErrorY / 200;
-  c = 0;
-  while (c < 200) {
-    Wire.beginTransmission(MPU);
-    Wire.write(0x43);
-    Wire.endTransmission(false);
-    Wire.requestFrom(MPU, 6, true);
-    GyroX = Wire.read() << 8 | Wire.read();
-    GyroY = Wire.read() << 8 | Wire.read();
-    GyroZ = Wire.read() << 8 | Wire.read();
-    GyroErrorX = GyroErrorX + (GyroX / 131.0);
-    GyroErrorY = GyroErrorY + (GyroY / 131.0);
-    GyroErrorZ = GyroErrorZ + (GyroZ / 131.0);
-    c++;
-  }
-
-  GyroErrorX = GyroErrorX / 200;
-  GyroErrorY = GyroErrorY / 200;
-  GyroErrorZ = GyroErrorZ / 200;
-  Serial.print("AccErrorX: ");
-  Serial.println(AccErrorX);
-  Serial.print("AccErrorY: ");
-  Serial.println(AccErrorY);
-  Serial.print("GyroErrorX: ");
-  Serial.println(GyroErrorX);
-  Serial.print("GyroErrorY: ");
-  Serial.println(GyroErrorY);
-  Serial.print("GyroErrorZ: ");
-  Serial.println(GyroErrorZ);
+  // Wait to full timeStep period
+  delay((timeStep*1000) - (millis() - timer));
 }

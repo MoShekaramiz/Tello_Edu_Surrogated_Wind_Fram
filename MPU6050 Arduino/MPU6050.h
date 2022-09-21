@@ -23,13 +23,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <Arduino.h>
 
-typedef __int8 int8_t;
-typedef unsigned __int8 uint8_t;
-typedef __int16 int16_t;
-typedef unsigned __int16 uint16_t;
-typedef __int32 int32_t;
-typedef unsigned __int32 uint32_t;
-
 #define MPU6050_ADDRESS             (0x68) // 0x69 when AD0 pin to Vcc
 
 #define MPU6050_REG_ACCEL_XOFFS_H     (0x06)
@@ -75,6 +68,9 @@ typedef unsigned __int32 uint32_t;
 #define MPU6050_REG_USER_CTRL         (0x6A) // User Control
 #define MPU6050_REG_PWR_MGMT_1        (0x6B) // Power Management 1
 #define MPU6050_REG_WHO_AM_I          (0x75) // Who Am I
+
+//typedef unsigned __int8 uint8_t;
+//typedef __int16 int16_t;
 
 #ifndef VECTOR_STRUCT_H
 #define VECTOR_STRUCT_H

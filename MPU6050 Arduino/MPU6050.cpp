@@ -27,7 +27,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include <Wire.h>
 #include <math.h>
 
-#include <MPU6050.h>
+#include "MPU6050.h"
 
 bool MPU6050::begin(mpu6050_dps_t scale, mpu6050_range_t range, int mpua)
 {
@@ -348,7 +348,7 @@ Vector MPU6050::readRawAccel(void)
     #if ARDUINO >= 100
 	Wire.write(MPU6050_REG_ACCEL_XOUT_H);
     #else
-	Wire.write((uint8_t)(MPU6050_REG_ACCEL_XOUT_H);
+	Wire.write((uint8_t)(MPU6050_REG_ACCEL_XOUT_H));
     #endif
     Wire.endTransmission();
 
@@ -409,7 +409,7 @@ Vector MPU6050::readRawGyro(void)
     #if ARDUINO >= 100
 	Wire.write(MPU6050_REG_GYRO_XOUT_H);
     #else
-	Wire.write((uint8_t)(MPU6050_REG_GYRO_XOUT_H);
+	Wire.write((uint8_t)(MPU6050_REG_GYRO_XOUT_H));
     #endif
     Wire.endTransmission();
 
@@ -622,7 +622,7 @@ uint8_t MPU6050::fastRegister8(uint8_t reg)
     #if ARDUINO >= 100
 	Wire.write(reg);
     #else
-	Wire.write((uint8_t)(reg);
+	Wire.write((uint8_t)(reg));
     #endif
     Wire.endTransmission();
 
@@ -647,7 +647,7 @@ uint8_t MPU6050::readRegister8(uint8_t reg)
     #if ARDUINO >= 100
 	Wire.write(reg);
     #else
-	Wire.write((uint8_t)(reg);
+	Wire.write((uint8_t)(reg));
     #endif
     Wire.endTransmission();
 
@@ -716,9 +716,9 @@ void MPU6050::writeRegister16(uint8_t reg, int16_t value)
 	Wire.write((uint8_t)(value >> 8));
 	Wire.write((uint8_t)value);
     #else
-	Wire.write((uint8_t)(reg);
-	Wire.write((uint8_t)((uint8_t)(value >> 8));
-	Wire.write((uint8_t)((uint8_t)value);
+	Wire.write((uint8_t)(reg));
+	Wire.write((uint8_t)((uint8_t)(value >> 8)));
+	Wire.write((uint8_t)((uint8_t)value));
     #endif
     Wire.endTransmission();
 }
