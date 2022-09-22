@@ -1,6 +1,6 @@
 {
     "board": "arduino:samd:mkr1000",
-    "programmer": "arduino:atmel_ice",
+    "programmer": "arduino:sam_ice",
     "sketch": "test_mpu.ino",
     "port": "COM6"
 }
