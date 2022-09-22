@@ -11,59 +11,45 @@ import movement as mov
 
 start = time.time()
 
-# Array of 10 test points
-xpos = np.array([0, 1000, 0, 500, 489, 832, 217, 613, 801, 58, 531, 371, 99, 471])
+# Array of 8 test points
+xpos = np.array([0, 1000, 0, 1000, 360, 832, 217, 613, 801, 58, 531, 200])
 xpos = np.append(xpos, xpos[0])
-ypos = np.array([0, 0, 1000, 600, 78, 619, 340, 753, 124, 189, 227, 848, 687, 638])
+ypos = np.array([0, 0, 650, 650, 52, 409, 224, 550, 82, 125, 150, 560])
 ypos = np.append(ypos, ypos[0])
 data = np.array([xpos, ypos], np.int32)
 
-# Array of 9 test points
-# xpos = np.array([0, 1000, 0, 1000, 489, 832, 217, 613, 801, 58, 531, 371, 99])
-# xpos = np.append(xpos, xpos[0])
-# ypos = np.array([0, 0, 1000, 1000, 78, 619, 340, 753, 124, 189, 227, 848, 687])
-# ypos = np.append(ypos, ypos[0])
-# data = np.array([xpos, ypos], np.int32)
-
-# Array of 8 test points
-# xpos = np.array([0, 1000, 0, 1000, 489, 832, 217, 613, 801, 58, 531, 371])
-# xpos = np.append(xpos, xpos[0])
-# ypos = np.array([0, 0, 1000, 1000, 78, 619, 340, 753, 124, 189, 227, 848])
-# ypos = np.append(ypos, ypos[0])
-# data = np.array([xpos, ypos], np.int32)
-
 # Array of 7 test points
-# xpos = np.array([0, 1000, 0, 1000, 489, 832, 217, 613, 801, 58, 531])
+# xpos = np.array([0, 1000, 0, 1000, 360, 832, 217, 613, 801, 58, 531])
 # xpos = np.append(xpos, xpos[0])
-# ypos = np.array([0, 0, 1000, 1000, 78, 619, 340, 753, 124, 189, 227])
+# ypos = np.array([0, 0, 650, 650, 52, 409, 224, 550, 82, 125, 150])
 # ypos = np.append(ypos, ypos[0])
 # data = np.array([xpos, ypos], np.int32)
 
 # Array of 6 test points
-# xpos = np.array([0, 1000, 0, 1000, 489, 832, 217, 613, 801, 58])
+# xpos = np.array([0, 1000, 0, 1000, 360, 832, 217, 613, 801, 58])
 # xpos = np.append(xpos, xpos[0])
-# ypos = np.array([0, 0, 1000, 1000, 78, 619, 340, 753, 124, 189])
+# ypos = np.array([0, 0, 650, 650, 52, 409, 224, 550, 82, 125])
 # ypos = np.append(ypos, ypos[0])
 # data = np.array([xpos, ypos], np.int32)
 
 # Array of 5 test points
-# xpos = np.array([0, 1000, 0, 1000, 489, 832, 217, 613, 801])
+# xpos = np.array([0, 1000, 0, 1000, 360, 832, 217, 613, 801])
 # xpos = np.append(xpos, xpos[0])
-# ypos = np.array([0, 0, 1000, 1000, 78, 619, 340, 753, 124])
+# ypos = np.array([0, 0, 650, 650, 52, 409, 224, 550, 82])
 # ypos = np.append(ypos, ypos[0])
 # data = np.array([xpos, ypos], np.int32)
 
 # Array of 4 test points
-# xpos = np.array([0, 1000, 0, 1000, 489, 832, 217, 613])
+# xpos = np.array([0, 1000, 0, 1000, 360, 832, 217, 613])
 # xpos = np.append(xpos, xpos[0])
-# ypos = np.array([0, 0, 1000, 1000, 78, 619, 340, 753])
+# ypos = np.array([0, 0, 650, 650, 52, 409, 224, 550])
 # ypos = np.append(ypos, ypos[0])
 # data = np.array([xpos, ypos], np.int32)
 
 # Array of 3 test points
-# xpos = np.array([0, 1000, 0, 1000, 489, 832, 217])
+# xpos = np.array([0, 1000, 0, 1000, 360, 832, 217])
 # xpos = np.append(xpos, xpos[0])
-# ypos = np.array([0, 0, 1000, 1000, 78, 619, 340])
+# ypos = np.array([0, 0, 650, 650, 52, 409, 224])
 # ypos = np.append(ypos, ypos[0])
 # data = np.array([xpos, ypos], np.int32)
 
@@ -120,7 +106,7 @@ class TravelingSalesman():
     def plot(self):
         plt.rcParams["font.family"] = "Times New Roman"
         figure, axis = plt.subplots(2, 1)
-        axis[0].axis([0, 1000, 0, 1000])
+        axis[0].axis([0, 1000, 0, 650])
         axis[0].title.set_text("Path Before Optimization")
         axis[0].set_xlabel('x')
         axis[0].set_ylabel('y')
@@ -132,7 +118,7 @@ class TravelingSalesman():
         axis[0].quiver(data[0][:-1], data[1][:-1], data[0][1:]-data[0][:-1], 
                    data[1][1:]-data[1][:-1],scale_units='xy', angles='xy', scale=1, color='teal', width=0.005)
 
-        axis[1].axis([0, 1000, 0, 1000])
+        axis[1].axis([0, 1000, 0, 650])
         axis[1].title.set_text("Path After Optimization")
         axis[1].set_xlabel('x')
         axis[1].set_ylabel('y')
@@ -159,16 +145,15 @@ class TravelingSalesman():
 if __name__ == "__main__":
     with open('OutputLog.csv', 'w') as outFile:
         outFile.write(f"{round(start)}\n")
-    turbines = {"WindTurbine_1": [[0, 0, 0, 0], [489, 78]], "WindTurbine_2": [[0, 0, 0, 0], [832, 619]], "WindTurbine_3": [[0, 0, 0, 0], [217, 340]],
-                "WindTurbine_4": [[0, 0, 0, 0], [613, 753]], "WindTurbine_5": [[0, 0, 0, 0], [801, 124]], "WindTurbine_6": [[0, 0, 0, 0], [58, 189]],
-                "WindTurbine_7": [[0, 0, 0, 0], [531, 227]], "WindTurbine_8": [[0, 0, 0, 0], [371, 848]], "WindTurbine_9": [[0, 0, 0, 0], [99, 687]],
-                "WindTurbine_10": [[0, 0, 0, 0], [471, 638]]}
+    turbines = {"WindTurbine_1": [[0, 0, 0, 0], [360, 52]], "WindTurbine_2": [[0, 0, 0, 0], [832, 409]], "WindTurbine_3": [[0, 0, 0, 0], [217, 224]],
+                "WindTurbine_4": [[0, 0, 0, 0], [613, 550]], "WindTurbine_5": [[0, 0, 0, 0], [801, 82]], "WindTurbine_6": [[0, 0, 0, 0], [58, 125]],
+                "WindTurbine_7": [[0, 0, 0, 0], [531, 150]], "WindTurbine_8": [[0, 0, 0, 0], [200, 560]]}
     # Uncomment to get positions of each target in inches
-    # with open('Positions.csv', 'w') as outFile: 
-    #     for item in turbines:
-    #         positionx = turbines[item][1][0]/2.54
-    #         positiony = turbines[item][1][1]/2.54
-    #         outFile.write(f"{item}: ({positionx}, {positiony})\n")
+    with open('Positions.csv', 'w') as outFile: 
+        for item in turbines:
+            positionx = turbines[item][1][0]/2.54
+            positiony = turbines[item][1][1]/2.54
+            outFile.write(f"{item}: ({positionx}, {positiony})\n")
     path = TravelingSalesman() 
     with open('OutputLog.csv', 'a') as outFile:
         outFile.write(f"Annealing finished at {round(time.time()-start)}\n")

@@ -376,7 +376,7 @@ class movement():
                                     return_angle = abs(math.degrees(math.atan((x-right_corner[0])/(y-right_corner[1]))))
                                 except ZeroDivisionError:
                                     pass
-                                self.target_angle(self, return_angle, right_corner[0], right_corner[1], quadrant)
+                                self.target_angle(return_angle, right_corner[0], right_corner[1], quadrant)
                                 self.move(fwd=right_distance)
 
                             else:

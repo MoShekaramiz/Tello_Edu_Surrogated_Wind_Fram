@@ -40,19 +40,10 @@ def findTurbine(img, cascade=0):
     else:
         return img, [[0, 0], 0, 0]
 
-def find_circles(img, down=True):
+def find_circles(img, down=True, green=False):
     if down == True:
         img = cv.medianBlur(img,5)   
-        # clahe = cv.createCLAHE(clipLimit=3., tileGridSize=(8,8))
 
-        # lab = cv.cvtColor(img, cv.COLOR_BGR2LAB)  # convert from BGR to LAB color space
-        # l, a, b = cv.split(lab)  # split on 3 different channels
-
-        # l2 = clahe.apply(l)  # apply CLAHE to the L-channel
-
-        # lab = cv.merge((l2,a,b))  # merge channels
-        # img = cv.cvtColor(lab, cv.COLOR_LAB2BGR)  # convert from LAB to BGR
-        # img = cv.normalize(img, None, alpha=-1.5*255, beta=1.5*255, norm_type=cv.NORM_MINMAX, dtype=cv.CV_8U)
         cimg = cv.cvtColor(img, cv.COLOR_BGR2GRAY)
         # cimg = cv.cvtColor(img,cv.COLOR_GRAY2BGR)
         circles = cv.HoughCircles(cimg, cv.HOUGH_GRADIENT, 1, 120,
@@ -68,10 +59,13 @@ def find_circles(img, down=True):
                 cv.circle(img,(i[0],i[1]),2,(0,0,255),3)
         return img, circles
     else:
-        # greenLower = (29, 86, 6)
+        if green == True:
+            greenLower = (29, 86, 6)
+            greenUpper = (64, 255, 255)
+        else:
+            pass
+        # greenLower = (40, 97, 20)
         # greenUpper = (64, 255, 255)
-        greenLower = (40, 97, 20)
-        greenUpper = (64, 255, 255)
         blurred = cv.GaussianBlur(img, (11, 11), 0)
         hsv = cv.cvtColor(blurred, cv.COLOR_BGR2HSV)
         mask = cv.inRange(hsv, greenLower, greenUpper)
