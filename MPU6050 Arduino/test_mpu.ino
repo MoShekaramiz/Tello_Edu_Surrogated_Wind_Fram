@@ -24,31 +24,28 @@ float yaw = 0;
 void setup() 
 {
   Serial.begin(9600);
-  // while (true) {
-  //   Serial.println("BLAAAA");
-  // }
-  delay(10000);
-  Serial.println("1");
+
+  // Countdown 10 seconds to allow MPU to warm up
+  for (int i = 10; i > 0; i--)
+  {
+    Serial.println(i);
+    delay(1000);
+  }
+  
   // Initialize MPU6050
   while(!mpu.begin(MPU6050_SCALE_2000DPS, MPU6050_RANGE_2G))
   {
     Serial.println("Could not find a valid MPU6050 sensor, check wiring!");
     delay(500);
   }
-  
-  Serial.println("2");
-  
+    
   // Calibrate gyroscope. The calibration must be at rest.
   // If you don't want calibrate, comment this line.
   mpu.calibrateGyro();
-  
-  Serial.println("3");
 
-  // Set threshold sensivty. Default 3.
+ // Set threshold sensivty. Default 3.
   // If you don't want use threshold, comment this line or set 0.
   mpu.setThreshold(3);
-  
-  Serial.println("4");
 }
 
 void loop()
@@ -63,14 +60,16 @@ void loop()
   //roll = roll + norm.XAxis * timeStep;
   //yaw = yaw + norm.ZAxis * timeStep;
 
-  delay(3000);
   // Output raw
   Serial.print(" Pitch = ");
   Serial.print(norm.YAxis);
-  Serial.print(" Roll = ");
+  Serial.print("\t\tRoll = ");
   Serial.print(norm.XAxis);  
-  Serial.print(" Yaw = ");
+  Serial.print("\t\tYaw = ");
   Serial.println(norm.ZAxis);
+
+  //use this to change how often output updates
+  delay(500);
 
   // Wait to full timeStep period
   //delay((timeStep*1000) - (millis() - timer));
