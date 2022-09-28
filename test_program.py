@@ -19,7 +19,7 @@ if __name__ == "__main__":
     #create CSV file
     
     filename = input("Enter filename: ")
-    #filename = filename + ".csv"
+    filename = filename + ".csv"
 
     f = open(filename, 'w')
     writer = csv.writer(f)
@@ -29,10 +29,10 @@ if __name__ == "__main__":
     #debugging
     #f.close()
 
-    drone = mv.movement()
+    drone = mv.movement()       
     drone_var = drone.get_drone()
-
     start_time = drone_var.get_flight_time()
+
 
     print(">>>>>>>>>>>>>>>>START BATTERY: ", drone_var.get_battery(), "%")
     print(">>>>>>>>>>>>>>>>BEGINNING FLIGHT TIME: ", start_time)
@@ -40,9 +40,17 @@ if __name__ == "__main__":
     row = [0, 0]
 
     #drone will automatically land if the battery is <= 10%
-    #we need to land before that happens to get time data
-    while (drone_var.get_battery() > 10):
-        drone.move(up=20)
+    #we need to land before that happens to get time data, 15% seems to be sweet spot
+    #battery seems to drop anywhere between 1 - 3% every 10 seconds
+    
+    while (drone_var.get_battery() > 15):
+        #drone will time out if we don't send a command once every 15 seconds
+        try:
+            drone.move(up=20)
+        except:
+            f.close()
+            writer.writerow("Flight Terminated Early")
+            print(">>>>>>>>>>>>>>>>CRITICAL: Drone terminated early, writing data to file", filename)
         current_time = drone_var.get_flight_time()
         current_bat = drone_var.get_battery()
         row[0] = current_time
@@ -52,7 +60,12 @@ if __name__ == "__main__":
         writer.writerow(row)
         sleep(10)
 
-        drone.move(down=20)
+        try:
+            drone.move(down=20)
+        except:
+            f.close()
+            writer.writerow("Flight Terminated Early")
+            print(">>>>>>>>>>>>>>>>CRITICAL: Drone terminated early, writing data to file ", filename)
         current_time = drone_var.get_flight_time()
         current_bat = drone_var.get_battery()
         row[0] = current_time
@@ -69,14 +82,17 @@ if __name__ == "__main__":
     total_minutes = floor(total_time / 60)
     total_seconds = total_time % 60
 
-    time_string = "Total Flight Time: ", total_minutes, " minutes ", total_seconds, " seconds"
+    time_string = "Total Flight Time: ", + total_minutes + " minutes " + total_seconds + " seconds"
     print(time_string)
     writer.writerow(time_string)
-    
+    writer.writerow("Successful Flight!")
+        
     # close out of .csv file
     f.close()
-
+    # land drone
     drone.land()
+
+    
     
 
 
