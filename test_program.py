@@ -82,7 +82,7 @@ if __name__ == "__main__":
     total_minutes = floor(total_time / 60)
     total_seconds = total_time % 60
 
-    time_string = "Total Flight Time: ", + total_minutes + " minutes " + total_seconds + " seconds"
+    time_string = "Total Flight Time: " + str(total_minutes) + " minutes " + str(total_seconds) + " seconds"
     print(time_string)
     writer.writerow(time_string)
     writer.writerow("Successful Flight!")
