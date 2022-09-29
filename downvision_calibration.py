@@ -3,15 +3,30 @@ import cv2 as cv
 import haar_cascade as hc
 from qr_reader import droneReadQR
 import movement as mov
+from check_camera import check_camera  
 from time import sleep, time
-    
+import math
+
+fbRange = [62000,82000] # [32000, 52000] # preset parameter for detected image boundary size
+w, h = 720, 480         # display size of the screen
+
 def calibrate(drone_class, land=False, x_coordinate=0, y_coordinate=0):
     # with open('OutputLog.csv', 'r') as outFile:
     #             start = int(outFile.readline())
     # with open('OutputLog.csv', 'a') as outFile:
     #             outFile.write(f"Calibration at ({x_coordinate, y_coordinate}) started at: {round(time()-start)}\n")
     drone = drone_class.get_drone()
-    drone_class.go_to(x_coordinate, y_coordinate, 0)
+    drone_class.go_to(x_coordinate, y_coordinate, rotate_only=True)
+    frame = drone.get_frame_read()
+    img = frame.frame
+    img = cv.resize(img, (w, h))
+    img, circle, width, center = hc.find_circles(img, green=False)
+    cv.imshow("Scanning For Calibration Marker", img)
+    cv.waitKey(1)
+    found = go_to_helipad(drone_class, width, center)
+    cv.destroyWindow("Scanning For Calibration Marker")
+    if found == False:
+        drone_class.go_to(x_coordinate, y_coordinate)
     print("><><><><><><><><><><><><><>", drone.get_height())
     drone_class.move(down=105)
     print("><><><><><><><><><><><><><>", drone.get_height())
@@ -34,7 +49,7 @@ def calibrate(drone_class, land=False, x_coordinate=0, y_coordinate=0):
     while location_calibrated is False:
         frame = drone.get_frame_read()
         img = frame.frame
-        img, info = hc.find_circles(img)
+        img, info = hc.find_circles(img, green=False)
         cv.imshow("Downward Output", img)
         cv.waitKey(1)
 
@@ -124,7 +139,76 @@ def calibrate(drone_class, land=False, x_coordinate=0, y_coordinate=0):
     # with open('OutputLog.csv', 'a') as outFile:
     #             outFile.write(f"Calibration at ({x_coordinate, y_coordinate}) finished at: {round(time()-start)}\n")
         
-            
+def go_to_helipad(drone, width, center):
+    camera = drone.get_drone()
+    if center == 0:
+        for i in range(10):
+            if center == 0:
+                frame = camera.get_frame_read()
+                img = frame.frame
+                img = cv.resize(img, (w, h))
+                img, circle, width, center = hc.find_circles(img, green=False)
+                cv.imshow("Scanning For Calibration Marker", img)
+                cv.waitKey(1)
+            else:
+                break
+        if center == 0:
+            return False
+    
+    x = center  # The x location of the center of the bounding box in the frame 
+    area = width*width # The width of the bounding box
+    img_pass = 0    # Flag to determine if the drone is returning from a target to skip point distance calculations
+
+    # object detected
+    if(x != 0):
+        # TODO: CHANGE 40.64 TO THE WIDTH OF THE CIRCLE IN CM
+        distance = int((650 * 40.64) / width) - 30 # (Focal length of camera lense * Real-world width of object)/Width of object in pixels  -  40 centimeters to stop short
+        if distance < 20:
+            distance = 20
+
+        if(0 < x <= 340):
+            # The drone needs to angle to the left to center the target.
+            new_angle = int(round(((360 - x) / 360) * 41.3))
+
+            drone.move(ccw=new_angle)  
+            img, circle, width, center = check_camera(camera, circles=True)     
+            go_to_helipad(drone, width, center)
+            img_pass = 1
+
+        elif(x >= 380):
+            # The drone needs to angle to the right to center the target.
+            new_angle = int(round(((x - 360) / 360) * 41.3))
+            target_angle = drone.get_angle()-new_angle
+            if target_angle < 0: target_angle += 360
+
+            drone.move(cw=new_angle) 
+            img, circle, width, center = check_camera(camera, circles=True)      
+            go_to_helipad(drone, width, center)
+            img_pass = 1
+
+        if area > fbRange[0] and area < fbRange[1] and img_pass == 0:
+            # The drone has approached the target and will scan for a QR code 
+            return True
+
+        elif area > fbRange[1] and img_pass == 0:
+            # The drone is too close to the target
+            drone.move(back=20)
+            img, circle, width, center = check_camera(camera, circles=True)
+            go_to_helipad(drone, width, center)
+
+        elif area < fbRange[0] and area != 0 and img_pass == 0:
+            # The drone is too far from the target
+            if distance <= 500:
+                drone.move(fwd=distance)
+            else:
+                while distance != 0:
+                    if distance > 500:
+                        drone.move(fwd=500)
+                        distance -= 500
+                    else:
+                        drone.move(fwd=distance)
+                        distance -= distance
+            return True  
 
 if __name__ == "__main__":
     drone = mov.movement()
@@ -136,5 +220,5 @@ if __name__ == "__main__":
     # feed.start()
     # #feed.run()
     # sleep(1)
-    calibrate(drone, land=True)
+    calibrate(drone, True, 200, 0)
     drone.land()
