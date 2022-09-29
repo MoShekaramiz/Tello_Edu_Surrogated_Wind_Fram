@@ -1,11 +1,7 @@
-from djitellopy import Tello
 import cv2 as cv
 import haar_cascade as hc
-from qr_reader import droneReadQR
 import movement as mov
 from check_camera import check_camera  
-from time import sleep, time
-import math
 
 fbRange = [62000,82000] # [32000, 52000] # preset parameter for detected image boundary size
 w, h = 720, 480         # display size of the screen
@@ -212,7 +208,7 @@ def go_to_helipad(drone, width, center):
 
 if __name__ == "__main__":
     drone = mov.movement()
-    drone.go_to(365, 20) 
+    # drone.go_to(365, 20) 
     # drone.go_to(220, 200)
     # drone.go_to(100, 78)
     # drone.move_down(20)
