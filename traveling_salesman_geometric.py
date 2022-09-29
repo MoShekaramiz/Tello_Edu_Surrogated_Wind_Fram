@@ -149,21 +149,22 @@ if __name__ == "__main__":
                 "WindTurbine_4": [[0, 0, 0, 0], [613, 550]], "WindTurbine_5": [[0, 0, 0, 0], [801, 82]], "WindTurbine_6": [[0, 0, 0, 0], [58, 125]],
                 "WindTurbine_7": [[0, 0, 0, 0], [531, 150]], "WindTurbine_8": [[0, 0, 0, 0], [200, 560]]}
     # Uncomment to get positions of each target in inches
-    with open('Positions.csv', 'w') as outFile: 
-        for item in turbines:
-            positionx = turbines[item][1][0]/2.54
-            positiony = turbines[item][1][1]/2.54
-            outFile.write(f"{item}: ({positionx}, {positiony})\n")
+    # with open('Positions.csv', 'w') as outFile: 
+    #     for item in turbines:
+    #         positionx = turbines[item][1][0]/2.54
+    #         positiony = turbines[item][1][1]/2.54
+    #         outFile.write(f"{item}: ({positionx}, {positiony})\n")
     path = TravelingSalesman() 
-    with open('OutputLog.csv', 'a') as outFile:
-        outFile.write(f"Annealing finished at {round(time.time()-start)}\n")
+    # with open('OutputLog.csv', 'a') as outFile:
+    #     outFile.write(f"Annealing finished at {round(time.time()-start)}\n")
     path.plot()
     drone = mov.movement()
     start_time = time.time()
     coordinates = path.get_path()
+    drone.append_current_path(coordinates)
     camera = drone.get_drone()
-    with open('OutputLog.csv', 'a') as outFile:
-        outFile.write(f"Starting battery: {camera.get_battery()}\n")
+    # with open('OutputLog.csv', 'a') as outFile:
+    #     outFile.write(f"Starting battery: {camera.get_battery()}\n")
     coordinates = np.delete(coordinates, 0, axis=1)
     coordinates = np.delete(coordinates, -1, axis=1)
     for location in range(int(coordinates.size/2)):
@@ -190,9 +191,9 @@ if __name__ == "__main__":
 
     drone.go_to(ending_angle=0)
     print(">>>>>>>>>>>>>>>> TOTAL FLIGHT TIME: ", time.time() - start_time)
-    with open('OutputLog.csv', 'a') as outFile:
-                outFile.write(f"Ended at: {round(time.time()-start)}\n")
-                outFile.write(f"Ending battery: {camera.get_battery()}\n")
+    # with open('OutputLog.csv', 'a') as outFile:
+    #             outFile.write(f"Ended at: {round(time.time()-start)}\n")
+    #             outFile.write(f"Ending battery: {camera.get_battery()}\n")
     calibrate(drone, land=True)
     drone.land()
 

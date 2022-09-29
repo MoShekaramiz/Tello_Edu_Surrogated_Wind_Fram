@@ -17,6 +17,7 @@ class movement():
         self.new_location = [0, 0, 0, 0]   # [x location, y location, z location, angle]
         self.turbine_locations = []        # List of all known turbine locations
         self.video_stream = None
+        self.path = None
         self.takeoff(height, stream)
     
     def takeoff(self, height=70, stream=True): 
@@ -49,14 +50,23 @@ class movement():
         self.drone.streamoff()
         print("\nThe drone has succesfully landed. See directory " + CWD + " to view collected data.\n")
         sys.exit(0)
+    
+    def append_current_path(self, path):
+        '''Add the path being used by the drone for traveling salesman'''
+        self.path = path
+    
+    def get_path(self):
+        '''Returns the path being used for traveling salesman'''
+        return self.path
 
     def append_turbine_locations(self, QR, known_locations=None):
         '''Add the location of a found turbine to the list and create the no-fly zone around it.'''
-        self.turbine_locations.append([self.new_location[0] - 30, self.new_location[0] + 30, self.new_location[1] - 30, 
-                                       self.new_location[1] + 30, QR, self.new_location[0], self.new_location[1]])
+        self.turbine_locations = known_locations
 
     def get_turbine_locations(self):
-        '''Returns the list of all known turbines locatoins, their no-fly zones, and their QR code data.'''
+        '''Returns the list of all known turbines locations, their no-fly zones, and their QR code data.'''
+        # turnbine_locations["WindTurbine_X"][1][0] = x coordinate
+        # turnbine_locations["WindTurbine_X"][1][1] = y coordinate
         return self.turbine_locations
         
     def get_location(self):
