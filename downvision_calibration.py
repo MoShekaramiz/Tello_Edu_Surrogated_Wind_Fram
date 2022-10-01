@@ -45,13 +45,13 @@ def calibrate(drone_class, land=False, x_coordinate=0, y_coordinate=0):
     while location_calibrated is False:
         frame = drone.get_frame_read()
         img = frame.frame
-        img, info = hc.find_circles(img, green=False)
+        img, circle = hc.find_circles(img, green=True)
         cv.imshow("Downward Output", img)
         cv.waitKey(1)
 
-        if info is not None:
-            circle_x = info[0][0][0]
-            circle_y = info[0][0][1]
+        if circle is not None:
+            circle_x = circle[0][0][0]
+            circle_y = circle[0][0][1]
             frames_since_positive = 0
             if circle_x in range(150, 170) and circle_y in range(110, 130): # Calibration in tolerance range
                 drone.send_rc_control(0, 0, 0, 0)
@@ -99,7 +99,7 @@ def calibrate(drone_class, land=False, x_coordinate=0, y_coordinate=0):
     while angle_calibrated is False:
         frame = drone.get_frame_read()
         img = frame.frame
-        img, info = hc.find_circles(img, down=False)
+        img, info = hc.find_circles(img, down=False, green=True)
         cv.imshow("Angle Recalibration", img)
         cv.waitKey(1)
 

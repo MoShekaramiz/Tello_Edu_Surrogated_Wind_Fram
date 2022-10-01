@@ -60,7 +60,10 @@ def find_circles(img, down=True, green=False):
                 cv.circle(img,(i[0],i[1]),i[2],(0,255,0),2)
                 # draw the center of the circle
                 cv.circle(img,(i[0],i[1]),2,(0,0,255),3)
-        return img, circles
+        if green == True:
+            return img, circles
+        else:
+            return img, circles, radius, x_center
     else:
         if green == True:
             greenLower = (29, 86, 6)
