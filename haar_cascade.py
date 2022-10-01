@@ -44,6 +44,7 @@ def findTurbine(img, cascade=0):
 def find_circles(img, down=True, green=False):
     if down == True:
         radius = 0
+        x_center = 0
         img = cv.medianBlur(img,5)   
 
         cimg = cv.cvtColor(img, cv.COLOR_BGR2GRAY)
@@ -96,12 +97,13 @@ def find_circles(img, down=True, green=False):
                 # draw the outer circle
                 cv.circle(output,(i[0],i[1]),i[2],(0,255,0),2)
                 radius = 2 * i[2]
+                x_center = i[0]
                 # draw the center of the circle
                 cv.circle(output,(i[0],i[1]),2,(0,0,255),3)
         if green == True:
             return output, circles
         else:
-            return output, circles, radius, i[0]
+            return output, circles, radius, x_center
 
 if __name__ == "__main__":
     # cap = cv.VideoCapture(0)
