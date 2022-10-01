@@ -12,11 +12,11 @@ import movement as mov
 start = time.time()
 
 # Array of 8 test points
-xpos = np.array([0, 1000, 0, 1000, 360, 832, 217, 613, 801, 58, 531, 200])
-xpos = np.append(xpos, xpos[0])
-ypos = np.array([0, 0, 650, 650, 52, 409, 224, 550, 82, 125, 150, 560])
-ypos = np.append(ypos, ypos[0])
-data = np.array([xpos, ypos], np.int32)
+# xpos = np.array([0, 1000, 0, 1000, 360, 832, 217, 613, 801, 58, 531, 200])
+# xpos = np.append(xpos, xpos[0])
+# ypos = np.array([0, 0, 650, 650, 52, 409, 224, 550, 82, 125, 150, 560])
+# ypos = np.append(ypos, ypos[0])
+# data = np.array([xpos, ypos], np.int32)
 
 # Array of 7 test points
 # xpos = np.array([0, 1000, 0, 1000, 360, 832, 217, 613, 801, 58, 531])
@@ -47,11 +47,11 @@ data = np.array([xpos, ypos], np.int32)
 # data = np.array([xpos, ypos], np.int32)
 
 # Array of 3 test points
-# xpos = np.array([0, 1000, 0, 1000, 360, 832, 217])
-# xpos = np.append(xpos, xpos[0])
-# ypos = np.array([0, 0, 650, 650, 52, 409, 224])
-# ypos = np.append(ypos, ypos[0])
-# data = np.array([xpos, ypos], np.int32)
+xpos = np.array([0, 1000, 0, 1000, 360, 832, 217])
+xpos = np.append(xpos, xpos[0])
+ypos = np.array([0, 0, 650, 650, 52, 409, 224])
+ypos = np.append(ypos, ypos[0])
+data = np.array([xpos, ypos], np.int32)
 
 # Lab Test Points
 # xpos = np.array([0, 220, 100, 365])
@@ -161,7 +161,6 @@ if __name__ == "__main__":
     drone = mov.movement()
     start_time = time.time()
     coordinates = path.get_path()
-    drone.append_current_path(coordinates)
     camera = drone.get_drone()
     # with open('OutputLog.csv', 'a') as outFile:
     #     outFile.write(f"Starting battery: {camera.get_battery()}\n")
