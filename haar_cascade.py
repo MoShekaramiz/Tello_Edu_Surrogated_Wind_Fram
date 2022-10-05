@@ -1,4 +1,5 @@
-'''Haar Cascade detection through OpenCV using the OpenCV documentation. By Branden Pinney and Shayne Duncan 2022.'''
+'''Haar Cascade detection through OpenCV using the OpenCV documentation. This version includes the blue circles for the landing pads.
+By Branden Pinney, Quintin Jepsen and Shayne Duncan 2022.'''
 
 import cv2 as cv
 import os
@@ -42,6 +43,8 @@ def findTurbine(img, cascade=0):
 
 def find_circles(img, down=True, green=False):
     if down == True:
+        radius = 0
+        x_center = 0
         img = cv.medianBlur(img,5)   
 
         cimg = cv.cvtColor(img, cv.COLOR_BGR2GRAY)
@@ -57,25 +60,38 @@ def find_circles(img, down=True, green=False):
                 cv.circle(img,(i[0],i[1]),i[2],(0,255,0),2)
                 # draw the center of the circle
                 cv.circle(img,(i[0],i[1]),2,(0,0,255),3)
-        return img, circles
+        if green == True:
+            return img, circles
+        else:
+            return img, circles, radius, x_center
     else:
         if green == True:
             greenLower = (29, 86, 6)
             greenUpper = (64, 255, 255)
         else:
-            pass
+            blueLower = (40, 115, 115)
+            blueUpper = (102, 255, 255)
         # greenLower = (40, 97, 20)
         # greenUpper = (64, 255, 255)
         blurred = cv.GaussianBlur(img, (11, 11), 0)
         hsv = cv.cvtColor(blurred, cv.COLOR_BGR2HSV)
-        mask = cv.inRange(hsv, greenLower, greenUpper)
+        if green == True:
+            mask = cv.inRange(hsv, greenLower, greenUpper)
+        else:
+            mask = cv.inRange(hsv, blueLower, blueUpper)
         mask = cv.erode(mask, None, iterations=2)
         mask = cv.dilate(mask, None, iterations=2)
         output = cv.bitwise_and(img, img, mask = mask)
         cimg = cv.cvtColor(output, cv.COLOR_BGR2GRAY)
-        circles = cv.HoughCircles(cimg, cv.HOUGH_GRADIENT, 1, 120,
+        if green == False:
+            circles = cv.HoughCircles(cimg, cv.HOUGH_GRADIENT, 1, 120,
+                            param1=80, param2=15,
+                            minRadius = 5, maxRadius = 250)
+        else:
+            circles = cv.HoughCircles(cimg, cv.HOUGH_GRADIENT, 1, 120,
                             param1=80, param2=25,
                             minRadius = 15, maxRadius = 80)
+
 
         if circles is not None:
             circles = np.uint16(np.around(circles))
@@ -83,26 +99,31 @@ def find_circles(img, down=True, green=False):
                 print(i[0])
                 # draw the outer circle
                 cv.circle(output,(i[0],i[1]),i[2],(0,255,0),2)
+                radius = 2 * i[2]
+                x_center = i[0]
                 # draw the center of the circle
                 cv.circle(output,(i[0],i[1]),2,(0,0,255),3)
-        return output, circles
+        if green == True:
+            return output, circles
+        else:
+            return output, circles, radius, x_center
 
 if __name__ == "__main__":
-    cap = cv.VideoCapture(0)
-    while True:
-        _, img = cap.read()
-        img, circles = find_circles(img, False)
-        #img = cv.resize(img, None, fx=1, fy=1, interpolation=cv.INTER_AREA)
-        cv.imshow("Output", img)
-        cv.waitKey(1)
-
-    # drone = Tello()
-    # drone.connect()
-
-    # drone.streamon()
+    # cap = cv.VideoCapture(0)
     # while True:
-    #     frame = drone.get_frame_read()
-    #     img = frame.frame
-    #     img, info = find_circles(img, down=False)
+    #     _, img = cap.read()
+    #     img, circles = find_circles(img, False, False)
+    #     #img = cv.resize(img, None, fx=1, fy=1, interpolation=cv.INTER_AREA)
     #     cv.imshow("Output", img)
     #     cv.waitKey(1)
+
+    drone = Tello()
+    drone.connect()
+
+    drone.streamon()
+    while True:
+         frame = drone.get_frame_read()
+         img = frame.frame
+         img, info = find_circles(img, down=False)
+         cv.imshow("Output", img)
+         cv.waitKey(1)
