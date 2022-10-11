@@ -1,0 +1,6 @@
+{
+    "board": "arduino:samd:mkr1000",
+    "programmer": "arduino:sam_ice",
+    "sketch": "test_bmp.ino",
+    "port": "COM6"
+}
