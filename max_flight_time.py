@@ -3,6 +3,7 @@ from time import sleep
 import csv
 from tracemalloc import start
 import movement as mv
+import os
 
 #drone.move(fwd=200)
 #drone.go_to(0, 0)
@@ -21,10 +22,15 @@ if __name__ == "__main__":
     filename = input("Enter filename: ")
     filename = filename + ".csv"
 
+    os.chdir("C:\\Users\\josh.faber\\Documents")
+    print("Saving ", filename, " in directory ", os.getcwd)
+
     f = open(filename, 'w')
     writer = csv.writer(f)
     header = ["Time", "Battery"]
     writer.writerow(header)
+
+    terminated_early = False
 
     #debugging
     #f.close()
@@ -51,6 +57,8 @@ if __name__ == "__main__":
             writer.writerow("Flight Terminated Early")
             f.close()
             print(">>>>>>>>>>>>>>>>CRITICAL: Drone terminated early, writing data to file", filename)
+            terminated_early = True
+            break
         current_time = drone_var.get_flight_time()
         current_bat = drone_var.get_battery()
         row[0] = current_time
@@ -75,6 +83,8 @@ if __name__ == "__main__":
             writer.writerow("Flight Terminated Early")
             f.close()
             print(">>>>>>>>>>>>>>>>CRITICAL: Drone terminated early, writing data to file ", filename)
+            terminated_early = True
+            break
         current_time = drone_var.get_flight_time()
         current_bat = drone_var.get_battery()
         row[0] = current_time
@@ -104,10 +114,11 @@ if __name__ == "__main__":
     writer.writerow(time_string)
     writer.writerow("Successful Flight!")
 
-    print(">>>>>>>>>>>>>>>>SUCCESS: Writing data to file ", filename)
+    print(">>>>>>>>>>>>>>>> SUCCESS: Writing data to file ", filename)
         
     # close out of .csv file
-    f.close()
+    if (terminated_early == False):
+        f.close()
     # land drone
     drone.land()
 
