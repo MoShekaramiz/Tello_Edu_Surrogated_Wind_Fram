@@ -10,7 +10,7 @@ class LiveFeed(threading.Thread):
     This uses 3 while loops to output either regular video, haar cascade detection,
     or QR code detection.'''
     def __init__(self, drone):
-        threading.Thread.__init__(self)
+        self.thread = threading.Thread.__init__(self)
         self.haar = threading.Event()
         self.qr = threading.Event()
         self.stop = threading.Event()
@@ -68,3 +68,4 @@ class LiveFeed(threading.Thread):
         self.qr.set()
         self.haar.set()
         self.stop.set()
+        self.thread.join()

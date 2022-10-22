@@ -1,9 +1,7 @@
 '''Module to assist with detecting QR codes in OpenCV. By Branden Pinney and Shayne Duncan 2022.'''
-
-import cv2 as cv
 import pyqrcode
-# import png
-from pyqrcode import QRCode
+import cv2 as cv
+
   
 def make_QR(names):
     for name in names:
