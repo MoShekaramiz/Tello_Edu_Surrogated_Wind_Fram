@@ -116,6 +116,11 @@ class movement():
             # decreases drone altitiude
             down = round(down)
             self.drone.move_down(down)
+            height = self.drone.get_height()
+            while height > down:
+                self.drone.send_rc_control(0, 0, 15)
+                height = self.drone.get_height()
+            self.drone.send_rc_control(0, 0, 0)
             self.new_location[2] -= down
 
         if ccw != 0:

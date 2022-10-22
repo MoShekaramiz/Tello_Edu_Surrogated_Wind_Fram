@@ -48,9 +48,9 @@ start = time.time()
 # data = np.array([xpos, ypos], np.int32) 
 
 # Array of 3 test points
-xpos = np.array([0, 360, 832, 217])
+xpos = np.array([0, 1000, 0, 1000,360, 832, 217])
 xpos = np.append(xpos, xpos[0])
-ypos = np.array([0, 52, 409, 224])
+ypos = np.array([0, 0, 650, 650, 52, 409, 224])
 ypos = np.append(ypos, ypos[0])
 data = np.array([xpos, ypos], np.int32)
 

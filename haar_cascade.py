@@ -42,9 +42,9 @@ def findTurbine(img, cascade=0):
         return img, [[0, 0], 0, 0]
 
 def find_circles(img, down=True, green=False):
+    radius = 0
+    x_center = 0
     if down == True:
-        radius = 0
-        x_center = 0
         img = cv.medianBlur(img,5)   
 
         cimg = cv.cvtColor(img, cv.COLOR_BGR2GRAY)
