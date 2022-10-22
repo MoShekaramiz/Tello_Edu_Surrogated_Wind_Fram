@@ -22,7 +22,13 @@ def calibrate(drone_class, land=False, x_coordinate=0, y_coordinate=0):
     found = go_to_helipad(drone_class, width, center)
     cv.destroyWindow("Scanning For Calibration Marker")
     if found == False:
-        drone_class.go_to(x_coordinate, y_coordinate)
+        print("Not found.")
+        drone_class.go_to((x_coordinate + drone_class.get_x_location())/2, (y_coordinate + drone_class.get_y_location())/2)
+        found = go_to_helipad(drone_class, width, center)
+        print("Not found, second time.")
+        if found == False:
+            drone_class.go_to(x_coordinate, y_coordinate)
+            print("Not found, third time.")
     print("><><><><><><><><><><><><><>", drone.get_height())
     drone_class.move(down=105)
     print("><><><><><><><><><><><><><>", drone.get_height())
