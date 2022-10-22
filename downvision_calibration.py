@@ -138,13 +138,13 @@ def calibrate(drone_class, land=False, x_coordinate=0, y_coordinate=0):
 def go_to_helipad(drone, width, center):
     camera = drone.get_drone()
     if center == 0:
-        for i in range(10):
+        for i in range(100):
             if center == 0:
                 frame = camera.get_frame_read()
                 img = frame.frame
                 img = cv.resize(img, (w, h))
-                img, circle, width, center = hc.find_circles(img, green=False)
-                cv.imshow("Scanning For Calibration Marker", img)
+                img, circle, width, center = hc.find_circles(img, down=False, green=False)
+                cv.imshow("Scanning For Blue Circle", img)
                 cv.waitKey(1)
             else:
                 break
@@ -158,11 +158,11 @@ def go_to_helipad(drone, width, center):
     # object detected
     if(x != 0):
         # TODO: CHANGE 40.64 TO THE WIDTH OF THE CIRCLE IN CM
-        distance = int((650 * 40.64) / width) - 30 # (Focal length of camera lense * Real-world width of object)/Width of object in pixels  -  40 centimeters to stop short
+        distance = int((650 * 17.28) / width) - 60 # (Focal length of camera lense * Real-world width of object)/Width of object in pixels  -  40 centimeters to stop short
         if distance < 20:
             distance = 20
 
-        if(0 < x <= 340):
+        if(0 < x <= 355):
             # The drone needs to angle to the left to center the target.
             new_angle = int(round(((360 - x) / 360) * 41.3))
 
@@ -171,7 +171,7 @@ def go_to_helipad(drone, width, center):
             go_to_helipad(drone, width, center)
             img_pass = 1
 
-        elif(x >= 380):
+        elif(x >= 365):
             # The drone needs to angle to the right to center the target.
             new_angle = int(round(((x - 360) / 360) * 41.3))
             target_angle = drone.get_angle()-new_angle
@@ -194,13 +194,13 @@ def go_to_helipad(drone, width, center):
 
         elif area < fbRange[0] and area != 0 and img_pass == 0:
             # The drone is too far from the target
-            if distance <= 500:
+            if distance <= 250:
                 drone.move(fwd=distance)
             else:
                 while distance != 0:
-                    if distance > 500:
-                        drone.move(fwd=500)
-                        distance -= 500
+                    if distance > 250:
+                        drone.move(fwd=250)
+                        distance -= 250
                     else:
                         drone.move(fwd=distance)
                         distance -= distance
