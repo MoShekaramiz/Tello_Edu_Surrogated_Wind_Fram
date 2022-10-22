@@ -1,7 +1,9 @@
 '''The main object detection and drone flight module. By Branden Pinney 2022'''
 
+from re import search
 from time import sleep, time
 import math
+from turtle import left, right
 import cv2 as cv
 from djitellopy import Tello
 from qr_reader import droneReadQR
@@ -132,6 +134,19 @@ def qr_detection(drone, turbines, starting_location):
     video = drone.get_video()
     video.stop_haar()
     img_counter = 0
+
+    # Counter to determine which search loop the drone is in
+    # It is no good to have drone continually search until the battery dies
+    search_loop_counter = 1
+    # Remember this spot to fall back on for the different search loops below
+    search_orign_location = [drone.get_x_location(), drone.get_y_location()]
+    # Search algorithm uses an octagon with each turn being 45 degrees
+    # The length of the octagon sides can be edited below, use smaller length for small rooms
+    octagon_side_length = 60
+    # Calculate the diameter of the octagon
+    octagon_diameter = 2.41*octagon_side_length
+    octagon_radius = octagon_diameter / 2 
+
     while True:
         QR, img, info = droneReadQR(drone.get_drone())
         img = cv.resize(img, (w, h))
@@ -181,16 +196,55 @@ def qr_detection(drone, turbines, starting_location):
             except:
                 break
 
+        # Orbiting algorithm to find qr code to scan
+        # By default, the forward search loop comes first
         else:
             img_counter += 1
-            if img_counter == 195:
-                # drone.go_to(starting_location[0], starting_location[1], starting_location[2])
-                img_counter = 0
+            # This if statement is checking if the drone has made a full loop searching
+            # Changing from 195 to 255 to make the drone go in a full loop before changing search
+            if img_counter == 270:
+                # Check which search pattern the drone has already attempted.
+                if search_loop_counter == 1:
+                    # Back side search loop
+                    print("The drone has made a full forward loop, time to try backwards search loop")
+                    drone.move(ccw=180)
+                    # This will start the seach again
+                    img_counter = 0
+                    # Keep track of which search loop we are in
+                    search_loop_counter += 1
+                elif search_loop_counter == 2:
+                    # Left side search loop
+                    print("The drone has made a full backwards loop, time to try left side search loop")
+                    drone.move(ccw=270)
+                    # This will start the seach again
+                    img_counter = 0
+                    # Keep track of which search loop we are in
+                    search_loop_counter += 1
+                elif search_loop_counter == 3:
+                    # right side search loop
+                    print("The drone has made a full left side loop, time to try right side search loop")
+                    drone.move(ccw=180)
+                    # This will start the seach again
+                    img_counter = 0
+                    # Keep track of which search loop we are in
+                    search_loop_counter += 1
+                elif search_loop_counter == 4:
+                    # Tell drone to go home and land
+                    print("Telling drone to go back to helipad and land")
+                    drone.go_to(0, 0, 0)
+                    # calibrate(drone_class, land=False, x_coordinate=0, y_coordinate=0):
+                    drone.land()
+                else:
+                    # search_loop_counter should not ever be this value
+                    print("ERROR, search_loop_counter is an unexpected value of : " + str(search_loop_counter))
             elif (img_counter%30) == 0:
+                # Rotating counter clockwise 45 degrees
                 drone.move(ccw=45)
-                drone.move(right=30)
+                drone.move(right=(octagon_side_length))
+                print("Drone moving: " + str(octagon_side_length) + " cm to the right\n")
             elif (img_counter%15) == 0:
-                drone.move(right=30)
+                drone.move(right=(octagon_side_length))
+                print("Drone moving: " + str(octagon_side_length) + " cm to the right\n")
 
 def test(mission_list, turbine_list):
     '''Function called by the GUI. Takes a mission list of selected angles and the name

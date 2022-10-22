@@ -17,7 +17,6 @@ class movement():
         self.new_location = [0, 0, 0, 0]   # [x location, y location, z location, angle]
         self.turbine_locations = []        # List of all known turbine locations
         self.video_stream = None
-        self.path = None
         self.takeoff(height, stream)
     
     def takeoff(self, height=70, stream=True): 
@@ -50,23 +49,14 @@ class movement():
         self.drone.streamoff()
         print("\nThe drone has succesfully landed. See directory " + CWD + " to view collected data.\n")
         sys.exit(0)
-    
-    def append_current_path(self, path):
-        '''Add the path being used by the drone for traveling salesman'''
-        self.path = path
-    
-    def get_path(self):
-        '''Returns the path being used for traveling salesman'''
-        return self.path
 
     def append_turbine_locations(self, QR, known_locations=None):
         '''Add the location of a found turbine to the list and create the no-fly zone around it.'''
-        self.turbine_locations = known_locations
+        self.turbine_locations.append([self.new_location[0] - 30, self.new_location[0] + 30, self.new_location[1] - 30, 
+                                       self.new_location[1] + 30, QR, self.new_location[0], self.new_location[1]])
 
     def get_turbine_locations(self):
-        '''Returns the list of all known turbines locations, their no-fly zones, and their QR code data.'''
-        # turnbine_locations["WindTurbine_X"][1][0] = x coordinate
-        # turnbine_locations["WindTurbine_X"][1][1] = y coordinate
+        '''Returns the list of all known turbines locatoins, their no-fly zones, and their QR code data.'''
         return self.turbine_locations
         
     def get_location(self):
@@ -386,7 +376,7 @@ class movement():
                                     return_angle = abs(math.degrees(math.atan((x-right_corner[0])/(y-right_corner[1]))))
                                 except ZeroDivisionError:
                                     pass
-                                self.target_angle(return_angle, right_corner[0], right_corner[1], quadrant)
+                                self.target_angle(self, return_angle, right_corner[0], right_corner[1], quadrant)
                                 self.move(fwd=right_distance)
 
                             else:
@@ -471,5 +461,3 @@ class movement():
                     self.move(down=self.get_z_location() - targetz)
                     
         print(f"\nCURRENT LOCATION >>>>>>>>>>{self.new_location}\n")
-
-

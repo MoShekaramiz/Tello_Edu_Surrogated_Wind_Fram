@@ -2,13 +2,13 @@
 
 import cv2 as cv
 import pyqrcode
-import png
+# import png
 from pyqrcode import QRCode
   
 def make_QR(names):
     for name in names:
         code = pyqrcode.create(name)
-        code.png(name + '.png', scale=12)
+        # code.png(name + '.png', scale=12)
 
 def boundingBox(img, bbox):
     '''Creates a bounding box around the detected QR code'''
