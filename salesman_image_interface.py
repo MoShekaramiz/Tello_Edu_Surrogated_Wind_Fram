@@ -44,7 +44,7 @@ def trackObject(drone, info, turbines, starting_location):
 
     # object detected
     if(x != 0):
-        distance = int((650 * 40.64) / width) - 30 # (Focal length of camera lense * Real-world width of object)/Width of object in pixels  -  40 centimeters to stop short
+        distance = int((650 * 40.64) / width) - 60 # (Focal length of camera lense * Real-world width of object)/Width of object in pixels  -  40 centimeters to stop short
         if distance < 20:
             distance = 20
 
