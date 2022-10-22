@@ -38,7 +38,7 @@ class movement():
         self.video_stream = LiveFeed(self.drone)
         self.video_stream.start()
     
-    def land(self):
+    def land(self, turn_off = False):
         '''Lands the drone at the end of flight.'''
         print(">>>>>>>>>>>>>>>> BATTERY REMAINING: ", self.drone.get_battery())
         print(">>>>>>>>>>>>>>>> ENDING FLIGHT TIME: ", self.drone.get_flight_time())
@@ -48,7 +48,8 @@ class movement():
         self.video_stream.stop_image()
         self.drone.streamoff()
         print("\nThe drone has succesfully landed. See directory " + CWD + " to view collected data.\n")
-        sys.exit(0)
+        if turn_off == True:
+            sys.exit()
 
     def append_turbine_locations(self, QR, known_locations=None):
         '''Add the location of a found turbine to the list and create the no-fly zone around it.'''

@@ -7,6 +7,7 @@ from check_camera import check_camera
 from salesman_image_interface import trackObject, qr_detection
 from downvision_calibration import calibrate
 import time
+import sys
 import movement as mov
 
 start = time.time()
@@ -47,18 +48,18 @@ start = time.time()
 # data = np.array([xpos, ypos], np.int32)
 
 # Array of 3 test points
-xpos = np.array([0, 1000, 0, 1000, 360, 832, 217])
-xpos = np.append(xpos, xpos[0])
-ypos = np.array([0, 0, 650, 650, 52, 409, 224])
-ypos = np.append(ypos, ypos[0])
-data = np.array([xpos, ypos], np.int32)
-
-# Lab Test Points
-# xpos = np.array([0, 220, 100, 365])
+# xpos = np.array([0, 1000, 0, 1000, 360, 832, 217])
 # xpos = np.append(xpos, xpos[0])
-# ypos = np.array([0, 200, 78, 20])
+# ypos = np.array([0, 0, 650, 650, 52, 409, 224])
 # ypos = np.append(ypos, ypos[0])
 # data = np.array([xpos, ypos], np.int32)
+
+# Lab Test Points
+xpos = np.array([0, 120, 50, 165, 100])
+xpos = np.append(xpos, xpos[0])
+ypos = np.array([0, 100, 28, 20, 100])
+ypos = np.append(ypos, ypos[0])
+data = np.array([xpos, ypos], np.int32)
 
 class TravelingSalesman():
     def __init__(self):
@@ -166,27 +167,73 @@ if __name__ == "__main__":
     #     outFile.write(f"Starting battery: {camera.get_battery()}\n")
     coordinates = np.delete(coordinates, 0, axis=1)
     coordinates = np.delete(coordinates, -1, axis=1)
-    for location in range(int(coordinates.size/2)):
-        if coordinates[0][location] == 0 or coordinates[0][location] == 1000: # second number to be changed to whatever the boundary size is
-            calibrate(drone, False, coordinates[0][location], coordinates[1][location])
-        else:
-            # Rotate the drone to face the next location
-            drone.go_to(coordinates[0][location], coordinates[1][location], rotate_only=True) 
-
-            # Take 10 images to find the location of the target and do the mission if it is found
-            info = check_camera(camera)      
-            found = trackObject(drone, info, turbines, [drone.get_x_location(), drone.get_y_location(), drone.get_angle()])
-            
-            # If it is not seen move towards the target
-            img_counter = 0
-            while found == False:
-                dist = math.sqrt((drone.get_x_location() - coordinates[0][location])**2 + (drone.get_y_location() - coordinates[1][location])**2)
-                if dist > 35:
-                    drone.go_to(coordinates[0][location], coordinates[1][location], half_travel=True)
-                    found = trackObject(drone, info, turbines, [drone.get_x_location(), drone.get_y_location(), drone.get_angle()])
+    finished = False
+    while finished == False:
+        index = -1
+        test = 0
+        for location in range(int(coordinates.size/2)):
+            index += 1
+            if camera.get_battery() < 20:
+                xpos = coordinates[0][index:]
+                ypos = coordinates[1][index:]
+                current_x = drone.get_x_location()
+                current_y = drone.get_y_location()
+                quadrant = 0
+                if 1000 - current_x > 500:
+                    if 650 - current_y > 325:
+                        drone.go_to(0, 0, 0)
+                    else:
+                        drone.go_to(0, 650, 0)
+                        quadrant = 2
                 else:
-                    qr_detection(drone, turbines, [drone.get_x_location(), drone.get_y_location(), drone.get_z_location()])
-                    found = True
+                    if 650 - current_y > 325:
+                        drone.go_to(1000, 0, 0)
+                        quadrant = 4
+                    else:
+                        drone.go_to(1000, 650, 0)
+                        quadrant = 1
+                calibrate(drone, land=False)
+                drone.land(True)
+                try:
+                    input("DRONE BATTERY LOW. CHANGE BATTERY, RECONNECT, THEN PRESS ENTER.")
+                except:
+                    input("DRONE BATTERY LOW. CHANGE BATTERY, RECONNECT, THEN PRESS ENTER.")
+                drone = mov.movement()
+                if quadrant == 1:
+                    drone.set_coordinates(1000, 650)
+                elif quadrant == 2:
+                    drone.set_coordinates(0, 650)
+                elif quadrant == 4:
+                    drone.set_coordinates(1000, 650)
+                path = TravelingSalesman() 
+                path.plot()
+                coordinates = path.get_path()
+                camera = drone.get_drone()
+                break
+            test += 1
+            if coordinates[0][location] == 0 or coordinates[0][location] == 1000: # second number to be changed to whatever the boundary size is
+                calibrate(drone, False, coordinates[0][location], coordinates[1][location])
+            else:
+                # Rotate the drone to face the next location
+                drone.go_to(coordinates[0][location], coordinates[1][location], rotate_only=True) 
+                drone.go_to(coordinates[0][location], coordinates[1][location])
+
+                # Take 10 images to find the location of the target and do the mission if it is found
+                info = check_camera(camera)      
+                found = trackObject(drone, info, turbines, [drone.get_x_location(), drone.get_y_location(), drone.get_angle()])
+                
+                # If it is not seen move towards the target
+                img_counter = 0
+                while found == False:
+                    dist = math.sqrt((drone.get_x_location() - coordinates[0][location])**2 + (drone.get_y_location() - coordinates[1][location])**2)
+                    if dist > 35:
+                        drone.go_to(coordinates[0][location], coordinates[1][location], half_travel=True)
+                        found = trackObject(drone, info, turbines, [drone.get_x_location(), drone.get_y_location(), drone.get_angle()])
+                    else:
+                        qr_detection(drone, turbines, [drone.get_x_location(), drone.get_y_location(), drone.get_z_location()])
+                        found = True
+                if coordinates[0][location] == coordinates[0][-1] and coordinates[1][location] == coordinates[1][-1]:
+                    finished = True
 
     drone.go_to(ending_angle=0)
     print(">>>>>>>>>>>>>>>> TOTAL FLIGHT TIME: ", time.time() - start_time)
@@ -194,6 +241,7 @@ if __name__ == "__main__":
     #             outFile.write(f"Ended at: {round(time.time()-start)}\n")
     #             outFile.write(f"Ending battery: {camera.get_battery()}\n")
     calibrate(drone, land=True)
-    drone.land()
+    drone.land(turn_off = True)
+
 
     

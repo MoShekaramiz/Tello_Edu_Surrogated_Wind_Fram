@@ -1,5 +1,5 @@
 '''Module to assist with detecting QR codes in OpenCV. By Branden Pinney and Shayne Duncan 2022.'''
-
+import pyqrcode
 import cv2 as cv
 
   
