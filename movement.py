@@ -462,5 +462,3 @@ class movement():
                     self.move(down=self.get_z_location() - targetz)
                     
         print(f"\nCURRENT LOCATION >>>>>>>>>>{self.new_location}\n")
-
-
