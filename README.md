@@ -522,6 +522,8 @@ drone.land()
 ## downvision_calibration.py Instructions<a name="downvision_calibration.py-Instructions"></a>
 This file allows the user to re-calibrate the location and angle of the drone by positioning the drone first over a STARTRC UAV landing pad as seen in the video below. 
 
+[![Drone Location Calibration Test](http://img.youtube.com/vi/H2kWhc6m8rA/0.jpg)](http://www.youtube.com/watch?v=H2kWhc6m8rA)
+
 ### calibrate() <a name="calibrate()"></a>
 
 <details><summary>calibrate()</summary>
@@ -533,8 +535,6 @@ The drone will then lower to 30cm off the ground and use RC motor controls and H
 drone.go_to(0, 0, 0)
 calibrate(drone, land=True, x_coordinate=0, y_coordinate=0)
 ```
-
-[![Drone Location Calibration Test](http://img.youtube.com/vi/H2kWhc6m8rA/0.jpg)](http://www.youtube.com/watch?v=H2kWhc6m8rA)
     
 </p>
 </details>
@@ -544,6 +544,8 @@ This file contains the simulated annealing process for the traveling salesman pr
 
 ### TravelingSalesman()<a name="TravelingSalesman()"></a>
 A class that uses the numpy array of locations and a simulated annealing algorithm to attempt to optimize the shortest possible path to all the target locations.
+
+![alt text](https://github.com/BrandenPinney/Tello-Drone-Project/blob/main/Readme_img/Figure_1.png "Traveling Salesman")
 
 #### plot()<a name="plot()"></a>
 
