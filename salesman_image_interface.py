@@ -44,7 +44,8 @@ def trackObject(drone, info, turbines, starting_location):
 
     # object detected
     if(x != 0):
-        distance = int((650 * 40.64) / width) - 60 # (Focal length of camera lense * Real-world width of object)/Width of object in pixels  -  40 centimeters to stop short
+        # Angel's edit - I believe this might be the (Euclidean) distance which we do not want to cut short
+        distance = int((650 * 40.64) / width) - 40 # (Focal length of camera lense * Real-world width of object)/Width of object in pixels  -  40 centimeters to stop short
         if distance < 20:
             distance = 20
 
@@ -54,7 +55,10 @@ def trackObject(drone, info, turbines, starting_location):
         turbine_locations = drone.get_turbine_locations()
         for i in turbine_locations:
             if(i[0] < targetx < i[1]) and (i[2] < targety < i[3]):
-                drone.go_to(starting_location[0], starting_location[1], starting_location[2])
+                # drone.go_to(starting_location[0], starting_location[1], starting_location[2])
+                # Make the drone stop short in the x direction and face the fan
+                # Third parameter should be 0 for the angle to be facing the turbines
+                drone.go_to(starting_location[0], starting_location[1], 0)
                 return
 
         if(0 < x <= 340):
@@ -68,6 +72,7 @@ def trackObject(drone, info, turbines, starting_location):
                 if(i[0] < targetx < i[1]) and (i[2] < targety < i[3]):
                     drone.go_to(starting_location[0], starting_location[1], starting_location[2])
                     return False
+
             drone.move(ccw=new_angle)  
             info = check_camera(camera)      
             trackObject(drone, info, turbines, starting_location)
@@ -135,14 +140,14 @@ def qr_detection(drone, turbines, starting_location):
     video.stop_haar()
     img_counter = 0
 
+    # Have the drone face angle 0 degrees since that would make the drone face the front of the fans and qr codes
+    drone.go_to(drone.get_x_location(), drone.get_y_location(), 0)
     # Counter to determine which search loop the drone is in
     # It is no good to have drone continually search until the battery dies
     search_loop_counter = 1
-    # Remember this spot to fall back on for the different search loops below
-    search_orign_location = [drone.get_x_location(), drone.get_y_location()]
     # Search algorithm uses an octagon with each turn being 45 degrees
     # The length of the octagon sides can be edited below, use smaller length for small rooms
-    octagon_side_length = 60
+    octagon_side_length = 40
     # Calculate the diameter of the octagon
     octagon_diameter = 2.41*octagon_side_length
     octagon_radius = octagon_diameter / 2 
@@ -201,29 +206,29 @@ def qr_detection(drone, turbines, starting_location):
         else:
             img_counter += 1
             # This if statement is checking if the drone has made a full loop searching
-            # Changing from 195 to 255 to make the drone go in a full loop before changing search
+            # Changing from 195 to 270 to make the drone go in a full loop before changing search
             if img_counter == 270:
                 # Check which search pattern the drone has already attempted.
                 if search_loop_counter == 1:
                     # Back side search loop
-                    print("The drone has made a full forward loop, time to try backwards search loop")
-                    drone.move(ccw=180)
+                    print("The drone has made a full forward loop, time to try right side search loop")
+                    drone.move(cw=90)
                     # This will start the seach again
                     img_counter = 0
                     # Keep track of which search loop we are in
                     search_loop_counter += 1
                 elif search_loop_counter == 2:
                     # Left side search loop
-                    print("The drone has made a full backwards loop, time to try left side search loop")
-                    drone.move(ccw=270)
+                    print("The drone has made a full right side loop, time to try backwards side search loop")
+                    drone.move(cw=90)
                     # This will start the seach again
                     img_counter = 0
                     # Keep track of which search loop we are in
                     search_loop_counter += 1
                 elif search_loop_counter == 3:
                     # right side search loop
-                    print("The drone has made a full left side loop, time to try right side search loop")
-                    drone.move(ccw=180)
+                    print("The drone has made a full backside side loop, time to try left side search loop")
+                    drone.move(cw=90)
                     # This will start the seach again
                     img_counter = 0
                     # Keep track of which search loop we are in
@@ -241,10 +246,8 @@ def qr_detection(drone, turbines, starting_location):
                 # Rotating counter clockwise 45 degrees
                 drone.move(ccw=45)
                 drone.move(right=(octagon_side_length))
-                print("Drone moving: " + str(octagon_side_length) + " cm to the right\n")
             elif (img_counter%15) == 0:
                 drone.move(right=(octagon_side_length))
-                print("Drone moving: " + str(octagon_side_length) + " cm to the right\n")
 
 # def test(mission_list, turbine_list):
 #     '''Function called by the GUI. Takes a mission list of selected angles and the name
