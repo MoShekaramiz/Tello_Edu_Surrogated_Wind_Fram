@@ -1,9 +1,7 @@
 '''The main object detection and drone flight module. By Branden Pinney 2022'''
 
-from re import search
 from time import sleep, time
 import math
-from turtle import left, right
 import cv2 as cv
 from djitellopy import Tello
 from qr_reader import droneReadQR
