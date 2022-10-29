@@ -72,10 +72,10 @@ class TravelingSalesman():
         print(data)
         print(f">>>>>>>>>>>>>>>>>>>>>> STARTING PATH ENERGY: {e1}\n")
 
-        T = 2000
-
-        while T > 1:  
-            for i in range(400):
+        array_size = xpos.size
+        T = 150 * array_size
+        while T > 1:
+            for i in range(30 * array_size):
                 if e1 < e_min:
                     e_min = e1
                     self.path_min = np.copy(path1)
