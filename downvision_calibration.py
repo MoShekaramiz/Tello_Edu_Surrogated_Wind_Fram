@@ -3,6 +3,7 @@ import haar_cascade as hc
 import movement as mov
 from check_camera import check_camera  
 
+#angel comment
 fbRange = [62000,82000] # [32000, 52000] # preset parameter for detected image boundary size
 w, h = 720, 480         # display size of the screen
 
