@@ -4,3 +4,4 @@ __pycache__/output_video.cpython-310.pyc
 __pycache__/qr_reader.cpython-310.pyc
 *.csv
 *.xlsx
+*.pyc

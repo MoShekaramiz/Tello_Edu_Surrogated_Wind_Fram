@@ -22,7 +22,7 @@ if __name__ == "__main__":
     filename = input("Enter filename: ")
     filename = filename + ".csv"
 
-    os.chdir("C:\\Users\\josh.faber\\Documents")
+    os.chdir("C:\\Users\\jsfab\\Documents")
     print("Saving ", filename, " in directory ", os.getcwd)
 
     f = open(filename, 'w')
