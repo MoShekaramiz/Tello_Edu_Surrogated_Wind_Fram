@@ -225,7 +225,8 @@ def go_to_helipad(drone, width, center, flag=0):
                         center = 0
                         go_to_helipad(drone, width, center)
                     else:
-                        drone.move(fwd=distance)
+                        # Angel - I am commenting out this because I think this causes the drone to overshoot
+                        # drone.move(fwd=distance)
                         distance -= distance
             return True  
 

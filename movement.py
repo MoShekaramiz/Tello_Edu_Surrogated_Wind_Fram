@@ -115,13 +115,9 @@ class movement():
         elif up == 0 and down != 0:
             # decreases drone altitiude
             down = round(down)
-            self.drone.move_down(down)
-            height = self.drone.get_height()
-            while height > down:
-                self.drone.send_rc_control(0, 0, 15, 0)
-                height = self.drone.get_height()
-            self.drone.send_rc_control(0, 0, 0, 0)
-            self.new_location[2] -= down
+            if self.new_location[2] > down:
+                self.drone.move_down(down)
+                self.new_location[2] -= down
 
         if ccw != 0:
             # counter-clockwise takes priority -- updates angle after counter-clockwise rotation
@@ -329,102 +325,102 @@ class movement():
             vector_angle = 0
         possible_collisions = []
 
-        # for i in self.turbine_locations:
-        #     centerx = i[5]
-        #     centery = i[6]
-        #     center_distance = int(math.sqrt((x-centerx)**2 + (y-centery)**2))
+        for i in self.turbine_locations:
+            centerx = i[5]
+            centery = i[6]
+            center_distance = int(math.sqrt((x-centerx)**2 + (y-centery)**2))
 
-        #     if quadrant == 1: # drone in quadrant 1
-        #         if (target_x < centerx < x) and (target_y < centery < y):
-        #             possible_collisions.append([i[0], i[1], i[2], i[3], center_distance, centerx, centery])
+            if quadrant == 1: # drone in quadrant 1
+                if (target_x < centerx < x) and (target_y < centery < y):
+                    possible_collisions.append([i[0], i[1], i[2], i[3], center_distance, centerx, centery])
 
-        #     elif quadrant == 2: # drone in quadrant 2
-        #         if (x < centerx < target_x) and (target_y < centery < y):
-        #             possible_collisions.append([i[0], i[1], i[2], i[3], center_distance, centerx, centery])
+            elif quadrant == 2: # drone in quadrant 2
+                if (x < centerx < target_x) and (target_y < centery < y):
+                    possible_collisions.append([i[0], i[1], i[2], i[3], center_distance, centerx, centery])
 
-        #     elif quadrant == 3: # drone in quadrant 3
-        #         if (target_x < centerx < x) and (y < centery < target_y):
-        #             possible_collisions.append([i[0], i[1], i[2], i[3], center_distance, centerx, centery])
+            elif quadrant == 3: # drone in quadrant 3
+                if (target_x < centerx < x) and (y < centery < target_y):
+                    possible_collisions.append([i[0], i[1], i[2], i[3], center_distance, centerx, centery])
 
-        #     elif quadrant == 4: # drone in quadrant 4
-        #         if (x < centerx < target_x) and (y < centery < target_y):
-        #             possible_collisions.append([i[0], i[1], i[2], i[3], center_distance, centerx, centery])
+            elif quadrant == 4: # drone in quadrant 4
+                if (x < centerx < target_x) and (y < centery < target_y):
+                    possible_collisions.append([i[0], i[1], i[2], i[3], center_distance, centerx, centery])
 
         if rotate_only is True:
             self.target_angle(vector_angle, target_x, target_y, quadrant)
             return
 
-        # if len(possible_collisions) != 0:
-        #     possible_collisions = sorted(possible_collisions, key=operator.itemgetter(4)) # sort the possible collision list by distance from drone
-        #     starting_point = self.new_location
-        #     for i in range(point_distance): 
-        #             targetx = i * math.cos(vector_angle)
-        #             targety = i * math.sin(vector_angle)
+        if len(possible_collisions) != 0:
+            possible_collisions = sorted(possible_collisions, key=operator.itemgetter(4)) # sort the possible collision list by distance from drone
+            starting_point = self.new_location
+            for i in range(point_distance): 
+                    targetx = i * math.cos(vector_angle)
+                    targety = i * math.sin(vector_angle)
 
-        #             for j in possible_collisions:
-        #                 centerx = j[5]
-        #                 centery = j[6] 
-        #                 if(j[0] < targetx < j[1]) and (j[2] < targety < j[3]): # if the drone will pass near the turbine
-        #                     if(quadrant == 1) or (quadrant == 3): # if in quadrant 1 or 3
-        #                         right_corner = [j[1], j[2]] # bottom right corner of the no-go zone
-        #                         left_corner = [j[0], j[3]] # top left corner of the no-go zone
+                    for j in possible_collisions:
+                        centerx = j[5]
+                        centery = j[6] 
+                        if(j[0] < targetx < j[1]) and (j[2] < targety < j[3]): # if the drone will pass near the turbine
+                            if(quadrant == 1) or (quadrant == 3): # if in quadrant 1 or 3
+                                right_corner = [j[1], j[2]] # bottom right corner of the no-go zone
+                                left_corner = [j[0], j[3]] # top left corner of the no-go zone
 
-        #                     else: # if in quadrant 2 or 4
-        #                         right_corner = [j[1], j[3]] # top right corner of the no-go zone
-        #                         left_corner =[j[0], j[2]] # bottom left corner of the no-go zone
+                            else: # if in quadrant 2 or 4
+                                right_corner = [j[1], j[3]] # top right corner of the no-go zone
+                                left_corner =[j[0], j[2]] # bottom left corner of the no-go zone
 
-        #                     right_distance = math.sqrt((right_corner[0] - self.new_location[0])**2 + (right_corner[1] - self.new_location[1])**2) # point-distance to the bottom right corner
-        #                     left_distance = math.sqrt((left_corner[0] - self.new_location[0])**2 + (left_corner[1] - self.new_location[1])**2) # point-distance to the bottom left corner
+                            right_distance = math.sqrt((right_corner[0] - self.new_location[0])**2 + (right_corner[1] - self.new_location[1])**2) # point-distance to the bottom right corner
+                            left_distance = math.sqrt((left_corner[0] - self.new_location[0])**2 + (left_corner[1] - self.new_location[1])**2) # point-distance to the bottom left corner
 
-        #                     if right_distance < left_distance:
-        #                         try:
-        #                             return_angle = abs(math.degrees(math.atan((x-right_corner[0])/(y-right_corner[1]))))
-        #                         except ZeroDivisionError:
-        #                             pass
-        #                         self.target_angle(self, return_angle, right_corner[0], right_corner[1], quadrant)
-        #                         self.move(fwd=right_distance)
+                            if right_distance < left_distance:
+                                try:
+                                    return_angle = abs(math.degrees(math.atan((x-right_corner[0])/(y-right_corner[1]))))
+                                except ZeroDivisionError:
+                                    pass
+                                self.target_angle(self, return_angle, right_corner[0], right_corner[1], quadrant)
+                                self.move(fwd=right_distance)
 
-        #                     else:
-        #                         try:
-        #                             return_angle = abs(math.degrees(math.atan((x-left_corner[0])/(y-left_corner[1]))))
-        #                         except ZeroDivisionError:
-        #                             pass
-        #                         self.target_angle(return_angle, left_corner[0], left_corner[1], quadrant)
-        #                         self.move(fwd=left_distance)
+                            else:
+                                try:
+                                    return_angle = abs(math.degrees(math.atan((x-left_corner[0])/(y-left_corner[1]))))
+                                except ZeroDivisionError:
+                                    pass
+                                self.target_angle(return_angle, left_corner[0], left_corner[1], quadrant)
+                                self.move(fwd=left_distance)
 
-        #                     self.go_to(target_x, target_y, ending_angle) # call return path again until there are no possible collisions remaining
-        #                     ######### Work on if the no-go zone overlaps an axis
-        #     if self.new_location == starting_point:
-        #         self.target_angle(vector_angle, target_x, target_y, quadrant)
-        #         while (point_distance != 0):
-        #             if (point_distance >= 500):
-        #                 self.move(fwd=500)
-        #                 point_distance -= 500
+                            self.go_to(target_x, target_y, ending_angle) # call return path again until there are no possible collisions remaining
+                            ######### Work on if the no-go zone overlaps an axis
+            if self.new_location == starting_point:
+                self.target_angle(vector_angle, target_x, target_y, quadrant)
+                while (point_distance != 0):
+                    if (point_distance >= 500):
+                        self.move(fwd=500)
+                        point_distance -= 500
 
-        #             elif (point_distance < 500) and (point_distance < 20):
-        #                 point_distance = 0
+                    elif (point_distance < 500) and (point_distance < 20):
+                        point_distance = 0
 
-        #             else:
-        #                 self.move(fwd=point_distance)
-        #                 sleep(0.5)
-        #                 point_distance = 0
-        #         if ending_angle is not None: # rotate the shortest distance to the ending angle
-        #             angle = self.new_location[3] # current angle has to be updated
-        #             if ending_angle < 0:
-        #                 ending_angle = abs(360 + angle) % 360
-        #             else:
-        #                 ending_angle = ending_angle % 360
-        #             alpha = ending_angle - angle
-        #             if alpha < 0:
-        #                 alpha = round(abs(alpha))
-        #                 if alpha < 180:
-        #                    self.move(cw=(alpha))
-        #                 else:
-        #                     self.move(ccw=(360 - alpha))
-        #             elif alpha < 180:
-        #                 self.move(cw=(round(alpha)))
-        #             else:
-        #                 self.move(ccw=(round(360 - alpha)))
+                    else:
+                        self.move(fwd=point_distance)
+                        sleep(0.5)
+                        point_distance = 0
+                if ending_angle is not None: # rotate the shortest distance to the ending angle
+                    angle = self.new_location[3] # current angle has to be updated
+                    if ending_angle < 0:
+                        ending_angle = abs(360 + angle) % 360
+                    else:
+                        ending_angle = ending_angle % 360
+                    alpha = ending_angle - angle
+                    if alpha < 0:
+                        alpha = round(abs(alpha))
+                        if alpha < 180:
+                           self.move(cw=(alpha))
+                        else:
+                            self.move(ccw=(360 - alpha))
+                    elif alpha < 180:
+                        self.move(cw=(round(alpha)))
+                    else:
+                        self.move(ccw=(round(360 - alpha)))
         else:
             self.target_angle(vector_angle, target_x, target_y, quadrant)
             while (point_distance != 0):
