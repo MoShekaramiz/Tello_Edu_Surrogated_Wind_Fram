@@ -91,7 +91,10 @@ if __name__ == "__main__":
         row[1] = current_bat
         print("Time: ", current_time)
         print("Battery: ", current_bat, "%")
-        writer.writerow(row)
+        try:
+            writer.writerow(row)
+        except:
+            break
         sleep(5)
 
         current_time = drone_var.get_flight_time()
@@ -100,7 +103,10 @@ if __name__ == "__main__":
         row[1] = current_bat
         print("Time: ", current_time)
         print("Battery: ", current_bat, "%")
-        writer.writerow(row)
+        try:
+            writer.writerow(row)
+        except:
+            break
         sleep(5)
 
     end_time = drone_var.get_flight_time()

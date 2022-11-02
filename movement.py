@@ -1,6 +1,7 @@
 '''The movment module that facilitates drone coordinate tracking and return path algorithms. By Branden Pinney and Shayne Duncan 2022'''
 
 from ast import operator
+from mimetypes import init
 from djitellopy import Tello
 import operator
 import math
@@ -114,12 +115,23 @@ class movement():
 
         elif up == 0 and down != 0:
             # decreases drone altitiude
+            initial_height = self.drone.get_height()    # grabs initial height
             down = round(down)
+            target_height = initial_height - down
             self.drone.move_down(down)
             height = self.drone.get_height()
-            while height > down:
-                self.drone.send_rc_control(0, 0, 15, 0)
+            tries = 1
+            while (height > target_height) and (height > 30):     # if move_down doesn't work, rc control
+                self.drone.send_rc_control(0, 0, -15, 0)
                 height = self.drone.get_height()
+                print("Try: ", tries)
+                print("----- Initial Height ----- ", initial_height)
+                print("----- Current Height ----- ", height)
+                print("----- Target Height ------ ", target_height)
+                sleep(2)
+                if tries == 10:
+                    break
+                tries += 1
             self.drone.send_rc_control(0, 0, 0, 0)
             self.new_location[2] -= down
 
