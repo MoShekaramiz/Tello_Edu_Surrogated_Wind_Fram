@@ -9,7 +9,8 @@ from downvision_calibration import calibrate
 import time
 import sys
 import movement as mov
-
+# Angel's edit - import random
+import random
 start = time.time()
 
 # Array of 8 test points
@@ -171,6 +172,10 @@ if __name__ == "__main__":
     coordinates = np.delete(coordinates, 0, axis=1)
     coordinates = np.delete(coordinates, -1, axis=1)
     finished = False
+    
+    # Angel - declare variable to be the distance we want to stop short in the x-axis
+    x_distance_cutoff = 50
+
     while finished == False:
         index = -1
         test = 0
@@ -218,8 +223,11 @@ if __name__ == "__main__":
                 calibrate(drone, False, coordinates[0][location], coordinates[1][location])
             else:
                 # Rotate the drone to face the next location
-                # Angel's edit of - 50
-                drone.go_to(coordinates[0][location] - 50, coordinates[1][location], rotate_only=True) 
+                drone.go_to(coordinates[0][location], coordinates[1][location], rotate_only=True) 
+                
+                # Angel's edit - Move the drone towards the fan to avoid detecting other fans
+                drone.go_to(coordinates[0][location] - x_distance_cutoff, coordinates[1][location], half_travel=True)
+                drone.go_to(drone.get_x_location(), drone.get_y_location(), 0) 
 
                 # Take 10 images to find the location of the target and do the mission if it is found
                 info = check_camera(camera)      
@@ -229,9 +237,10 @@ if __name__ == "__main__":
                 img_counter = 0
                 while found == False:
                     dist = math.sqrt((drone.get_x_location() - coordinates[0][location])**2 + (drone.get_y_location() - coordinates[1][location])**2)
-                    if dist > 35:
+                    # Angel's edit of + 50
+                    if dist > 35 + x_distance_cutoff:
                         # Angel's edit of - 50
-                        drone.go_to(coordinates[0][location] - 50, coordinates[1][location], half_travel=True)
+                        drone.go_to(coordinates[0][location] - x_distance_cutoff, coordinates[1][location], half_travel=True)
                         found = trackObject(drone, info, turbines, [drone.get_x_location(), drone.get_y_location(), drone.get_angle()])
                     else:
                         qr_detection(drone, turbines, [drone.get_x_location(), drone.get_y_location(), drone.get_z_location()])
