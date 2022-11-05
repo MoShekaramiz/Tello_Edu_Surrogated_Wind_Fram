@@ -123,26 +123,26 @@ class TravelingSalesman():
     def plot(self):
         plt.rcParams["font.family"] = "Times New Roman"
         figure, axis = plt.subplots(2, 1)
-        axis[0].axis([0, 1000, 0, 650])
+        axis[0].axis([0, 1000, 0, 550])
         axis[0].title.set_text("Path Before Optimization")
         axis[0].set_xlabel('x')
         axis[0].set_ylabel('y')
         # plt.axis([0, 285, 0, 285])
         for i, j in zip(data[0], data[1]):
             axis[0].text(i, j+20, '({}, {})'.format(i, j), fontsize='small')
-        axis[0].text(10, 900, f'Total Energy: {int(self.energy_calc(data))}', fontsize='small')
+        axis[0].text(10, 500, f'Total Energy: {int(self.energy_calc(data))}', fontsize='small')
         axis[0].plot(data[0], data[1], '-o', markersize=4)
         axis[0].quiver(data[0][:-1], data[1][:-1], data[0][1:]-data[0][:-1], 
                    data[1][1:]-data[1][:-1],scale_units='xy', angles='xy', scale=1, color='teal', width=0.005)
 
-        axis[1].axis([0, 1000, 0, 650])
+        axis[1].axis([0, 1000, 0, 550])
         axis[1].title.set_text("Path After Optimization")
         axis[1].set_xlabel('x')
         axis[1].set_ylabel('y')
         # plt.axis([0, 285, 0, 285])
         for i, j in zip(self.path_min[0], self.path_min[1]):
             axis[1].text(i, j+20, '({}, {})'.format(i, j), fontsize='small')
-        axis[1].text(10, 900, f'Total Energy: {int(self.energy_calc(self.path_min))}', fontsize='small')
+        axis[1].text(10, 500, f'Total Energy: {int(self.energy_calc(self.path_min))}', fontsize='small')
         axis[1].plot(self.path_min[0], self.path_min[1], '-o', markersize=4)
         axis[1].quiver(self.path_min[0][:-1], self.path_min[1][:-1], self.path_min[0][1:]-self.path_min[0][:-1], 
                    self.path_min[1][1:]-self.path_min[1][:-1],scale_units='xy', angles='xy', scale=1, color='teal', width=0.005)
@@ -163,8 +163,8 @@ if __name__ == "__main__":
     with open('OutputLog.csv', 'w') as outFile:
         outFile.write(f"{round(start)}\n")
     turbines = {"WindTurbine_1": [[0, 0, 0, 0], [360, 52]], "WindTurbine_2": [[0, 0, 0, 0], [832, 409]], "WindTurbine_3": [[0, 0, 0, 0], [217, 224]]}
-                # "WindTurbine_4": [[0, 0, 0, 0], [613, 550]], "WindTurbine_5": [[0, 0, 0, 0], [801, 82]], "WindTurbine_6": [[0, 0, 0, 0], [58, 125]],
-                # "WindTurbine_7": [[0, 0, 0, 0], [531, 150]], "WindTurbine_8": [[0, 0, 0, 0], [200, 560]]}
+                # "WindTurbine_4": [[0, 0, 0, 0], [613, 460]], "WindTurbine_5": [[0, 0, 0, 0], [801, 82]], "WindTurbine_6": [[0, 0, 0, 0], [58, 125]],
+                # "WindTurbine_7": [[0, 0, 0, 0], [531, 150]], "WindTurbine_8": [[0, 0, 0, 0], [200, 440]]}
     # Uncomment to get positions of each target in inches
     # with open('Positions.csv', 'w') as outFile: 
     #     for item in turbines:
@@ -186,7 +186,7 @@ if __name__ == "__main__":
     coordinates = np.delete(coordinates, 0, axis=1)
     coordinates = np.delete(coordinates, -1, axis=1)
     finished = False
-
+    
     # Angel - declare variable to be the distance we want to stop short in the x-axis
     x_distance_cutoff = 50
 
@@ -202,17 +202,17 @@ if __name__ == "__main__":
                 current_y = drone.get_y_location()
                 quadrant = 0
                 if 1000 - current_x > 500:
-                    if 650 - current_y > 325:
+                    if 550 - current_y > 325:
                         drone.go_to(0, 0, 0)
                     else:
-                        drone.go_to(0, 650, 0)
+                        drone.go_to(0, 550, 0)
                         quadrant = 2
                 else:
-                    if 650 - current_y > 325:
+                    if 550 - current_y > 325:
                         drone.go_to(1000, 0, 0)
                         quadrant = 4
                     else:
-                        drone.go_to(1000, 650, 0)
+                        drone.go_to(1000, 550, 0)
                         quadrant = 1
                 calibrate(drone, land=False)
                 drone.land(True)
@@ -222,11 +222,11 @@ if __name__ == "__main__":
                     input("DRONE BATTERY LOW. CHANGE BATTERY, RECONNECT, THEN PRESS ENTER.")
                 drone = mov.movement()
                 if quadrant == 1:
-                    drone.set_coordinates(1000, 650)
+                    drone.set_coordinates(1000, 550)
                 elif quadrant == 2:
-                    drone.set_coordinates(0, 650)
+                    drone.set_coordinates(0, 550)
                 elif quadrant == 4:
-                    drone.set_coordinates(1000, 650)
+                    drone.set_coordinates(1000, 550)
                 path = TravelingSalesman() 
                 path.plot()
                 coordinates = path.get_path()
