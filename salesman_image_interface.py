@@ -40,6 +40,9 @@ def trackObject(drone, info, turbines, starting_location):
     width = info[2] # The width of the bounding box
     img_pass = 0    # Flag to determine if the drone is returning from a target to skip point distance calculations
 
+    # Angel - declare variable to be the distance we want to stop short in the x-axis
+    x_distance_cutoff = 50
+
     # object detected
     if(x != 0):
         distance = int((650 * 40.64) / width) - 40 # (Focal length of camera lense * Real-world width of object)/Width of object in pixels  -  40 centimeters to stop short
@@ -55,7 +58,7 @@ def trackObject(drone, info, turbines, starting_location):
                 # Make the drone stop short in the x direction and face the fan
                 # Third parameter should be 0 for the angle to be facing the turbines
                 # Angel's edit of - 50
-                drone.go_to(starting_location[0] - 50, starting_location[1], 0)
+                drone.go_to(starting_location[0] - x_distance_cutoff, starting_location[1], 0)
                 return
 
         if(0 < x <= 340):
@@ -68,7 +71,7 @@ def trackObject(drone, info, turbines, starting_location):
             for i in turbine_locations:
                 if(i[0] < targetx < i[1]) and (i[2] < targety < i[3]):
                     # Angel's edit of - 50
-                    drone.go_to(starting_location[0] - 50, starting_location[1], starting_location[2])
+                    drone.go_to(starting_location[0] - x_distance_cutoff, starting_location[1], starting_location[2])
                     return False
 
             drone.move(ccw=new_angle)  
@@ -89,7 +92,7 @@ def trackObject(drone, info, turbines, starting_location):
             for i in turbine_locations:
                 if(i[0] < targetx < i[1]) and (i[2] < targety < i[3]):
                     # Angel's edit of - 50
-                    drone.go_to(starting_location[0] - 50, starting_location[1], starting_location[2])
+                    drone.go_to(starting_location[0] - x_distance_cutoff, starting_location[1], starting_location[2])
                     return False
             drone.move(cw=new_angle) 
             info = check_camera(camera)       
