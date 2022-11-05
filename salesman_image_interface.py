@@ -40,7 +40,7 @@ def trackObject(drone, info, turbines, starting_location):
     width = info[2] # The width of the bounding box
     img_pass = 0    # Flag to determine if the drone is returning from a target to skip point distance calculations
 
-    # Angel - declare variable to be the distance we want to stop short in the x-axis
+    #  - declare variable to be the distance we want to stop short in the x-axis
     x_distance_cutoff = 50
 
     # object detected
@@ -57,7 +57,7 @@ def trackObject(drone, info, turbines, starting_location):
             if(i[0] < targetx < i[1]) and (i[2] < targety < i[3]):
                 # Make the drone stop short in the x direction and face the fan
                 # Third parameter should be 0 for the angle to be facing the turbines
-                # Angel's edit of - 50
+                # Angel's edit of - x_distance_cutoff
                 drone.go_to(starting_location[0] - x_distance_cutoff, starting_location[1], 0)
                 return
 
@@ -70,7 +70,7 @@ def trackObject(drone, info, turbines, starting_location):
             turbine_locations = drone.get_turbine_locations()
             for i in turbine_locations:
                 if(i[0] < targetx < i[1]) and (i[2] < targety < i[3]):
-                    # Angel's edit of - 50
+                    # Angel's edit of - x_distance_cutoff
                     drone.go_to(starting_location[0] - x_distance_cutoff, starting_location[1], starting_location[2])
                     return False
 
@@ -91,7 +91,7 @@ def trackObject(drone, info, turbines, starting_location):
             turbine_locations = drone.get_turbine_locations()
             for i in turbine_locations:
                 if(i[0] < targetx < i[1]) and (i[2] < targety < i[3]):
-                    # Angel's edit of - 50
+                    # Angel's edit of - x_distance_cutoff
                     drone.go_to(starting_location[0] - x_distance_cutoff, starting_location[1], starting_location[2])
                     return False
             drone.move(cw=new_angle) 
@@ -149,10 +149,7 @@ def qr_detection(drone, turbines, starting_location):
     search_loop_counter = 1
     # Search algorithm uses an octagon with each turn being 45 degrees
     # The length of the octagon sides can be edited below, use smaller length for small rooms
-    octagon_side_length = 40
-    # Calculate the diameter of the octagon
-    octagon_diameter = 2.41*octagon_side_length
-    octagon_radius = octagon_diameter / 2 
+    octagon_side_length = 30
 
     while True:
         QR, img, info = droneReadQR(drone.get_drone())
@@ -162,11 +159,11 @@ def qr_detection(drone, turbines, starting_location):
             drone_var = drone.get_drone()
             # print(">>>>>>>>>>>>>>>>CURRENT FLIGHT TIME: ", drone_var.get_flight_time())
             print(">>>>>>>>>>>>>>>>QR CODE FOUND: ", QR)
-            # Angel - Delete this when done testing all fans
+            # Angel - Delete this line below when done testing individual fans
             drone.land()
             # with open('OutputLog.csv', 'a') as outFile:
             #     outFile.write(f"Found QR code:{QR} at {round(time()-start)}\n")
-            #d 
+            # 
             drone.append_turbine_locations(QR)
             turbine_found = 0 # Flag to determine if the correct turbine was found
             video.stop_qr()

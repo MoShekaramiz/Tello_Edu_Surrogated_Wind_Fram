@@ -84,6 +84,12 @@ def calibrate(drone_class, land=False, x_coordinate=0, y_coordinate=0):
             else:
                 x = round(-(circle_x-160)/10)
                 y = round(-(circle_y-120)/10)
+                # Angel - we were getting -45 which made the drone go nuts, here is to avoid it
+                if x > 8:
+                    x = 8
+                if x < -8:
+                    x = -8
+                # Angel - end of edited code
                 if found_center == 0:
                     if (-8 < x < -2) or (2 < x < 8):
                         if x < 0: x = -8

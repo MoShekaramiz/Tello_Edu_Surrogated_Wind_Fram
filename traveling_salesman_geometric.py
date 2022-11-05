@@ -16,66 +16,66 @@ start = time.time()
 # Array of 8 test points
 # xpos = np.array([0, 1000, 0, 1000, 360, 832, 217, 613, 801, 58, 531, 200])
 # xpos = np.append(xpos, xpos[0])
-# ypos = np.array([0, 0, 650, 650, 52, 409, 224, 550, 82, 125, 150, 560])
+# ypos = np.array([0, 0, 550, 550, 52, 409, 224, 460, 82, 125, 150, 440])
 # ypos = np.append(ypos, ypos[0])
 # data = np.array([xpos, ypos], np.int32)
 
 # Array of 7 test points
 # xpos = np.array([0, 1000, 0, 1000, 360, 832, 217, 613, 801, 58, 531])
 # xpos = np.append(xpos, xpos[0])
-# ypos = np.array([0, 0, 650, 650, 52, 409, 224, 550, 82, 125, 150])
+# ypos = np.array([0, 0, 550, 550, 52, 409, 224, 460, 82, 125, 150])
 # ypos = np.append(ypos, ypos[0])
 # data = np.array([xpos, ypos], np.int32)
 
 # Array of 6 test points
 # xpos = np.array([0, 1000, 0, 1000, 360, 832, 217, 613, 801, 58])
 # xpos = np.append(xpos, xpos[0])
-# ypos = np.array([0, 0, 650, 650, 52, 409, 224, 550, 82, 125])
+# ypos = np.array([0, 0, 550, 550, 52, 409, 224, 460, 82, 125])
 # ypos = np.append(ypos, ypos[0])
 # data = np.array([xpos, ypos], np.int32)
 
 # Array of 5 test points
 # xpos = np.array([0, 1000, 0, 1000, 360, 832, 217, 613, 801])
 # xpos = np.append(xpos, xpos[0])
-# ypos = np.array([0, 0, 650, 650, 52, 409, 224, 550, 82])
+# ypos = np.array([0, 0, 550, 550, 52, 409, 224, 460, 82])
 # ypos = np.append(ypos, ypos[0])
 # data = np.array([xpos, ypos], np.int32)
 
 # Array of 4 test points
 # xpos = np.array([0, 1000, 0, 1000, 360, 832, 217, 613])
 # xpos = np.append(xpos, xpos[0])
-# ypos = np.array([0, 0, 650, 650, 52, 409, 224, 550])
+# ypos = np.array([0, 0, 550, 550, 52, 409, 224, 460])
 # ypos = np.append(ypos, ypos[0])
 # data = np.array([xpos, ypos], np.int32) 
 
 # Array of 3 test points
 # xpos = np.array([0, 1000, 1000, 360, 832, 217])
 # xpos = np.append(xpos, xpos[0])
-# ypos = np.array([0, 0, 650, 52, 409, 224])
+# ypos = np.array([0, 0, 550, 52, 409, 224])
 # ypos = np.append(ypos, ypos[0])
 # data = np.array([xpos, ypos], np.int32)
 
 # Lab Test Points
-xpos = np.array([0, 250, 0])
-xpos = np.append(xpos, xpos[0])
-ypos = np.array([0, 150, 0])
-ypos = np.append(ypos, ypos[0])
-data = np.array([xpos, ypos], np.int32)
+# xpos = np.array([0, 250, 0])
+# xpos = np.append(xpos, xpos[0])
+# ypos = np.array([0, 150, 0])
+# ypos = np.append(ypos, ypos[0])
+# data = np.array([xpos, ypos], np.int32)
 
 # Testing individual random fans
-# xfans = [360, 832, 217, 613, 801, 58, 531, 200]
-# yfans = [52, 409, 224, 550, 82, 125, 150, 560]
-# # list of fan numbers, we will choose a random value from the list
-# list1 = [1, 2, 3, 4, 5, 6, 7, 8]
-# random_choice = random.choice(list1)
-# # Change this number below to determine which fan to test, if you want random fan, comment out the whole line below
-# random_choice = 4
-# print("Choosing fan " + str(random_choice))
-# xpos = np.array([0, xfans[random_choice-1], 0])
-# xpos = np.append(xpos, xpos[0])
-# ypos = np.array([0, yfans[random_choice-1], 0])
-# ypos = np.append(ypos, ypos[0])
-# data = np.array([xpos, ypos], np.int32) 
+xfans = [360, 832, 217, 613, 801, 58, 531, 200]
+yfans = [52, 409, 224, 460, 82, 125, 150, 440]
+# list of fan numbers, we will choose a random value from the list
+list1 = [1, 2, 3, 4, 5, 6, 7, 8]
+random_choice = random.choice(list1)
+# Change this number below to determine which fan to test, if you want random fan, comment out the whole line below
+random_choice = 8
+print("Choosing fan " + str(random_choice))
+xpos = np.array([0, xfans[random_choice-1], 0])
+xpos = np.append(xpos, xpos[0])
+ypos = np.array([0, yfans[random_choice-1], 0])
+ypos = np.append(ypos, ypos[0])
+data = np.array([xpos, ypos], np.int32) 
 
 class TravelingSalesman():
     def __init__(self):
@@ -239,9 +239,9 @@ if __name__ == "__main__":
                 # Rotate the drone to face the next location
                 drone.go_to(coordinates[0][location], coordinates[1][location], rotate_only=True) 
                 
-                # Angel's edit - Move the drone towards the fan to avoid detecting other fans
-                drone.go_to(coordinates[0][location] - x_distance_cutoff, coordinates[1][location], half_travel=True)
-                drone.go_to(drone.get_x_location(), drone.get_y_location(), 0) 
+                # Angel's edit - Move the drone towards the fan and face forward to avoid detecting other fans
+                drone.go_to(coordinates[0][location] - 300, coordinates[1][location], 0)#, half_travel=True)
+                # drone.go_to(drone.get_x_location(), drone.get_y_location(), 0) 
 
                 # Take 10 images to find the location of the target and do the mission if it is found
                 info = check_camera(camera)      
@@ -251,9 +251,9 @@ if __name__ == "__main__":
                 img_counter = 0
                 while found == False:
                     dist = math.sqrt((drone.get_x_location() - coordinates[0][location])**2 + (drone.get_y_location() - coordinates[1][location])**2)
-                    # Angel's edit of + 50
+                    # Angel's edit of + x_distance_cutoff
                     if dist > 35 + x_distance_cutoff:
-                        # Angel's edit of - 50
+                        # Angel's edit of - x_distance_cutoff
                         drone.go_to(coordinates[0][location] - x_distance_cutoff, coordinates[1][location], half_travel=True)
                         found = trackObject(drone, info, turbines, [drone.get_x_location(), drone.get_y_location(), drone.get_angle()])
                     else:
