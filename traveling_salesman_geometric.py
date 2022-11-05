@@ -49,19 +49,33 @@ data = np.array([xpos, ypos], np.int32)
 # data = np.array([xpos, ypos], np.int32) 
 
 # Array of 3 test points
-# xpos = np.array([0, 1000, 1000,360, 832, 217])
+# xpos = np.array([0, 1000, 1000, 360, 832, 217])
 # xpos = np.append(xpos, xpos[0])
 # ypos = np.array([0, 0, 550, 52, 409, 224])
 # ypos = np.append(ypos, ypos[0])
 # data = np.array([xpos, ypos], np.int32)
 
 # Lab Test Points
-# xpos = np.array([0, 150, 300])
-# xpos = np.append(xpos, xpos[0])
-# ypos = np.array([0, 150, 300])
-# ypos = np.append(ypos, ypos[0])
-# data = np.array([xpos, ypos], np.int32)
+xpos = np.array([0, 250, 0])
+xpos = np.append(xpos, xpos[0])
+ypos = np.array([0, 150, 0])
+ypos = np.append(ypos, ypos[0])
+data = np.array([xpos, ypos], np.int32)
 
+# Testing individual random fans
+# xfans = [360, 832, 217, 613, 801, 58, 531, 200]
+# yfans = [52, 409, 224, 550, 82, 125, 150, 560]
+# # list of fan numbers, we will choose a random value from the list
+# list1 = [1, 2, 3, 4, 5, 6, 7, 8]
+# random_choice = random.choice(list1)
+# # Change this number below to determine which fan to test, if you want random fan, comment out the whole line below
+# random_choice = 4
+# print("Choosing fan " + str(random_choice))
+# xpos = np.array([0, xfans[random_choice-1], 0])
+# xpos = np.append(xpos, xpos[0])
+# ypos = np.array([0, yfans[random_choice-1], 0])
+# ypos = np.append(ypos, ypos[0])
+# data = np.array([xpos, ypos], np.int32) 
 
 class TravelingSalesman():
     def __init__(self):

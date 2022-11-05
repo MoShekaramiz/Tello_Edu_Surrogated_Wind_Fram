@@ -1,7 +1,9 @@
+from this import d
 import cv2 as cv
 import haar_cascade as hc
 import movement as mov
 from check_camera import check_camera  
+import numpy
 
 #angel comment
 fbRange = [62000,82000] # [32000, 52000] # preset parameter for detected image boundary size
@@ -20,19 +22,26 @@ def calibrate(drone_class, land=False, x_coordinate=0, y_coordinate=0):
     img, circle, width, center = hc.find_circles(img, green=False)
     cv.imshow("Scanning For Calibration Marker", img)
     cv.waitKey(1)
-    found = go_to_helipad(drone_class, width, center)
     cv.destroyWindow("Scanning For Calibration Marker")
+    drone_class.go_to(x_coordinate - 200, y_coordinate)
+    drone_class.go_to(drone_class.get_x_location(), drone_class.get_y_location(), 0)
+    drone_class.move(down=40)
+    found = go_to_helipad(drone_class, width, center)
     if found == False:
-        print("Not found.")
-        drone_class.go_to((x_coordinate + drone_class.get_x_location())/2, (y_coordinate + drone_class.get_y_location())/2)
-        found = go_to_helipad(drone_class, width, center)
-        if found == False:
-            drone_class.go_to((x_coordinate + drone_class.get_x_location())/2, (y_coordinate + drone_class.get_y_location())/2)
-            found = go_to_helipad(drone_class, width, center)
-            print("Not found, second time.")
-            if found == False:
-                drone_class.go_to(x_coordinate, y_coordinate)
-                print("Not found, third time")
+        drone_class.go_to(x_coordinate, y_coordinate, 0)
+    # found = go_to_helipad(drone_class, width, center)
+    # cv.destroyWindow("Scanning For Calibration Marker")
+    # if found == False:
+    #     print("Not found.")
+    #     drone_class.go_to((x_coordinate + drone_class.get_x_location())/2, (y_coordinate + drone_class.get_y_location())/2)
+    #     found = go_to_helipad(drone_class, width, center)
+    #     if found == False:
+    #         drone_class.go_to((x_coordinate + drone_class.get_x_location())/2, (y_coordinate + drone_class.get_y_location())/2)
+    #         found = go_to_helipad(drone_class, width, center)
+    #         print("Not found, second time.")
+    #         if found == False:
+    #             drone_class.go_to(x_coordinate, y_coordinate)
+    #             print("Not found, third time")
     print("><><><><><><><><><><><><><>", drone.get_height())
     drone_class.move(down=105)
     print("><><><><><><><><><><><><><>", drone.get_height())
@@ -43,7 +52,6 @@ def calibrate(drone_class, land=False, x_coordinate=0, y_coordinate=0):
     for i in range(5):
         drone.send_rc_control(0, 0, 0, 0)
     print("><><><><><><><><><><><><><>", drone.get_height())
-
     drone.send_command_with_return("downvision 1")
     location_calibrated = False
     angle_calibrated = False
@@ -145,7 +153,7 @@ def calibrate(drone_class, land=False, x_coordinate=0, y_coordinate=0):
     # with open('OutputLog.csv', 'a') as outFile:
     #             outFile.write(f"Calibration at ({x_coordinate, y_coordinate}) finished at: {round(time()-start)}\n")
 # blue circles        
-def go_to_helipad(drone, width, center, flag=0):
+def go_to_helipad(drone, width, center, flag_rotate=0, flag_shift=0, flag_shift_direction = "none"):
     camera = drone.get_drone()
     if center == 0:
         for i in range(100):
@@ -158,9 +166,18 @@ def go_to_helipad(drone, width, center, flag=0):
                 cv.waitKey(1)
             else:
                 break
-        if center == 0 and flag != 0:
-            drone.move(ccw=flag)
-            go_to_helipad(drone, width, center, flag)
+        # if we did not find the center after finding it previously and our last command was a rotate. Rotate the same degree in the opposite direction
+        if center == 0 and flag_rotate != 0:
+            drone.move(ccw=flag_rotate)
+            go_to_helipad(drone, width, center, flag_rotate)
+        # if we did not find the center after finding it previously and our last command was a shift left. Move right the same distance.
+        elif center == 0 and flag_shift != 0 and flag_shift_direction == "left":
+            drone.move(right=flag_shift)
+            go_to_helipad(drone, width, center, flag_shift)
+        # if we did not find the center after finding it previously and our last command was a shift right. Move left the same distance.
+        elif center == 0 and flag_shift != 0 and flag_shift_direction == "right":
+            drone.move(left=flag_shift)
+            go_to_helipad(drone, width, center, flag_shift)
         elif center == 0:
             return False
     
@@ -174,30 +191,55 @@ def go_to_helipad(drone, width, center, flag=0):
         # TODO: CHANGE 40.64 TO THE WIDTH OF THE CIRCLE IN CM
         distance = int((650 * 17.28) / width) - 90 # (Focal length of camera lense * Real-world width of object)/Width of object in pixels  -  40 centimeters to stop short
         print("Distance: ", distance)
+        #if our distance is set to 
         if distance < 20 and distance > 10:
+            print("distance is 0")
             distance = 20
         elif distance <= 10:
+            print("distance is 0")
             distance = 0
         if(0 < x <= 350):
-            # The drone needs to angle to the left to center the target.
+            # The drone sees the blue circle in the left half of the image
             new_angle = int(round(((360 - x) / 360) * 41.3))
-
-            drone.move(ccw=new_angle)  
-            flag = new_angle * -1
+            print("new_angle: " , new_angle)
+            shift = numpy.abs(distance * numpy.sin(new_angle * numpy.pi/180))
+            print("Shift Left: " , shift)
+            # If our opposite O found from distance * sin(theta) < 20 rotate the drone counter-clockwise to center on the blue circle.
+            if shift < 20:
+                drone.move(ccw=new_angle)  
+                flag_rotate = new_angle * -1
+                flag_shift = 0
+            else:
+            # If our opposite O found from distance * sin(theta) > 20 shift the drone left by O to center on the blue circle.
+                drone.move(left=shift)
+                flag_shift = shift
+                flag_rotate = 0
+                flag_shift_direction = "left"
             img, circle, width, center = check_camera(camera, circles=True)     
-            go_to_helipad(drone, width, center, flag)
+            go_to_helipad(drone, width, center, flag_rotate, flag_shift, flag_shift_direction)
             img_pass = 1
 
         elif(x >= 370):
-            # The drone needs to angle to the right to center the target.
+            # The drone sees the blue circle in the right half of the image
             new_angle = int(round(((x - 360) / 360) * 41.3))
             target_angle = drone.get_angle()-new_angle
             if target_angle < 0: target_angle += 360
-
-            drone.move(cw=new_angle)
-            flag = new_angle 
+            print("new_angle: " , new_angle)
+            shift = numpy.abs(distance * numpy.sin(new_angle * numpy.pi/180))
+            print("Shift Right: " , shift)
+            # If our opposite O found from distance * sin(theta) < 20 rotate the drone clockwise to center on the blue circle.
+            if shift < 20:
+                drone.move(cw=new_angle)
+                flag_rotate = new_angle
+                flag_shift = 0
+            # If our opposite O found from distance * sin(theta) > 20 shift the drone right by O to center on the blue circle.
+            else:
+                drone.move(right=shift)
+                flag_shift = shift
+                flag_rotate = 0
+                flag_shift_direction = "right" 
             img, circle, width, center = check_camera(camera, circles=True)      
-            go_to_helipad(drone, width, center, flag)
+            go_to_helipad(drone, width, center, flag_rotate, flag_shift, flag_shift_direction)
             img_pass = 1
 
         if area > fbRange[0] and area < fbRange[1] and img_pass == 0:
@@ -212,21 +254,31 @@ def go_to_helipad(drone, width, center, flag=0):
 
         elif area < fbRange[0] and area != 0 and img_pass == 0:
             # The drone is too far from the target
-            flag = 0
+            flag_rotate = 0
             if distance <= 250 and distance > 19:
                 drone.move(fwd=distance)
+                print("First If")
             else:
                 while distance != 0:
                     if distance > 250:
                         drone.move(fwd=250)
-                        if distance % 250 < 250:
-                            drone.move(down=40)
+                        print("While loop IF")
                         distance -= 250
+                        if distance < 250:
+                            drone.move(down=40)
                         center = 0
                         go_to_helipad(drone, width, center)
-                    else:
+                    else: 
+                        if distance < 20 and distance > 10:
+                            print("distance is 20")
+                            distance = 20
+                        elif distance <= 10:
+                            print("distance is 0")
+                            distance = 0
+                        print("While loop else")
                         drone.move(fwd=distance)
                         distance -= distance
+                        
             return True  
 
 if __name__ == "__main__":
