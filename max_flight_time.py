@@ -65,7 +65,10 @@ if __name__ == "__main__":
         row[1] = current_bat
         print("Time: ", current_time)
         print("Battery: ", current_bat, "%")
-        writer.writerow(row)
+        try:
+            writer.writerow(row)
+        except:
+            break
         sleep(5)
 
         current_time = drone_var.get_flight_time()
@@ -74,13 +77,16 @@ if __name__ == "__main__":
         row[1] = current_bat
         print("Time: ", current_time)
         print("Battery: ", current_bat, "%")
-        writer.writerow(row)
+        try:
+            writer.writerow(row)
+        except:
+            break
         sleep(5)
 
         try:
             drone.move(down=20)
         except:
-            writer.writerow("Flight Terminated Early")
+            writer.writerow("Fligh8t Terminated Early")
             f.close()
             print(">>>>>>>>>>>>>>>>CRITICAL: Drone terminated early, writing data to file ", filename)
             terminated_early = True
@@ -117,10 +123,12 @@ if __name__ == "__main__":
 
     time_string = "Total Flight Time: " + str(total_minutes) + " minutes " + str(total_seconds) + " seconds"
     print(time_string)
-    writer.writerow(time_string)
-    writer.writerow("Successful Flight!")
-
-    print(">>>>>>>>>>>>>>>> SUCCESS: Writing data to file ", filename)
+    if (terminated_early == False):
+        writer.writerow(time_string)
+        writer.writerow("Successful Flight!")
+        print(">>>>>>>>>>>>>>>> SUCCESS: Writing data to file ", filename)
+    else:
+        print(">>>>>>>>>>>>>>>> FAILURE: Writing data to file ", filename)
         
     # close out of .csv file
     if (terminated_early == False):
