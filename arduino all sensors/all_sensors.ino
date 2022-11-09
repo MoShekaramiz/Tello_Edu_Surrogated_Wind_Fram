@@ -16,6 +16,9 @@
 
 #include <Arduino.h>
 
+#include <SPI.h>
+#include <WiFi101.h>
+
 #define BMP_SCK 13
 #define BMP_MISO 12
 #define BMP_MOSI 11
@@ -26,6 +29,9 @@
 Adafruit_BMP3XX bmp;
 TinyGPSPlus gps;
 MPU6050 mpu;
+
+char ssid[] = "TELLO-F24367";     // the name of your network
+int status = WL_IDLE_STATUS;     // the Wifi radio's status
 
 void setup() {
   //Serial1 is pins 13 and 14 on the MKR1000
