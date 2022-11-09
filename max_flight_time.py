@@ -35,9 +35,10 @@ if __name__ == "__main__":
     #debugging
     #f.close()
 
-    drone = mv.movement()       
+    drone = mv.movement(height=20)       
     drone_var = drone.get_drone()
     #start_time = drone_var.get_flight_time()
+
 
 
     print(">>>>>>>>>>>>>>>>START BATTERY: ", drone_var.get_battery(), "%")
@@ -52,7 +53,10 @@ if __name__ == "__main__":
     while (drone_var.get_battery() > 15):
         #drone will time out if we don't send a command once every 15 seconds
         try:
-            drone.move(up=20)
+            if (drone_var.get_height() > 70):
+                drone.move(down=20)
+            else:
+                drone.move(up=20)
         except:
             writer.writerow("Flight Terminated Early")
             f.close()
@@ -65,6 +69,7 @@ if __name__ == "__main__":
         row[1] = current_bat
         print("Time: ", current_time)
         print("Battery: ", current_bat, "%")
+        print("Height: ", drone_var.get_height())
         try:
             writer.writerow(row)
         except:
@@ -77,6 +82,7 @@ if __name__ == "__main__":
         row[1] = current_bat
         print("Time: ", current_time)
         print("Battery: ", current_bat, "%")
+        print("Height: ", drone_var.get_height())
         try:
             writer.writerow(row)
         except:
@@ -97,6 +103,7 @@ if __name__ == "__main__":
         row[1] = current_bat
         print("Time: ", current_time)
         print("Battery: ", current_bat, "%")
+        print("Height: ", drone_var.get_height())
         try:
             writer.writerow(row)
         except:
@@ -109,6 +116,7 @@ if __name__ == "__main__":
         row[1] = current_bat
         print("Time: ", current_time)
         print("Battery: ", current_bat, "%")
+        print("Height: ", drone_var.get_height())
         try:
             writer.writerow(row)
         except:
@@ -133,8 +141,8 @@ if __name__ == "__main__":
     # close out of .csv file
     if (terminated_early == False):
         f.close()
-    # land drone
-    drone.land()
+        drone.land()
+    
 
     
     
