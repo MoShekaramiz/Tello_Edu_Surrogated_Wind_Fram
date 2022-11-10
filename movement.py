@@ -33,7 +33,7 @@ class movement():
         print("Current battery remaining: ", self.drone.get_battery())
         self.drone.send_command_with_return("downvision 0")
         self.new_location[2] = self.drone.get_height()
-        sleep(1)
+        sleep(2)
         self.move(up=height)
         sleep(1)
     
