@@ -9,58 +9,73 @@ from downvision_calibration import calibrate
 import time
 import sys
 import movement as mov
-
+# Angel's edit - import random
+import random
 start = time.time()
 
 # Array of 8 test points
 # xpos = np.array([0, 1000, 0, 1000, 360, 832, 217, 613, 801, 58, 531, 200])
 # xpos = np.append(xpos, xpos[0])
-# ypos = np.array([0, 0, 650, 650, 52, 409, 224, 550, 82, 125, 150, 560])
+# ypos = np.array([0, 0, 550, 550, 52, 409, 224, 460, 82, 125, 150, 440])
 # ypos = np.append(ypos, ypos[0])
 # data = np.array([xpos, ypos], np.int32)
 
 # Array of 7 test points
 # xpos = np.array([0, 1000, 0, 1000, 360, 832, 217, 613, 801, 58, 531])
 # xpos = np.append(xpos, xpos[0])
-# ypos = np.array([0, 0, 650, 650, 52, 409, 224, 550, 82, 125, 150])
+# ypos = np.array([0, 0, 550, 550, 52, 409, 224, 460, 82, 125, 150])
 # ypos = np.append(ypos, ypos[0])
 # data = np.array([xpos, ypos], np.int32)
 
 # Array of 6 test points
 # xpos = np.array([0, 1000, 0, 1000, 360, 832, 217, 613, 801, 58])
 # xpos = np.append(xpos, xpos[0])
-# ypos = np.array([0, 0, 650, 650, 52, 409, 224, 550, 82, 125])
+# ypos = np.array([0, 0, 550, 550, 52, 409, 224, 460, 82, 125])
 # ypos = np.append(ypos, ypos[0])
 # data = np.array([xpos, ypos], np.int32)
 
 # Array of 5 test points
 # xpos = np.array([0, 1000, 0, 1000, 360, 832, 217, 613, 801])
 # xpos = np.append(xpos, xpos[0])
-# ypos = np.array([0, 0, 650, 650, 52, 409, 224, 550, 82])
+# ypos = np.array([0, 0, 550, 550, 52, 409, 224, 460, 82])
 # ypos = np.append(ypos, ypos[0])
 # data = np.array([xpos, ypos], np.int32)
 
 # Array of 4 test points
 # xpos = np.array([0, 1000, 0, 1000, 360, 832, 217, 613])
 # xpos = np.append(xpos, xpos[0])
-# ypos = np.array([0, 0, 650, 650, 52, 409, 224, 550])
+# ypos = np.array([0, 0, 550, 550, 52, 409, 224, 460])
 # ypos = np.append(ypos, ypos[0])
 # data = np.array([xpos, ypos], np.int32) 
 
 # Array of 3 test points
-xpos = np.array([0, 1000, 0, 1000,360, 832, 217])
-xpos = np.append(xpos, xpos[0])
-ypos = np.array([0, 0, 650, 650, 52, 409, 224])
-ypos = np.append(ypos, ypos[0])
-data = np.array([xpos, ypos], np.int32)
-
-# Lab Test Points
-# xpos = np.array([0, 150, 300])
+# xpos = np.array([0, 1000, 1000, 360, 832, 217])
 # xpos = np.append(xpos, xpos[0])
-# ypos = np.array([0, 150, 300])
+# ypos = np.array([0, 0, 550, 52, 409, 224])
 # ypos = np.append(ypos, ypos[0])
 # data = np.array([xpos, ypos], np.int32)
 
+# Lab Test Points
+# xpos = np.array([0, 250, 0])
+# xpos = np.append(xpos, xpos[0])
+# ypos = np.array([0, 150, 0])
+# ypos = np.append(ypos, ypos[0])
+# data = np.array([xpos, ypos], np.int32)
+
+# Testing individual random fans
+xfans = [360, 832, 217, 613, 801, 58, 531, 200]
+yfans = [52, 409, 224, 460, 82, 125, 150, 440]
+# list of fan numbers, we will choose a random value from the list
+list1 = [1, 2, 3, 4, 5, 6, 7, 8]
+random_choice = random.choice(list1)
+# Change this number below to determine which fan to test, if you want random fan, comment out the whole line below
+random_choice = 8
+print("Choosing fan " + str(random_choice))
+xpos = np.array([0, xfans[random_choice-1], 0])
+xpos = np.append(xpos, xpos[0])
+ypos = np.array([0, yfans[random_choice-1], 0])
+ypos = np.append(ypos, ypos[0])
+data = np.array([xpos, ypos], np.int32) 
 
 class TravelingSalesman():
     def __init__(self):
@@ -72,10 +87,10 @@ class TravelingSalesman():
         print(data)
         print(f">>>>>>>>>>>>>>>>>>>>>> STARTING PATH ENERGY: {e1}\n")
 
-        T = 2000
-
-        while T > 1:  
-            for i in range(400):
+        array_size = xpos.size
+        T = 150 * array_size
+        while T > 1:
+            for i in range(30 * array_size):
                 if e1 < e_min:
                     e_min = e1
                     self.path_min = np.copy(path1)
@@ -108,26 +123,26 @@ class TravelingSalesman():
     def plot(self):
         plt.rcParams["font.family"] = "Times New Roman"
         figure, axis = plt.subplots(2, 1)
-        axis[0].axis([0, 1000, 0, 650])
+        axis[0].axis([0, 1000, 0, 550])
         axis[0].title.set_text("Path Before Optimization")
         axis[0].set_xlabel('x')
         axis[0].set_ylabel('y')
         # plt.axis([0, 285, 0, 285])
         for i, j in zip(data[0], data[1]):
             axis[0].text(i, j+20, '({}, {})'.format(i, j), fontsize='small')
-        axis[0].text(10, 900, f'Total Energy: {int(self.energy_calc(data))}', fontsize='small')
+        axis[0].text(10, 500, f'Total Energy: {int(self.energy_calc(data))}', fontsize='small')
         axis[0].plot(data[0], data[1], '-o', markersize=4)
         axis[0].quiver(data[0][:-1], data[1][:-1], data[0][1:]-data[0][:-1], 
                    data[1][1:]-data[1][:-1],scale_units='xy', angles='xy', scale=1, color='teal', width=0.005)
 
-        axis[1].axis([0, 1000, 0, 650])
+        axis[1].axis([0, 1000, 0, 550])
         axis[1].title.set_text("Path After Optimization")
         axis[1].set_xlabel('x')
         axis[1].set_ylabel('y')
         # plt.axis([0, 285, 0, 285])
         for i, j in zip(self.path_min[0], self.path_min[1]):
             axis[1].text(i, j+20, '({}, {})'.format(i, j), fontsize='small')
-        axis[1].text(10, 900, f'Total Energy: {int(self.energy_calc(self.path_min))}', fontsize='small')
+        axis[1].text(10, 500, f'Total Energy: {int(self.energy_calc(self.path_min))}', fontsize='small')
         axis[1].plot(self.path_min[0], self.path_min[1], '-o', markersize=4)
         axis[1].quiver(self.path_min[0][:-1], self.path_min[1][:-1], self.path_min[0][1:]-self.path_min[0][:-1], 
                    self.path_min[1][1:]-self.path_min[1][:-1],scale_units='xy', angles='xy', scale=1, color='teal', width=0.005)
@@ -148,8 +163,8 @@ if __name__ == "__main__":
     with open('OutputLog.csv', 'w') as outFile:
         outFile.write(f"{round(start)}\n")
     turbines = {"WindTurbine_1": [[0, 0, 0, 0], [360, 52]], "WindTurbine_2": [[0, 0, 0, 0], [832, 409]], "WindTurbine_3": [[0, 0, 0, 0], [217, 224]]}
-                # "WindTurbine_4": [[0, 0, 0, 0], [613, 550]], "WindTurbine_5": [[0, 0, 0, 0], [801, 82]], "WindTurbine_6": [[0, 0, 0, 0], [58, 125]],
-                # "WindTurbine_7": [[0, 0, 0, 0], [531, 150]], "WindTurbine_8": [[0, 0, 0, 0], [200, 560]]}
+                # "WindTurbine_4": [[0, 0, 0, 0], [613, 460]], "WindTurbine_5": [[0, 0, 0, 0], [801, 82]], "WindTurbine_6": [[0, 0, 0, 0], [58, 125]],
+                # "WindTurbine_7": [[0, 0, 0, 0], [531, 150]], "WindTurbine_8": [[0, 0, 0, 0], [200, 440]]}
     # Uncomment to get positions of each target in inches
     # with open('Positions.csv', 'w') as outFile: 
     #     for item in turbines:
@@ -171,6 +186,10 @@ if __name__ == "__main__":
     coordinates = np.delete(coordinates, 0, axis=1)
     coordinates = np.delete(coordinates, -1, axis=1)
     finished = False
+    
+    # Angel - declare variable to be the distance we want to stop short in the x-axis
+    x_distance_cutoff = 50
+
     while finished == False:
         index = -1
         test = 0
@@ -183,17 +202,17 @@ if __name__ == "__main__":
                 current_y = drone.get_y_location()
                 quadrant = 0
                 if 1000 - current_x > 500:
-                    if 650 - current_y > 325:
+                    if 550 - current_y > 325:
                         drone.go_to(0, 0, 0)
                     else:
-                        drone.go_to(0, 650, 0)
+                        drone.go_to(0, 550, 0)
                         quadrant = 2
                 else:
-                    if 650 - current_y > 325:
+                    if 550 - current_y > 325:
                         drone.go_to(1000, 0, 0)
                         quadrant = 4
                     else:
-                        drone.go_to(1000, 650, 0)
+                        drone.go_to(1000, 550, 0)
                         quadrant = 1
                 calibrate(drone, land=False)
                 drone.land(True)
@@ -203,11 +222,11 @@ if __name__ == "__main__":
                     input("DRONE BATTERY LOW. CHANGE BATTERY, RECONNECT, THEN PRESS ENTER.")
                 drone = mov.movement()
                 if quadrant == 1:
-                    drone.set_coordinates(1000, 650)
+                    drone.set_coordinates(1000, 550)
                 elif quadrant == 2:
-                    drone.set_coordinates(0, 650)
+                    drone.set_coordinates(0, 550)
                 elif quadrant == 4:
-                    drone.set_coordinates(1000, 650)
+                    drone.set_coordinates(1000, 550)
                 path = TravelingSalesman() 
                 path.plot()
                 coordinates = path.get_path()
@@ -219,7 +238,10 @@ if __name__ == "__main__":
             else:
                 # Rotate the drone to face the next location
                 drone.go_to(coordinates[0][location], coordinates[1][location], rotate_only=True) 
-                drone.go_to(coordinates[0][location], coordinates[1][location])
+                
+                # Angel's edit - Move the drone towards the fan and face forward to avoid detecting other fans
+                drone.go_to(coordinates[0][location] - 300, coordinates[1][location], 0)#, half_travel=True)
+                # drone.go_to(drone.get_x_location(), drone.get_y_location(), 0) 
 
                 # Take 10 images to find the location of the target and do the mission if it is found
                 info = check_camera(camera)      
@@ -229,8 +251,10 @@ if __name__ == "__main__":
                 img_counter = 0
                 while found == False:
                     dist = math.sqrt((drone.get_x_location() - coordinates[0][location])**2 + (drone.get_y_location() - coordinates[1][location])**2)
-                    if dist > 35:
-                        drone.go_to(coordinates[0][location], coordinates[1][location], half_travel=True)
+                    # Angel's edit of + x_distance_cutoff
+                    if dist > 35 + x_distance_cutoff:
+                        # Angel's edit of - x_distance_cutoff
+                        drone.go_to(coordinates[0][location] - x_distance_cutoff, coordinates[1][location], half_travel=True)
                         found = trackObject(drone, info, turbines, [drone.get_x_location(), drone.get_y_location(), drone.get_angle()])
                     else:
                         qr_detection(drone, turbines, [drone.get_x_location(), drone.get_y_location(), drone.get_z_location()])

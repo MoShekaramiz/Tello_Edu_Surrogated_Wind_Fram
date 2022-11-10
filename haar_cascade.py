@@ -69,8 +69,10 @@ def find_circles(img, down=True, green=False):
             greenLower = (29, 86, 6)
             greenUpper = (64, 255, 255)
         else:
-            blueLower = (40, 115, 115)
+            blueLower = (40, 105, 105)
+            #orig LOW (40, 115, 115), 50, 75
             blueUpper = (102, 255, 255)
+            #orig HIGH (102, 255, 255)
         # greenLower = (40, 97, 20)
         # greenUpper = (64, 255, 255)
         blurred = cv.GaussianBlur(img, (11, 11), 0)
@@ -86,10 +88,10 @@ def find_circles(img, down=True, green=False):
         if green == False:
             circles = cv.HoughCircles(cimg, cv.HOUGH_GRADIENT, 1, 120,
                             param1=80, param2=15,
-                            minRadius = 5, maxRadius = 250)
+                            minRadius = 20, maxRadius = 250)
         else:
             circles = cv.HoughCircles(cimg, cv.HOUGH_GRADIENT, 1, 120,
-                            param1=80, param2=25,
+                            param1=80, param2=25, 
                             minRadius = 15, maxRadius = 80)
 
 
