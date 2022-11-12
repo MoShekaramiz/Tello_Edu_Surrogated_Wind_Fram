@@ -14,11 +14,11 @@ import random
 start = time.time()
 
 # Array of 8 test points
-# xpos = np.array([0, 360, 832, 217, 613, 801, 58, 531, 200])
-# xpos = np.append(xpos, xpos[0])
-# ypos = np.array([0, 61, 409, 224, 460, 99, 125, 150, 440])
-# ypos = np.append(ypos, ypos[0])
-# data = np.array([xpos, ypos], np.int32)
+xpos = np.array([0, 360, 832, 217, 613, 801, 58, 531, 200])
+xpos = np.append(xpos, xpos[0])
+ypos = np.array([0, 61, 409, 224, 460, 99, 125, 150, 440])
+ypos = np.append(ypos, ypos[0])
+data = np.array([xpos, ypos], np.int32)
 
 # Array of 7 test points
 # xpos = np.array([0, 1000, 0, 1000, 360, 832, 217, 613, 801, 58, 531])
@@ -63,21 +63,21 @@ start = time.time()
 # data = np.array([xpos, ypos], np.int32)
 
 # Testing two random fans
-xfans = [360, 832, 217, 613, 801, 58, 531, 200]
-yfans = [61, 409, 224, 460, 99, 125, 150, 440]
-# list of fan numbers, we will choose a random value from the list
-list1 = [1, 2, 3, 4, 5, 6, 7, 8]
-random_choice1 = random.choice(list1)
-random_choice2 = random.choice(list1)
-# Change this number below to determine which fan to test, if you want random fan, comment out the whole line below
-random_choice1 = 3
-random_choice2 = 2
-print("Choosing fans " + str(random_choice1) + ", " + str(random_choice2))
-xpos = np.array([0, xfans[random_choice1-1], xfans[random_choice2-1]])
-xpos = np.append(xpos, xpos[0])
-ypos = np.array([0, yfans[random_choice1-1], yfans[random_choice2-1]])
-ypos = np.append(ypos, ypos[0])
-data = np.array([xpos, ypos], np.int32) 
+# xfans = [360, 832, 217, 613, 801, 58, 531, 200]
+# yfans = [61, 409, 224, 460, 99, 125, 150, 440]
+# # list of fan numbers, we will choose a random value from the list
+# list1 = [1, 2, 3, 4, 5, 6, 7, 8]
+# random_choice1 = random.choice(list1)
+# random_choice2 = random.choice(list1)
+# # Change this number below to determine which fan to test, if you want random fan, comment out the whole line below
+# random_choice1 = 3
+# random_choice2 = 2
+# print("Choosing fans " + str(random_choice1) + ", " + str(random_choice2))
+# xpos = np.array([0, xfans[random_choice1-1], xfans[random_choice2-1]])
+# xpos = np.append(xpos, xpos[0])
+# ypos = np.array([0, yfans[random_choice1-1], yfans[random_choice2-1]])
+# ypos = np.append(ypos, ypos[0])
+# data = np.array([xpos, ypos], np.int32) 
 
 # Testing single random fans
 # xfans = [360, 832, 217, 613, 801, 58, 531, 200]
