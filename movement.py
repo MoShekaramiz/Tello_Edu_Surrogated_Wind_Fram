@@ -1,6 +1,7 @@
 '''The movment module that facilitates drone coordinate tracking and return path algorithms. By Branden Pinney and Shayne Duncan 2022'''
 
 from ast import operator
+from mimetypes import init
 from djitellopy import Tello
 import operator
 import math
@@ -32,7 +33,9 @@ class movement():
         print("Current battery remaining: ", self.drone.get_battery())
         self.drone.send_command_with_return("downvision 0")
         self.new_location[2] = self.drone.get_height()
+        sleep(2)
         self.move(up=height)
+        sleep(1)
     
     def video(self):
         self.video_stream = LiveFeed(self.drone)
