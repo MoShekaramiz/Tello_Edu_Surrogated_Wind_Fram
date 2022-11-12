@@ -1,4 +1,3 @@
-from this import d
 import cv2 as cv
 import haar_cascade as hc
 import movement as mov
