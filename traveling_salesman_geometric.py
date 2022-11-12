@@ -13,44 +13,44 @@ import random
 start = time.time()
 
 # Array of 8 test points
-# xpos = np.array([0, 360, 832, 217, 613, 801, 58, 531, 200])
-# xpos = np.append(xpos, xpos[0])
-# ypos = np.array([0, 52, 409, 224, 460, 99, 125, 150, 440])
-# ypos = np.append(ypos, ypos[0])
-# data = np.array([xpos, ypos], np.int32)
+xpos = np.array([0, 360, 832, 217, 613, 801, 58, 531, 200])
+xpos = np.append(xpos, xpos[0])
+ypos = np.array([0, 61, 409, 224, 460, 99, 125, 150, 440])
+ypos = np.append(ypos, ypos[0])
+data = np.array([xpos, ypos], np.int32)
 
 # Array of 7 test points
 # xpos = np.array([0, 1000, 0, 1000, 360, 832, 217, 613, 801, 58, 531])
 # xpos = np.append(xpos, xpos[0])
-# ypos = np.array([0, 0, 550, 550, 52, 409, 224, 460, 99, 125, 150])
+# ypos = np.array([0, 0, 550, 550, 61, 409, 224, 460, 99, 125, 150])
 # ypos = np.append(ypos, ypos[0])
 # data = np.array([xpos, ypos], np.int32)
 
 # Array of 6 test points
 # xpos = np.array([0, 1000, 0, 1000, 360, 832, 217, 613, 801, 58])
 # xpos = np.append(xpos, xpos[0])
-# ypos = np.array([0, 0, 550, 550, 52, 409, 224, 460, 99, 125])
+# ypos = np.array([0, 0, 550, 550, 61, 409, 224, 460, 99, 125])
 # ypos = np.append(ypos, ypos[0])
 # data = np.array([xpos, ypos], np.int32)
 
 # Array of 5 test points
 # xpos = np.array([0, 1000, 0, 1000, 360, 832, 217, 613, 801])
 # xpos = np.append(xpos, xpos[0])
-# ypos = np.array([0, 0, 550, 550, 52, 409, 224, 460, 99])
+# ypos = np.array([0, 0, 550, 550, 61, 409, 224, 460, 99])
 # ypos = np.append(ypos, ypos[0])
 # data = np.array([xpos, ypos], np.int32)
 
 # Array of 4 test points
 # xpos = np.array([0, 360, 832, 217, 613])
 # xpos = np.append(xpos, xpos[0])
-# ypos = np.array([0, 52, 409, 224, 460])
+# ypos = np.array([0, 61, 409, 224, 460])
 # ypos = np.append(ypos, ypos[0])
 # data = np.array([xpos, ypos], np.int32) 
  
 # Array of 3 test points
 # xpos = np.array([0, 360, 832, 217])
 # xpos = np.append(xpos, xpos[0])
-# ypos = np.array([0, 52, 409, 224])
+# ypos = np.array([0, 61, 409, 224])
 # ypos = np.append(ypos, ypos[0])
 # data = np.array([xpos, ypos], np.int32)
 
@@ -80,7 +80,7 @@ data = np.array([xpos, ypos], np.int32)
 
 # Testing single random fans
 # xfans = [360, 832, 217, 613, 801, 58, 531, 200]
-# yfans = [52, 409, 224, 460, 99, 125, 150, 440]
+# yfans = [61, 409, 224, 460, 99, 125, 150, 440]
 # # list of fan numbers, we will choose a random value from the list
 # list1 = [1, 2, 3, 4, 5, 6, 7, 8]
 # random_choice = random.choice(list1)
@@ -211,43 +211,43 @@ if __name__ == "__main__":
         test = 0
         for location in range(int(coordinates.size/2)):
             index += 1
-            if camera.get_battery() < 20:
-                xpos = coordinates[0][index:]
-                ypos = coordinates[1][index:]
-                current_x = drone.get_x_location()
-                current_y = drone.get_y_location()
-                quadrant = 0
-                if 1000 - current_x > 500:
-                    if 550 - current_y > 325:
-                        drone.go_to(0, 0, 0)
-                    else:
-                        drone.go_to(0, 550, 0)
-                        quadrant = 2
-                else:
-                    if 550 - current_y > 325:
-                        drone.go_to(1000, 0, 0)
-                        quadrant = 4
-                    else:
-                        drone.go_to(1000, 550, 0)
-                        quadrant = 1
-                calibrate(drone, land=False)
-                drone.land(True)
-                try:
-                    input("DRONE BATTERY LOW. CHANGE BATTERY, RECONNECT, THEN PRESS ENTER.")
-                except:
-                    input("DRONE BATTERY LOW. CHANGE BATTERY, RECONNECT, THEN PRESS ENTER.")
-                drone = mov.movement()
-                if quadrant == 1:
-                    drone.set_coordinates(1000, 550)
-                elif quadrant == 2:
-                    drone.set_coordinates(0, 550)
-                elif quadrant == 4:
-                    drone.set_coordinates(1000, 550)
-                path = TravelingSalesman() 
-                path.plot()
-                coordinates = path.get_path()
-                camera = drone.get_drone()
-                break
+            # if camera.get_battery() < 20:
+            #     xpos = coordinates[0][index:]
+            #     ypos = coordinates[1][index:]
+            #     current_x = drone.get_x_location()
+            #     current_y = drone.get_y_location()
+            #     quadrant = 0
+            #     if 1000 - current_x > 500:
+            #         if 550 - current_y > 325:
+            #             drone.go_to(0, 0, 0)
+            #         else:
+            #             drone.go_to(0, 550, 0)
+            #             quadrant = 2
+            #     else:
+            #         if 550 - current_y > 325:
+            #             drone.go_to(1000, 0, 0)
+            #             quadrant = 4
+            #         else:
+            #             drone.go_to(1000, 550, 0)
+            #             quadrant = 1
+            #     calibrate(drone, land=False)
+            #     drone.land(True)
+            #     try:
+            #         input("DRONE BATTERY LOW. CHANGE BATTERY, RECONNECT, THEN PRESS ENTER.")
+            #     except:
+            #         input("DRONE BATTERY LOW. CHANGE BATTERY, RECONNECT, THEN PRESS ENTER.")
+            #     drone = mov.movement()
+            #     if quadrant == 1:
+            #         drone.set_coordinates(1000, 550)
+            #     elif quadrant == 2:
+            #         drone.set_coordinates(0, 550)
+            #     elif quadrant == 4:
+            #         drone.set_coordinates(1000, 550)
+            #     path = TravelingSalesman() 
+            #     path.plot()
+            #     coordinates = path.get_path()
+            #     camera = drone.get_drone()
+            #     break
             test += 1
             if coordinates[0][location] == 0 or coordinates[0][location] == 1000: # second number to be changed to whatever the boundary size is
                 calibrate(drone, False, coordinates[0][location], coordinates[1][location])
@@ -257,6 +257,7 @@ if __name__ == "__main__":
                     if turbines[name][1][0] == coordinates[0][location] and turbines[name][1][1] == coordinates[1][location]:
                         target_turbine = name
                 # Rotate the drone to face the next location
+                print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> TARGET NUMBER " + str(target_turbine) + "\n")
                 drone.go_to(coordinates[0][location], coordinates[1][location], rotate_only=True) 
                 
                 # Angel's edit - Move the drone towards the fan and face forward to avoid detecting other fans
