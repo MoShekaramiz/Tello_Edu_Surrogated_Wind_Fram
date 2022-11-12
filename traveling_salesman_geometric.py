@@ -1,5 +1,4 @@
 import math
-from turtle import goto
 import numpy as np
 import matplotlib.pyplot as plt
 import random
@@ -64,7 +63,7 @@ start = time.time()
 
 # Testing two random fans
 xfans = [360, 832, 217, 613, 801, 58, 531, 200]
-yfans = [52, 409, 224, 460, 99, 125, 150, 440]
+yfans = [61, 409, 224, 460, 99, 125, 150, 440]
 # list of fan numbers, we will choose a random value from the list
 list1 = [1, 2, 3, 4, 5, 6, 7, 8]
 random_choice1 = random.choice(list1)
@@ -179,9 +178,9 @@ class TravelingSalesman():
 if __name__ == "__main__":
     with open('OutputLog.csv', 'w') as outFile:
         outFile.write(f"{round(start)}\n")
-    turbines = {"WindTurbine_1": [[0, 0, 0, 0], [360, 52]], "WindTurbine_2": [[0, 0, 0, 0], [832, 409]], "WindTurbine_3": [[0, 0, 0, 0], [217, 224]]}
-                # "WindTurbine_4": [[0, 0, 0, 0], [613, 460]], "WindTurbine_5": [[0, 0, 0, 0], [801, 82]], "WindTurbine_6": [[0, 0, 0, 0], [58, 125]],
-                # "WindTurbine_7": [[0, 0, 0, 0], [531, 150]], "WindTurbine_8": [[0, 0, 0, 0], [200, 440]]}
+    turbines = {"WindTurbine_1": [[0, 0, 0, 0], [360, 61]], "WindTurbine_2": [[0, 0, 0, 0], [832, 409]], "WindTurbine_3": [[0, 0, 0, 0], [217, 224]],
+                "WindTurbine_4": [[0, 0, 0, 0], [613, 460]], "WindTurbine_5": [[0, 0, 0, 0], [801, 99]], "WindTurbine_6": [[0, 0, 0, 0], [58, 125]],
+                "WindTurbine_7": [[0, 0, 0, 0], [531, 150]], "WindTurbine_8": [[0, 0, 0, 0], [200, 440]]}
     # Uncomment to get positions of each target in inches
     # with open('Positions.csv', 'w') as outFile: 
     #     for item in turbines:
@@ -212,43 +211,43 @@ if __name__ == "__main__":
         test = 0
         for location in range(int(coordinates.size/2)):
             index += 1
-            # if camera.get_battery() < 20:
-            #     xpos = coordinates[0][index:]
-            #     ypos = coordinates[1][index:]
-            #     current_x = drone.get_x_location()
-            #     current_y = drone.get_y_location()
-            #     quadrant = 0
-            #     if 1000 - current_x > 500:
-            #         if 550 - current_y > 325:
-            #             drone.go_to(0, 0, 0)
-            #         else:
-            #             drone.go_to(0, 550, 0)
-            #             quadrant = 2
-            #     else:
-            #         if 550 - current_y > 325:
-            #             drone.go_to(1000, 0, 0)
-            #             quadrant = 4
-            #         else:
-            #             drone.go_to(1000, 550, 0)
-            #             quadrant = 1
-            #     calibrate(drone, land=False)
-            #     drone.land(True)
-            #     try:
-            #         input("DRONE BATTERY LOW. CHANGE BATTERY, RECONNECT, THEN PRESS ENTER.")
-            #     except:
-            #         input("DRONE BATTERY LOW. CHANGE BATTERY, RECONNECT, THEN PRESS ENTER.")
-            #     drone = mov.movement()
-            #     if quadrant == 1:
-            #         drone.set_coordinates(1000, 550)
-            #     elif quadrant == 2:
-            #         drone.set_coordinates(0, 550)
-            #     elif quadrant == 4:
-            #         drone.set_coordinates(1000, 550)
-            #     path = TravelingSalesman() 
-            #     path.plot()
-            #     coordinates = path.get_path()
-            #     camera = drone.get_drone()
-            #     break
+            if camera.get_battery() < 20:
+                xpos = coordinates[0][index:]
+                ypos = coordinates[1][index:]
+                current_x = drone.get_x_location()
+                current_y = drone.get_y_location()
+                quadrant = 0
+                if 1000 - current_x > 500:
+                    if 550 - current_y > 325:
+                        drone.go_to(0, 0, 0)
+                    else:
+                        drone.go_to(0, 550, 0)
+                        quadrant = 2
+                else:
+                    if 550 - current_y > 325:
+                        drone.go_to(1000, 0, 0)
+                        quadrant = 4
+                    else:
+                        drone.go_to(1000, 550, 0)
+                        quadrant = 1
+                calibrate(drone, land=False)
+                drone.land(True)
+                try:
+                    input("DRONE BATTERY LOW. CHANGE BATTERY, RECONNECT, THEN PRESS ENTER.")
+                except:
+                    input("DRONE BATTERY LOW. CHANGE BATTERY, RECONNECT, THEN PRESS ENTER.")
+                drone = mov.movement()
+                if quadrant == 1:
+                    drone.set_coordinates(1000, 550)
+                elif quadrant == 2:
+                    drone.set_coordinates(0, 550)
+                elif quadrant == 4:
+                    drone.set_coordinates(1000, 550)
+                path = TravelingSalesman() 
+                path.plot()
+                coordinates = path.get_path()
+                camera = drone.get_drone()
+                break
             test += 1
             if coordinates[0][location] == 0 or coordinates[0][location] == 1000: # second number to be changed to whatever the boundary size is
                 calibrate(drone, False, coordinates[0][location], coordinates[1][location])

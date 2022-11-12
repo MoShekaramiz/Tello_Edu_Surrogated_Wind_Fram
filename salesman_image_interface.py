@@ -1,9 +1,8 @@
 '''The main object detection and drone flight module. By Branden Pinney 2022'''
 
-from time import sleep, time
+from time import sleep
 import math
 import cv2 as cv
-from djitellopy import Tello
 from qr_reader import droneReadQR
 from check_camera import check_camera
 import haar_cascade as hc
@@ -258,29 +257,6 @@ def qr_detection(drone, turbines, starting_location, target=None):
                 drone.move(right=(octagon_side_length))
             elif (img_counter%15) == 0:
                 drone.move(right=(octagon_side_length))
-
-# def test(mission_list, turbine_list):
-#     '''Function called by the GUI. Takes a mission list of selected angles and the name
-#     of the turbine being selected that matches the QR code format. Examples: [0, 0, 0, 0], WindTurbine_1.'''
-#     drone = Tello()
-#     drone.connect()
-#     sleep(0.5)
-#     print("Current battery remaining: ", drone.get_battery())
-#     sleep(0.3)
-#     drone.streamon()
-#     sleep(0.5)
-#     drone.takeoff()
-#     sleep(0.5)
-#     while True:
-#         frame = drone.get_frame_read()
-#         img = frame.frame
-#         img = cv.resize(img, (w, h))
-#         img, info = hc.findTurbine(img)
-#         QR, img, info = droneReadQR(drone)
-#         location = trackObject(drone, info, location, mission_list, turbine_list)
-#         img = cv.resize(img, None, fx=1, fy=1, interpolation=cv.INTER_AREA)
-#         cv.imshow("Output", img)
-#         cv.waitKey(1)
 
 # if __name__ == "__main__":
 #     turbines = {"WindTurbine_1": [0, 0, 0, 0]}
