@@ -41,11 +41,14 @@ def trackObject(drone, info, turbines, starting_location, target=None):
     img_pass = 0    # Flag to determine if the drone is returning from a target to skip point distance calculations
 
     #  - declare variable to be the distance we want to stop short in the x-axis
-    x_distance_cutoff = 50
+    x_distance_cutoff = 30
 
     # object detected
     if(x != 0):
         distance = int((650 * 40.64) / width) - 40 # (Focal length of camera lense * Real-world width of object)/Width of object in pixels  -  40 centimeters to stop short
+        # Angel
+        # if distance > 300:
+        #     trackObject(drone, info, turbines, [drone.get_x_location(), drone.get_y_location(), drone.get_angle()])
         if distance < 20:
             distance = 20
 
@@ -57,8 +60,7 @@ def trackObject(drone, info, turbines, starting_location, target=None):
             if(i[0] < targetx < i[1]) and (i[2] < targety < i[3]):
                 # Make the drone stop short in the x direction and face the fan
                 # Third parameter should be 0 for the angle to be facing the turbines
-                # Angel's edit of - x_distance_cutoff
-                drone.go_to(starting_location[0] - x_distance_cutoff, starting_location[1], 0)
+                drone.go_to(starting_location[0], starting_location[1], 0)
                 return
 
         if(0 < x <= 340):
@@ -70,8 +72,7 @@ def trackObject(drone, info, turbines, starting_location, target=None):
             turbine_locations = drone.get_turbine_locations()
             for i in turbine_locations:
                 if(i[0] < targetx < i[1]) and (i[2] < targety < i[3]):
-                    # Angel's edit of - x_distance_cutoff
-                    drone.go_to(starting_location[0] - x_distance_cutoff, starting_location[1], starting_location[2])
+                    drone.go_to(starting_location[0], starting_location[1], starting_location[2])
                     return False
 
             drone.move(ccw=new_angle)  
@@ -91,8 +92,7 @@ def trackObject(drone, info, turbines, starting_location, target=None):
             turbine_locations = drone.get_turbine_locations()
             for i in turbine_locations:
                 if(i[0] < targetx < i[1]) and (i[2] < targety < i[3]):
-                    # Angel's edit of - x_distance_cutoff
-                    drone.go_to(starting_location[0] - x_distance_cutoff, starting_location[1], starting_location[2])
+                    drone.go_to(starting_location[0], starting_location[1], starting_location[2])
                     return False
             drone.move(cw=new_angle) 
             info = check_camera(camera)       
@@ -113,7 +113,8 @@ def trackObject(drone, info, turbines, starting_location, target=None):
         elif area < fbRange[0] and area != 0 and img_pass == 0:
             # The drone is too far from the target
             if distance <= 500:
-                drone.move(fwd=distance)
+                # Angel's edit of - x_distance_cutoff
+                drone.move(fwd=distance - x_distance_cutoff)
             else:
                 while distance != 0:
                     if distance > 500:
@@ -159,7 +160,7 @@ def qr_detection(drone, turbines, starting_location, target=None):
             drone_var = drone.get_drone()
             # print(">>>>>>>>>>>>>>>>CURRENT FLIGHT TIME: ", drone_var.get_flight_time())
             print(">>>>>>>>>>>>>>>>QR CODE FOUND: ", QR)
-            # Angel - Delete this line below when done testing individual fans
+            # Angel - Comment this line below when not testing individual fans
             # drone.land()
             # with open('OutputLog.csv', 'a') as outFile:
             #     outFile.write(f"Found QR code:{QR} at {round(time()-start)}\n")
