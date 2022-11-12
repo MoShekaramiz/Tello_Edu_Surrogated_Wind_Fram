@@ -236,6 +236,10 @@ if __name__ == "__main__":
             if coordinates[0][location] == 0 or coordinates[0][location] == 1000: # second number to be changed to whatever the boundary size is
                 calibrate(drone, False, coordinates[0][location], coordinates[1][location])
             else:
+                target_turbine = None
+                for name in turbines:
+                    if turbines[name][1][0] == coordinates[0][location] and turbines[name][1][1] == coordinates[1][location]:
+                        target_turbine = name
                 # Rotate the drone to face the next location
                 drone.go_to(coordinates[0][location], coordinates[1][location], rotate_only=True) 
                 
@@ -245,7 +249,7 @@ if __name__ == "__main__":
 
                 # Take 10 images to find the location of the target and do the mission if it is found
                 info = check_camera(camera)      
-                found = trackObject(drone, info, turbines, [drone.get_x_location(), drone.get_y_location(), drone.get_angle()])
+                found = trackObject(drone, info, turbines, [drone.get_x_location(), drone.get_y_location(), drone.get_angle()], target_turbine)
                 
                 # If it is not seen move towards the target
                 img_counter = 0
@@ -257,7 +261,7 @@ if __name__ == "__main__":
                         drone.go_to(coordinates[0][location] - x_distance_cutoff, coordinates[1][location], half_travel=True)
                         found = trackObject(drone, info, turbines, [drone.get_x_location(), drone.get_y_location(), drone.get_angle()])
                     else:
-                        qr_detection(drone, turbines, [drone.get_x_location(), drone.get_y_location(), drone.get_z_location()])
+                        qr_detection(drone, turbines, [drone.get_x_location(), drone.get_y_location(), drone.get_z_location()], target_turbine)
                         found = True
                 if coordinates[0][location] == coordinates[0][-1] and coordinates[1][location] == coordinates[1][-1]:
                     finished = True

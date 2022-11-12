@@ -17,7 +17,7 @@ location = [0, 0, 0, 0] # Initialized list of x, y and angle coordinates for the
 turbine_locations = []  # List containing the locations of found turbines
 
 
-def trackObject(drone, info, turbines, starting_location):
+def trackObject(drone, info, turbines, starting_location, target=None):
     '''Take the variable for the drone, the output array from calling findTurbine in haar_cascade.py, and the current drone x,y location and relative angle (initialized as [0, 0, 0]).
     It scans for the target object of findTurbine and approaches the target. Once it is at a pre-determined distance fbRange, it will scan and return the value of the QR code
     and return the drone to the starting point.'''
@@ -101,7 +101,7 @@ def trackObject(drone, info, turbines, starting_location):
 
         if area > fbRange[0] and area < fbRange[1] and img_pass == 0:
             # The drone has approached the target and will scan for a QR code 
-            qr_detection(drone, turbines, starting_location)
+            qr_detection(drone, turbines, starting_location, target)
             return True
 
         elif area > fbRange[1] and img_pass == 0:
@@ -122,14 +122,14 @@ def trackObject(drone, info, turbines, starting_location):
                     else:
                         drone.move(fwd=distance)
                         distance -= distance
-            qr_detection(drone, turbines, starting_location)
+            qr_detection(drone, turbines, starting_location, target)
             return True
             #return location
     # else:
     #     if location[0:2] != starting_location: # If the drone has moved, return to the starting position
     #         drone.go_to(starting_location[0], starting_location[1], starting_location[2])
 
-def qr_detection(drone, turbines, starting_location):
+def qr_detection(drone, turbines, starting_location, target=None):
     '''Begins searching for a QR code at the current location of the drone'''
     # with open('OutputLog.csv', 'r') as outFile:
     #             start = int(outFile.readline())
@@ -160,48 +160,55 @@ def qr_detection(drone, turbines, starting_location):
             # print(">>>>>>>>>>>>>>>>CURRENT FLIGHT TIME: ", drone_var.get_flight_time())
             print(">>>>>>>>>>>>>>>>QR CODE FOUND: ", QR)
             # Angel - Delete this line below when done testing individual fans
-            drone.land()
+            # drone.land()
             # with open('OutputLog.csv', 'a') as outFile:
             #     outFile.write(f"Found QR code:{QR} at {round(time()-start)}\n")
             # 
-            drone.append_turbine_locations(QR)
-            turbine_found = 0 # Flag to determine if the correct turbine was found
-            video.stop_qr()
+            if QR == target:
+                drone.append_turbine_locations(QR)
+                turbine_found = 0 # Flag to determine if the correct turbine was found
+                video.stop_qr()
 
-            try: 
-                for i in turbines:
-                    if i == QR:
-                        turbine_found = 1
-                        drone.move(up=90)
-                        mission.mission0(drone, turbines[i][0], QR)
-                        turbines.pop(i) 
+                try: 
+                    for i in turbines:
+                        if i == QR:
+                            turbine_found = 1
+                            drone.move(up=90)
+                            mission.mission0(drone, turbines[i][0], QR)
+                            turbines.pop(i) 
 
-                        if len(turbines) != 0:
-                            video.start_haar()
-                            sleep(0.5)
-                            video.start_qr()
-                            sleep(0.5)
-                            #drone.go_to(starting_location[0], starting_location[1], starting_location[2])
-                            break
+                            if len(turbines) != 0:
+                                video.start_haar()
+                                sleep(0.5)
+                                video.start_qr()
+                                sleep(0.5)
+                                #drone.go_to(starting_location[0], starting_location[1], starting_location[2])
+                                break
 
-                        else:
-                            video.stop_qr()
-                            drone.go_to(0, 0, 0)
-                            drone.land()
+                            else:
+                                video.stop_qr()
+                                drone.go_to(0, 0, 0)
+                                drone.land()
 
-                if turbine_found == 0:
-                    drone.move(up=110)
-                    video.start_haar()
-                    sleep(0.5)
-                    video.stop_qr()
-                    sleep(1)
-                    video.start_qr()
-                    sleep(0.5)
-                    #drone.go_to(starting_location[0], starting_location[1], starting_location[2])
-                break
+                    if turbine_found == 0:
+                        drone.move(up=110)
+                        video.start_haar()
+                        sleep(0.5)
+                        video.stop_qr()
+                        sleep(1)
+                        video.start_qr()
+                        sleep(0.5)
+                        #drone.go_to(starting_location[0], starting_location[1], starting_location[2])
+                    break
 
-            except:
-                break
+                except:
+                    break
+            
+            else: # This section controls what the drone does if the QR code doesn't match the target
+                print(f">>>>>>>>>>>>>>>>QR CODE NOT MATCHING: {QR} != {target}")
+                video.stop_qr()
+                drone.go_to(0, 0, 0)
+                drone.land()
 
         # Orbiting algorithm to find qr code to scan
         # By default, the forward search loop comes first

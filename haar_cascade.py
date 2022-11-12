@@ -51,7 +51,7 @@ def find_circles(img, down=True, green=False):
         # cimg = cv.cvtColor(img,cv.COLOR_GRAY2BGR)
         circles = cv.HoughCircles(cimg, cv.HOUGH_GRADIENT, 1, 120,
                             param1=200, param2=40,
-                            minRadius = 85, maxRadius = 125)
+                            minRadius = 85, maxRadius = 200)
 
         if circles is not None:
             circles = np.uint16(np.around(circles))
