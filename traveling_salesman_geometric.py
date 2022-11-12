@@ -258,6 +258,7 @@ if __name__ == "__main__":
                     if turbines[name][1][0] == coordinates[0][location] and turbines[name][1][1] == coordinates[1][location]:
                         target_turbine = name
                 # Rotate the drone to face the next location
+                print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> TARGET NUMBER " + str(target_turbine) + "\n")
                 drone.go_to(coordinates[0][location], coordinates[1][location], rotate_only=True) 
                 
                 # Angel's edit - Move the drone towards the fan and face forward to avoid detecting other fans
