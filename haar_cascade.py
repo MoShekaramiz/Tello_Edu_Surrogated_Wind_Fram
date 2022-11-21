@@ -23,6 +23,7 @@ def findTurbine(img, cascade=0):
 
     turbineListC = []
     turbineListArea = []
+    turbineListW = []
 
     for (x,y,w,h) in turbines:
         # draw a rectangle around the detected object
@@ -32,12 +33,21 @@ def findTurbine(img, cascade=0):
         centerX = x + w // 2
         centerY = y + h // 2
         area = w * h
+        turbineListW.append(w)
         turbineListC.append([centerX, centerY])
         turbineListArea.append(area)
-    if len(turbineListArea) != 0: 
+        n = 1000
+    if len(turbineListW) != 0: 
         # if there is items in the area list, find the maximum value and return
-        i = turbineListArea.index(max(turbineListArea))
-        return img, [turbineListC[i], turbineListArea[i], w]
+        for i in range(len(turbineListW)):
+            distance = int((650 * 40.64) / turbineListW[i]) - 40
+            if (np.abs(300 - distance) < n):
+                idx = i
+                n = np.abs(300 - distance)
+        #i = turbineListArea.index(max(turbineListArea))
+        distance = int((650 * 40.64) / turbineListW[idx]) - 40
+        print("Distance in find turbine: ", distance)
+        return img, [turbineListC[idx], turbineListArea[idx], turbineListW[idx]]
     else:
         return img, [[0, 0], 0, 0]
 
@@ -51,7 +61,7 @@ def find_circles(img, down=True, green=False):
         # cimg = cv.cvtColor(img,cv.COLOR_GRAY2BGR)
         circles = cv.HoughCircles(cimg, cv.HOUGH_GRADIENT, 1, 120,
                             param1=200, param2=40,
-                            minRadius = 85, maxRadius = 200)
+                            minRadius = 85, maxRadius = 125)
 
         if circles is not None:
             circles = np.uint16(np.around(circles))
@@ -92,7 +102,7 @@ def find_circles(img, down=True, green=False):
         else:
             circles = cv.HoughCircles(cimg, cv.HOUGH_GRADIENT, 1, 120,
                             param1=80, param2=25, 
-                            minRadius = 15, maxRadius = 80)
+                            minRadius = 15, maxRadius = 200) # original: 80
 
 
         if circles is not None:
@@ -126,6 +136,6 @@ if __name__ == "__main__":
     while True:
          frame = drone.get_frame_read()
          img = frame.frame
-         img, info = find_circles(img, down=False)
+         img, info = find_circles(img, down=False, green=True)
          cv.imshow("Output", img)
          cv.waitKey(1)

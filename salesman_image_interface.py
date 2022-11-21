@@ -76,7 +76,7 @@ def trackObject(drone, info, turbines, starting_location, target=None):
 
             drone.move(ccw=new_angle)  
             info = check_camera(camera)      
-            trackObject(drone, info, turbines, starting_location)
+            trackObject(drone, info, turbines, starting_location, target)
             img_pass = 1
 
         elif(x >= 380):
@@ -95,7 +95,7 @@ def trackObject(drone, info, turbines, starting_location, target=None):
                     return False
             drone.move(cw=new_angle) 
             info = check_camera(camera)       
-            trackObject(drone, info, turbines, starting_location)
+            trackObject(drone, info, turbines, starting_location, target)
             img_pass = 1
 
         if area > fbRange[0] and area < fbRange[1] and img_pass == 0:
@@ -107,7 +107,7 @@ def trackObject(drone, info, turbines, starting_location, target=None):
             # The drone is too close to the target
             drone.move(back=20)
             info = check_camera(camera)
-            trackObject(drone, info, turbines, starting_location)
+            trackObject(drone, info, turbines, starting_location, target)
 
         elif area < fbRange[0] and area != 0 and img_pass == 0:
             # The drone is too far from the target
@@ -149,7 +149,9 @@ def qr_detection(drone, turbines, starting_location, target=None):
     search_loop_counter = 1
     # Search algorithm uses an octagon with each turn being 45 degrees
     # The length of the octagon sides can be edited below, use smaller length for small rooms
-    octagon_side_length = 30
+    snake_path_length = 30
+    # Distance to move foward for snake path
+    forward_distance = 30
 
     while True:
         QR, img, info = droneReadQR(drone.get_drone())
@@ -160,7 +162,7 @@ def qr_detection(drone, turbines, starting_location, target=None):
             # print(">>>>>>>>>>>>>>>>CURRENT FLIGHT TIME: ", drone_var.get_flight_time())
             print(">>>>>>>>>>>>>>>>QR CODE FOUND: ", QR)
             # Angel - Comment this line below when not testing individual fans
-            # drone.land()
+            drone.land()
             # with open('OutputLog.csv', 'a') as outFile:
             #     outFile.write(f"Found QR code:{QR} at {round(time()-start)}\n")
             # 
@@ -209,54 +211,45 @@ def qr_detection(drone, turbines, starting_location, target=None):
                 video.stop_qr()
                 drone.go_to(0, 0, 0)
                 drone.land()
-
-        # Orbiting algorithm to find qr code to scan
+        # Snake path algorithm to find qr code to scan
         # By default, the forward search loop comes first
         else:
             img_counter += 1
             # This if statement is checking if the drone has made a full loop searching
-            # Changing from 195 to 270 to make the drone go in a full loop before changing search
-            if img_counter == 270:
+            if img_counter == 135:
                 # Check which search pattern the drone has already attempted.
                 if search_loop_counter == 1:
-                    # Back side search loop
-                    print("The drone has made a full forward loop, time to try right side search loop")
-                    drone.move(cw=90)
-                    # This will start the seach again
+                    # Snake path search
+                    print("Drone completed snake search loop, repeating forward")
+                    # This will start the search again
                     img_counter = 0
-                    # Keep track of which search loop we are in
+                    # Keep track of which search increment we are in
                     search_loop_counter += 1
                 elif search_loop_counter == 2:
-                    # Left side search loop
-                    print("The drone has made a full right side loop, time to try backwards side search loop")
-                    drone.move(cw=90)
-                    # This will start the seach again
-                    img_counter = 0
-                    # Keep track of which search loop we are in
-                    search_loop_counter += 1
-                elif search_loop_counter == 3:
-                    # right side search loop
-                    print("The drone has made a full backside side loop, time to try left side search loop")
-                    drone.move(cw=90)
-                    # This will start the seach again
-                    img_counter = 0
-                    # Keep track of which search loop we are in
-                    search_loop_counter += 1
-                elif search_loop_counter == 4:
                     # Tell drone to go home and land
-                    print("Telling drone to go back to helipad and land")
+                    print("Qr code not found. Telling drone to go back to helipad and land")
                     drone.go_to(0, 0, 0)
                     # calibrate(drone_class, land=False, x_coordinate=0, y_coordinate=0):
                     drone.land()
                 else:
                     # search_loop_counter should not ever be this value
                     print("ERROR, search_loop_counter is an unexpected value of : " + str(search_loop_counter))
+            elif (img_counter%120) == 0:
+                drone.move(left=(snake_path_length))
+            elif (img_counter%105) == 0:
+                drone.move(fwd=(forward_distance))
+            elif (img_counter%90) == 0:
+                drone.move(right=(snake_path_length))
+            elif (img_counter%75) == 0:
+                drone.move(right=(snake_path_length))
+            elif (img_counter%60) == 0:
+                drone.move(fwd=(forward_distance))
+            elif (img_counter%45) == 0:
+                drone.move(left=(snake_path_length))
             elif (img_counter%30) == 0:
-                # Rotating counter clockwise 45 degrees
-                drone.move(ccw=45)
-                drone.move(right=(octagon_side_length))
+                drone.move(left=(snake_path_length))
             elif (img_counter%15) == 0:
-                drone.move(right=(octagon_side_length))
+                drone.move(right=(snake_path_length))
 
 # if __name__ == "__main__":
 #     turbines = {"WindTurbine_1": [0, 0, 0, 0]}
