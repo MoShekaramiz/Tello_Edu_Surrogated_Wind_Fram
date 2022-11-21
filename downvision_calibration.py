@@ -51,7 +51,7 @@ def calibrate(drone_class, land=False, x_coordinate=0, y_coordinate=0):
     for i in range(5):
         drone.send_rc_control(0, 0, 0, 0)
     print("><><><><><><><><><><><><><>", drone.get_height())
-    # drone.send_command_with_return("downvision 1")
+    drone.send_command_with_return("downvision 1")
     location_calibrated = False
     angle_calibrated = False
     img_counter = 0

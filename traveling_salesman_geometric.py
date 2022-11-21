@@ -72,7 +72,7 @@ random_choice3 = random.choice(list1)
 # random_choice1 = 4
 # random_choice2 = 5
 # random_choice2 = 5
-print("CHOOSING FANS " + str(random_choice1) + ", " + str(random_choice2) + ", " + str(random_choice3))
+print(">>>>>>>>>>>>>>>> CHOOSING FANS " + str(random_choice1) + ", " + str(random_choice2) + ", " + str(random_choice3))
 xpos = np.array([0, xfans[random_choice1-1], xfans[random_choice2-1], xfans[random_choice3-1],])
 xpos = np.append(xpos, xpos[0])
 ypos = np.array([0, yfans[random_choice1-1], yfans[random_choice2-1], yfans[random_choice3-1],])
@@ -235,8 +235,7 @@ if __name__ == "__main__":
         for location in range(int(coordinates.size/2)):
             index += 1
             if camera.get_battery() < 20:
-                print()
-                print("DRONE BATTERY LOW. CHANGE BATTERY!")
+                print("\n" + ">>>>>>>>>>>>>>>> DRONE BATTERY LOW. CHANGE BATTERY!")
                 xpos = coordinates[0][index:]
                 ypos = coordinates[1][index:]
                 current_x = drone.get_x_location()
