@@ -24,7 +24,7 @@ def trackObject(drone, info, turbines, starting_location, target=None, flag_rota
     # if the object is no longer detected, attempt to find it with 10 more frames
     camera = drone.get_drone()
     if info[0][0] == 0:
-        for i in range(10):
+        for i in range(100): #originally 10
             if info[0][0] == 0:
                 frame = camera.get_frame_read()
                 img = frame.frame
@@ -245,6 +245,7 @@ def qr_detection(drone, turbines, starting_location, target=None):
             else: # This section controls what the drone does if the QR code doesn't match the target
                 print(f">>>>>>>>>>>>>>>>QR CODE NOT MATCHING: {QR} != {target}")
                 video.stop_qr()
+                drone.move(up=70)
                 drone.go_to(0, 0, 0)
                 drone.land()
         # Snake path algorithm to find qr code to scan
@@ -252,7 +253,7 @@ def qr_detection(drone, turbines, starting_location, target=None):
         else:
             img_counter += 1
             # This if statement is checking if the drone has made a full loop searching
-            if img_counter == 135:
+            if img_counter == 120:
                 # Check which search pattern the drone has already attempted.
                 if search_loop_counter == 1:
                     # Snake path search
@@ -262,30 +263,46 @@ def qr_detection(drone, turbines, starting_location, target=None):
                     # Keep track of which search increment we are in
                     search_loop_counter += 1
                 elif search_loop_counter == 2:
+                    # Snake path search
+                    print("Drone completed snake search loop, repeating forward")
+                    # This will start the search again
+                    img_counter = 0
+                    # Keep track of which search increment we are in
+                    search_loop_counter += 1
+                elif search_loop_counter == 3:
+                    # Snake path search
+                    print("Drone completed snake search loop, repeating forward")
+                    # This will start the search again
+                    img_counter = 0
+                    # Keep track of which search increment we are in
+                    search_loop_counter += 1
+                elif search_loop_counter == 4:
                     # Tell drone to go home and land
                     print("Qr code not found. Telling drone to go back to helipad and land")
+                    drone.move(up=70)
                     drone.go_to(0, 0, 0)
                     # calibrate(drone_class, land=False, x_coordinate=0, y_coordinate=0):
                     drone.land()
                 else:
                     # search_loop_counter should not ever be this value
                     print("ERROR, search_loop_counter is an unexpected value of : " + str(search_loop_counter))
-            elif (img_counter%120) == 0:
-                drone.move(left=(snake_path_length))
             elif (img_counter%105) == 0:
-                drone.move(fwd=(forward_distance))
+                drone.move(left=(snake_path_length))
             elif (img_counter%90) == 0:
-                drone.move(right=(snake_path_length))
+                drone.move(fwd=(forward_distance))
             elif (img_counter%75) == 0:
                 drone.move(right=(snake_path_length))
             elif (img_counter%60) == 0:
-                drone.move(fwd=(forward_distance))
+                drone.move(right=(snake_path_length))
             elif (img_counter%45) == 0:
-                drone.move(left=(snake_path_length))
+                drone.move(fwd=(forward_distance))
+                print("DRONE HEIGHT: " + str(drone.get_height()))
             elif (img_counter%30) == 0:
-                drone.move(left=(snake_path_length))
+                drone.move(left=(2*snake_path_length))
+                print("DRONE HEIGHT: " + str(drone.get_height()))
             elif (img_counter%15) == 0:
                 drone.move(right=(snake_path_length))
+                print("DRONE HEIGHT: " + str(drone.get_height()))
 
 # if __name__ == "__main__":
 #     turbines = {"WindTurbine_1": [0, 0, 0, 0]}

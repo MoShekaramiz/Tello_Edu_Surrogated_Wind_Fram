@@ -46,7 +46,7 @@ def findTurbine(img, cascade=0):
                 n = np.abs(300 - distance)
         #i = turbineListArea.index(max(turbineListArea))
         distance = int((650 * 40.64) / turbineListW[idx]) - 40
-        print("Distance in find turbine: ", distance)
+        # print("Distance in find turbine: ", distance)
         return img, [turbineListC[idx], turbineListArea[idx], turbineListW[idx]]
     else:
         return img, [[0, 0], 0, 0]
