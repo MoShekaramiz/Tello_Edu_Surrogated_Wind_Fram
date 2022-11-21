@@ -9,6 +9,7 @@ import haar_cascade as hc
 import mission
 import math
 import movement as mov
+import numpy
 
 fbRange = [62000,82000] # [32000, 52000] # preset parameter for detected image boundary size
 w, h = 720, 480         # display size of the screen
@@ -16,7 +17,7 @@ location = [0, 0, 0, 0] # Initialized list of x, y and angle coordinates for the
 turbine_locations = []  # List containing the locations of found turbines
 
 
-def trackObject(drone, info, turbines, starting_location, target=None):
+def trackObject(drone, info, turbines, starting_location, target=None, flag_rotate=0, flag_shift=0, flag_shift_direction = "none"):
     '''Take the variable for the drone, the output array from calling findTurbine in haar_cascade.py, and the current drone x,y location and relative angle (initialized as [0, 0, 0]).
     It scans for the target object of findTurbine and approaches the target. Once it is at a pre-determined distance fbRange, it will scan and return the value of the QR code
     and return the drone to the starting point.'''
@@ -31,23 +32,33 @@ def trackObject(drone, info, turbines, starting_location, target=None):
                 img, info = hc.findTurbine(img)
             else:
                 break
-        if info[0][0] == 0:
-            return False
-    
+
+    # if we did not find the center after finding it previously and our last command was a rotate. Rotate the same degree in the opposite direction
+    if info[0][0] == 0 and flag_rotate != 0:
+        drone.move(ccw=flag_rotate)
+        trackObject(drone, info, turbines, starting_location, target, flag_rotate)
+    # if we did not find the center after finding it previously and our last command was a shift left. Move right the same distance.
+    elif info[0][0] == 0 and flag_shift != 0 and flag_shift_direction == "left":
+        drone.move(right=flag_shift)
+        trackObject(drone, info, turbines, starting_location, target, flag_shift)
+    # if we did not find the center after finding it previously and our last command was a shift right. Move left the same distance.
+    elif info[0][0] == 0 and flag_shift != 0 and flag_shift_direction == "right":
+        drone.move(left=flag_shift)
+        trackObject(drone, info, turbines, starting_location, target, flag_shift)
+    elif info[0][0] == 0:
+        return False
+
     area = info[1]  # The area of the bounding box
     x, y = info[0]  # The x and y location of the center of the bounding box in the frame
     width = info[2] # The width of the bounding box
     img_pass = 0    # Flag to determine if the drone is returning from a target to skip point distance calculations
 
-    #  - declare variable to be the distance we want to stop short in the x-axis
+    # Angel - declare variable to be the distance we want to stop short in the x-axis
     x_distance_cutoff = 30
 
     # object detected
     if(x != 0):
         distance = int((650 * 40.64) / width) - 40 # (Focal length of camera lense * Real-world width of object)/Width of object in pixels  -  40 centimeters to stop short
-        # Angel
-        # if distance > 300:
-        #     trackObject(drone, info, turbines, [drone.get_x_location(), drone.get_y_location(), drone.get_angle()])
         if distance < 20:
             distance = 20
 
@@ -57,7 +68,7 @@ def trackObject(drone, info, turbines, starting_location, target=None):
         turbine_locations = drone.get_turbine_locations()
         for i in turbine_locations:
             if(i[0] < targetx < i[1]) and (i[2] < targety < i[3]):
-                # Make the drone stop short in the x direction and face the fan
+                # Angel - Make the drone stop short in the x direction and face the fan
                 # Third parameter should be 0 for the angle to be facing the turbines
                 drone.go_to(starting_location[0], starting_location[1], 0)
                 return
@@ -73,10 +84,22 @@ def trackObject(drone, info, turbines, starting_location, target=None):
                 if(i[0] < targetx < i[1]) and (i[2] < targety < i[3]):
                     drone.go_to(starting_location[0], starting_location[1], starting_location[2])
                     return False
-
-            drone.move(ccw=new_angle)  
+            print("new_angle: " , new_angle)
+            shift = numpy.abs(distance * numpy.sin(new_angle * numpy.pi/180))
+            print("Shift Left: " , shift)
+            # If our opposite O found from distance * sin(theta) < 20 rotate the drone counter-clockwise to center on the blue circle.
+            if shift < 20:
+                drone.move(ccw=new_angle)  
+                flag_rotate = new_angle * -1
+                flag_shift = 0
+            else:
+            # If our opposite O found from distance * sin(theta) > 20 shift the drone left by O to center on the blue circle.
+                drone.move(left=shift)
+                flag_shift = shift
+                flag_rotate = 0
+                flag_shift_direction = "left" 
             info = check_camera(camera)      
-            trackObject(drone, info, turbines, starting_location, target)
+            trackObject(drone, info, turbines, starting_location, target, flag_rotate,  flag_shift, flag_shift_direction)
             img_pass = 1
 
         elif(x >= 380):
@@ -93,9 +116,22 @@ def trackObject(drone, info, turbines, starting_location, target=None):
                 if(i[0] < targetx < i[1]) and (i[2] < targety < i[3]):
                     drone.go_to(starting_location[0], starting_location[1], starting_location[2])
                     return False
-            drone.move(cw=new_angle) 
+            print("new_angle: " , new_angle)
+            shift = numpy.abs(distance * numpy.sin(new_angle * numpy.pi/180))
+            print("Shift Right: " , shift)
+            # If our opposite O found from distance * sin(theta) < 20 rotate the drone clockwise to center on the blue circle.
+            if shift < 20:
+                drone.move(cw=new_angle)
+                flag_rotate = new_angle
+                flag_shift = 0
+            # If our opposite O found from distance * sin(theta) > 20 shift the drone right by O to center on the blue circle.
+            else:
+                drone.move(right=shift)
+                flag_shift = shift
+                flag_rotate = 0
+                flag_shift_direction = "right"  
             info = check_camera(camera)       
-            trackObject(drone, info, turbines, starting_location, target)
+            trackObject(drone, info, turbines, starting_location, target, flag_rotate,  flag_shift, flag_shift_direction)
             img_pass = 1
 
         if area > fbRange[0] and area < fbRange[1] and img_pass == 0:
@@ -162,7 +198,7 @@ def qr_detection(drone, turbines, starting_location, target=None):
             # print(">>>>>>>>>>>>>>>>CURRENT FLIGHT TIME: ", drone_var.get_flight_time())
             print(">>>>>>>>>>>>>>>>QR CODE FOUND: ", QR)
             # Angel - Comment this line below when not testing individual fans
-            drone.land()
+            # drone.land()
             # with open('OutputLog.csv', 'a') as outFile:
             #     outFile.write(f"Found QR code:{QR} at {round(time()-start)}\n")
             # 

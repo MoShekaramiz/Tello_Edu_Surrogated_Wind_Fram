@@ -56,29 +56,30 @@ start = time.time()
 
 # Lab Test Points
 # distance check points
-xpos = np.array([0, 300, 0])
-xpos = np.append(xpos, xpos[0])
-ypos = np.array([0, -200, 0])
-ypos = np.append(ypos, ypos[0])
-data = np.array([xpos, ypos], np.int32)
+# xpos = np.array([0, 300, 0])
+# xpos = np.append(xpos, xpos[0])
+# ypos = np.array([0, -200, 0])
+# ypos = np.append(ypos, ypos[0])
+# data = np.array([xpos, ypos], np.int32)
 
 # Testing two random fans
-# xfans = [360, 832, 217, 613, 58, 531, 200]
-# yfans = [61, 409, 224, 460, 125, 150, 440]
-# # list of fan numbers, we will choose a random value from the list
-# list1 = [1, 2, 3, 4, 5, 6, 7]
-# random_choice1 = random.choice(list1)
-# random_choice2 = random.choice(list1)
-# # while random_choice1 == 
-# # Change this number below to determine which fan to test, if you want random fan, comment out the whole line below
-# # random_choice1 = 4
-# # random_choice2 = 3
-# print("Choosing fans " + str(random_choice1) + ", " + str(random_choice2))
-# xpos = np.array([0, xfans[random_choice1-1], xfans[random_choice2-1]])
-# xpos = np.append(xpos, xpos[0])
-# ypos = np.array([0, yfans[random_choice1-1], yfans[random_choice2-1]])
-# ypos = np.append(ypos, ypos[0])
-# data = np.array([xpos, ypos], np.int32) 
+xfans = [360, 832, 217, 613, 58, 531, 200]
+yfans = [61, 409, 224, 460, 125, 150, 440]
+# list of fan numbers, we will choose a random value from the list
+list1 = [1, 2, 3, 4, 5, 6, 7]
+random_choice1 = random.choice(list1)
+random_choice2 = random.choice(list1)
+while random_choice1 == random_choice2:
+    random_choice2 = random.choice(list1)
+# Change this number below to determine which fan to test, if you want random fan, comment out the whole line below
+# random_choice1 = 4
+# random_choice2 = 3
+print("Choosing fans " + str(random_choice1) + ", " + str(random_choice2))
+xpos = np.array([0, xfans[random_choice1-1], xfans[random_choice2-1]])
+xpos = np.append(xpos, xpos[0])
+ypos = np.array([0, yfans[random_choice1-1], yfans[random_choice2-1]])
+ypos = np.append(ypos, ypos[0])
+data = np.array([xpos, ypos], np.int32) 
 
 # Testing single random fans
 # xfans = [360, 832, 217, 613, 58, 531, 200]
@@ -137,6 +138,8 @@ class TravelingSalesman():
         print(path1)
         print(f">>>>>>>>>>>>>>>>>>>>> OPTIMIZED PATH ENERGY: {self.energy_calc(self.path_min)}\n")
         print("Run time: ", time.time() - start)
+        # Angel
+        # print(f">>>>>>>>>>>>>>>>>>>>> BATTERY: ",{camera.get_battery()})
         
     def plot(self):
         plt.rcParams["font.family"] = "Times New Roman"
@@ -265,7 +268,7 @@ if __name__ == "__main__":
                 drone.go_to(coordinates[0][location], coordinates[1][location], rotate_only=True) 
                 
                 # Angel's edit - Move the drone towards the fan, stop short on x-axis and face forward to avoid detecting other fans
-                drone.go_to(coordinates[0][location] - 250, coordinates[1][location], 0)#, half_travel=True)
+                drone.go_to(coordinates[0][location] - 300, coordinates[1][location], 0)#, half_travel=True)
 
                 # Take 10 images to find the location of the target and do the mission if it is found
                 info = check_camera(camera)      
