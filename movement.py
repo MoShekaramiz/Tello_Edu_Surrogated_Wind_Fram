@@ -179,12 +179,18 @@ class movement():
     def verify_height(self, start_height, up, down):
         if up != 0:
             current_height = self.drone.get_height()
-            if current_height != (start_height + up):
-                self.drone.move_up((start_height + up) - current_height)
+            target = start_height + up
+            if current_height < target:
+                self.drone.move_up(target - current_height)
+            else:
+                self.drone.move_down(current_height - target)
         if down != 0:
             current_height = self.drone.get_height()
-            if current_height != (start_height - down):
-                self.drone.move_down(current_height - (start_height - down))
+            target = start_height - down
+            if current_height < target:
+                self.drone.move_down(current_height - target)
+            else:
+                self.drone.move_up(target - current_height)
 
     def curve(self, radius = 50, left_right = 0):
         '''Curve a quarter circle left or right. Currently developed for a radius of 50cm.'''
