@@ -187,7 +187,7 @@ class movement():
         if down != 0:
             current_height = self.drone.get_height()
             target = start_height - down
-            if current_height < target:
+            if current_height > target:
                 self.drone.move_down(current_height - target)
             else:
                 self.drone.move_up(target - current_height)
