@@ -79,6 +79,7 @@ def calibrate(drone_class, land=False, x_coordinate=0, y_coordinate=0):
                     drone_class.set_coordinates(x_coordinate, y_coordinate, 30)
                     drone.send_command_with_return("downvision 0")
                     cv.destroyWindow("Downward Output")
+                    drone.land()
                 
             else:
                 x = round(-(circle_x-160)/10)

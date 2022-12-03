@@ -12,41 +12,37 @@ import movement as mov
 import random
 start = time.time()
 
+
+# Testing 7 random fans
 # xfans = [360, 832, 217, 613, 58, 531, 188]
 # yfans = [61, 409, 224, 460, 125, 150, 457]
-
-# Array of 8 test points
-# xpos = np.array([0, 360, 832, 217, 613, 58, 531, 188])
+# # list of fan numbers, we will choose a random value from the list
+# list1 = [1, 2, 3, 4, 5, 6, 7]
+# random_choice1 = random.choice(list1)
+# list1.remove(random_choice1)
+# random_choice2 = random.choice(list1)
+# list1.remove(random_choice2)
+# random_choice3 = random.choice(list1)
+# list1.remove(random_choice3)
+# random_choice4 = random.choice(list1)
+# list1.remove(random_choice4)
+# random_choice5 = random.choice(list1)
+# list1.remove(random_choice5)
+# random_choice6 = random.choice(list1)
+# list1.remove(random_choice6)
+# random_choice7 = random.choice(list1)
+# # Change this number below to determine which fan to test, if you want random fan, comment out the whole line below
+# # random_choice1 = 4
+# # random_choice2 = 5
+# # random_choice3 = 5
+# # random_choice4 = 5
+# # random_choice5 = 5
+# # random_choice6 = 5
+# # random_choice7 = 5
+# print(">>>>>>>>>>>>>>>> CHOOSING FANS " + str(random_choice1) + ", " + str(random_choice2) + ", " + str(random_choice3))
+# xpos = np.array([0, xfans[random_choice1-1], xfans[random_choice2-1], xfans[random_choice3-1],])
 # xpos = np.append(xpos, xpos[0])
-# ypos = np.array([0, 61, 409, 224, 460, 125, 150, 457])
-# ypos = np.append(ypos, ypos[0])
-# data = np.array([xpos, ypos], np.int32)
-
-# Array of 7 test points
-# xpos = np.array([0, 1000, 0, 1000, 360, 832, 217, 613, 801, 58, 531])
-# xpos = np.append(xpos, xpos[0])
-# ypos = np.array([0, 0, 550, 550, 61, 409, 224, 460, 99, 125, 150])
-# ypos = np.append(ypos, ypos[0])
-# data = np.array([xpos, ypos], np.int32)
-
-# Array of 6 test points
-# xpos = np.array([0, 1000, 0, 1000, 360, 832, 217, 613, 801, 58])
-# xpos = np.append(xpos, xpos[0])
-# ypos = np.array([0, 0, 550, 550, 61, 409, 224, 460, 99, 125])
-# ypos = np.append(ypos, ypos[0])
-# data = np.array([xpos, ypos], np.int32)
-
-# Array of 5 test points
-# xpos = np.array([0, 1000, 0, 1000, 360, 832, 217, 613, 801])
-# xpos = np.append(xpos, xpos[0])
-# ypos = np.array([0, 0, 550, 550, 61, 409, 224, 460, 99])
-# ypos = np.append(ypos, ypos[0])
-# data = np.array([xpos, ypos], np.int32)
-
-# Array of 4 test points
-# xpos = np.array([0, 360, 832, 217, 613])
-# xpos = np.append(xpos, xpos[0])
-# ypos = np.array([0, 61, 409, 224, 460])
+# ypos = np.array([0, yfans[random_choice1-1], yfans[random_choice2-1], yfans[random_choice3-1],])
 # ypos = np.append(ypos, ypos[0])
 # data = np.array([xpos, ypos], np.int32) 
 
@@ -59,8 +55,8 @@ start = time.time()
 # data = np.array([xpos, ypos], np.int32)
 
 # Testing three random fans
-xfans = [360, 832, 217, 613, 58, 531, 188]
-yfans = [61, 409, 224, 460, 125, 150, 457]
+xfans = [360, 832, 217, 613, 58, 832, 188]
+yfans = [58, 409, 224, 460, 125, 150, 457]
 # list of fan numbers, we will choose a random value from the list
 list1 = [1, 2, 3, 4, 5, 6, 7]
 random_choice1 = random.choice(list1)
@@ -69,9 +65,9 @@ random_choice2 = random.choice(list1)
 list1.remove(random_choice2)
 random_choice3 = random.choice(list1)
 # Change this number below to determine which fan to test, if you want random fan, comment out the whole line below
-# random_choice1 = 4
-# random_choice2 = 5
-# random_choice2 = 5
+# random_choice1 = 1
+# random_choice2 = 2
+# random_choice3 = 3
 print(">>>>>>>>>>>>>>>> CHOOSING FANS " + str(random_choice1) + ", " + str(random_choice2) + ", " + str(random_choice3))
 xpos = np.array([0, xfans[random_choice1-1], xfans[random_choice2-1], xfans[random_choice3-1],])
 xpos = np.append(xpos, xpos[0])
@@ -91,7 +87,7 @@ data = np.array([xpos, ypos], np.int32)
 # # Change this number below to determine which fan to test, if you want random fan, comment out the whole line below
 # random_choice1 = 4
 # random_choice2 = 5
-# print("Choosing fans " + str(random_choice1) + ", " + str(random_choice2))
+#  ("Choosing fans " + str(random_choice1) + ", " + str(random_choice2))
 # xpos = np.array([0, xfans[random_choice1-1], xfans[random_choice2-1]])
 # xpos = np.append(xpos, xpos[0])
 # ypos = np.array([0, yfans[random_choice1-1], yfans[random_choice2-1]])
@@ -99,10 +95,10 @@ data = np.array([xpos, ypos], np.int32)
 # data = np.array([xpos, ypos], np.int32) 
 
 # Testing single random fans
-# xfans = [360, 832, 217, 613, 58, 531, 200]
-# yfans = [61, 409, 224, 460, 125, 150, 440]
+# xfans = [360, 832, 217, 613, 58, 832, 188]
+# yfans = [58, 409, 224, 460, 125, 150, 457]
 # # list of fan numbers, we will choose a random value from the list
-# list1 = [1, 2, 3, 4, 5, 6, 7, 8]
+# list1 = [1, 2, 3, 4, 5, 6, 7, 8] 
 # random_choice = random.choice(list1)
 # # Change this number below to determine which fan to test, if you want random fan, comment out the whole line below
 # random_choice = 5
@@ -200,9 +196,9 @@ class TravelingSalesman():
 if __name__ == "__main__":
     with open('OutputLog.csv', 'w') as outFile:
         outFile.write(f"{round(start)}\n")
-    turbines = {"WindTurbine_1": [[0, 0, 0, 0], [360, 61]], "WindTurbine_2": [[0, 0, 0, 0], [832, 409]], "WindTurbine_3": [[0, 0, 0, 0], [217, 224]],
+    turbines = {"WindTurbine_1": [[0, 0, 0, 0], [360, 58]], "WindTurbine_2": [[0, 0, 0, 0], [832, 409]], "WindTurbine_3": [[0, 0, 0, 0], [217, 224]],
                 "WindTurbine_4": [[0, 0, 0, 0], [613, 460]], "WindTurbine_5": [[0, 0, 0, 0], [58, 125]],
-                "WindTurbine_6": [[0, 0, 0, 0], [531, 150]], "WindTurbine_7": [[0, 0, 0, 0], [188, 457]]}
+                "WindTurbine_6": [[0, 0, 0, 0], [832, 150]], "WindTurbine_7": [[0, 0, 0, 0], [188, 457]]}
 
     # Uncomment to get positions of each target in inches
     # with open('Positions.csv', 'w') as outFile: 

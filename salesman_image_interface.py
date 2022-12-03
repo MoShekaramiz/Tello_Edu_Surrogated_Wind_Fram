@@ -296,13 +296,10 @@ def qr_detection(drone, turbines, starting_location, target=None):
                 drone.move(right=(snake_path_length))
             elif (img_counter%45) == 0:
                 drone.move(fwd=(forward_distance))
-                print("DRONE HEIGHT: " + str(drone.get_height()))
             elif (img_counter%30) == 0:
                 drone.move(left=(2*snake_path_length))
-                print("DRONE HEIGHT: " + str(drone.get_height()))
             elif (img_counter%15) == 0:
                 drone.move(right=(snake_path_length))
-                print("DRONE HEIGHT: " + str(drone.get_height()))
 
 # if __name__ == "__main__":
 #     turbines = {"WindTurbine_1": [0, 0, 0, 0]}
