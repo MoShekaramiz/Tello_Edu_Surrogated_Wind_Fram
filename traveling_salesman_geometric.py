@@ -9,7 +9,7 @@ import time
 import sys
 import csv
 import movement as mov
-# Angel's edit - import random
+# Angel's edit
 import random
 from datetime import datetime
 start = time.time()
