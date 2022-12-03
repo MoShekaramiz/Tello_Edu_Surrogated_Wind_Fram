@@ -48,7 +48,6 @@ def calibrate(drone_class, fileName, start, st, fileFlag, land=False, x_coordina
     #             drone_class.go_to(x_coordinate, y_coordinate)
     #             print("Not found, third time")
     print("><><><><><><><><><><><><><>", drone.get_height())
-    drone_class.move(down=105)
     print("><><><><><><><><><><><><><>", drone.get_height())
     height = drone.get_height()
     while height > 30:
