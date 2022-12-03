@@ -105,6 +105,7 @@ class movement():
         The function will then rotate the drone first with counter-clockwise (ccw) being the priority, then move with forward (fwd) being the priority.
         The function will update the current location of the drone which can be reached with movement.get_location()'''
         sleep(0.3)
+        start_height = self.drone.get_height()
         if up != 0:
             # increases drone altitude
             up = round(up)
@@ -168,6 +169,28 @@ class movement():
             else:
                 self.new_location[0] += right * math.cos(math.radians(360 + (self.new_location[3] - 90)))
                 self.new_location[1] += right * math.sin(math.radians(360 + (self.new_location[3] - 90)))
+        
+        self.verify_height(start_height, up, down)
+
+    def verify_height(self, start_height, up, down):
+        if up != 0:
+            current_height = self.drone.get_height()
+            target = start_height + up
+            if current_height < target:
+                if target - current_height > 20:
+                    self.drone.move_up(target - current_height)
+            else:
+                if current_height - target > 20:
+                    self.drone.move_down(current_height - target)
+        if down != 0:
+            current_height = self.drone.get_height()
+            target = start_height - down
+            if current_height > target:
+                if current_height - target > 20:
+                    self.drone.move_down(current_height - target)
+            else:
+                if target - current_height > 20:
+                    self.drone.move_up(target - current_height)
 
     def curve(self, radius = 50, left_right = 0):
         '''Curve a quarter circle left or right. Currently developed for a radius of 50cm.'''
