@@ -181,19 +181,19 @@ class movement():
             current_height = self.drone.get_height()
             target = start_height + up
             if current_height < target:
-                if target - current_height != 0:
+                if target - current_height > 20:
                     self.drone.move_up(target - current_height)
             else:
-                if current_height - target != 0:
+                if current_height - target > 20:
                     self.drone.move_down(current_height - target)
         if down != 0:
             current_height = self.drone.get_height()
             target = start_height - down
             if current_height > target:
-                if current_height - target != 0:
+                if current_height - target > 20:
                     self.drone.move_down(current_height - target)
             else:
-                if target - current_height != 0:
+                if target - current_height > 20:
                     self.drone.move_up(target - current_height)
 
     def curve(self, radius = 50, left_right = 0):
