@@ -174,6 +174,7 @@ def qr_detection(drone, turbines, starting_location, fileName, start, flag_time,
     # with open('OutputLog.csv', 'r') as outFile:
     #             start = int(outFile.readline())
     print("flag_time:", flag_time)
+    print("fileName:", fileName)
     if(flag_time == 1):
         previous_time = start
     drone_lower = drone.get_drone()
@@ -190,8 +191,6 @@ def qr_detection(drone, turbines, starting_location, fileName, start, flag_time,
     # Counter to determine which search loop the drone is in
     # It is no good to have drone continually search until the battery dies
     search_loop_counter = 1
-    # Search algorithm uses an octagon with each turn being 45 degrees
-    # The length of the octagon sides can be edited below, use smaller length for small rooms
     snake_path_length = 30
     # Distance to move foward for snake path
     forward_distance = 30

@@ -78,8 +78,8 @@ start = time.time()
 # data = np.array([xpos, ypos], np.int32)
 
 # Testing three random fans
-xfans = [360, 832, 217, 613, 58, 832, 188]
-yfans = [58, 409, 224, 460, 125, 150, 457]
+xfans = [360, 832, 217, 613, 61, 832, 188]
+yfans = [58, 409, 224, 460, 132, 150, 457]
 # list of fan numbers, we will choose a random value from the list
 list1 = [1, 2, 3, 4, 5, 6, 7]
 random_choice1 = random.choice(list1)
@@ -221,8 +221,8 @@ if __name__ == "__main__":
     with open('OutputLog.csv', 'w') as outFile:
         outFile.write(f"{round(start)}\n")
     turbines = {"WindTurbine_1": [[0, 0, 0, 0], [360, 58]], "WindTurbine_2": [[0, 0, 0, 0], [832, 409]], "WindTurbine_3": [[0, 0, 0, 0], [217, 224]],
-                "WindTurbine_4": [[0, 0, 0, 0], [613, 460]], "WindTurbine_5": [[0, 0, 0, 0], [58, 125]],
-                "WindTurbine_6": [[0, 0, 0, 0], [531, 150]], "WindTurbine_7": [[0, 0, 0, 0], [188, 457]]}
+                "WindTurbine_4": [[0, 0, 0, 0], [613, 460]], "WindTurbine_5": [[0, 0, 0, 0], [61, 132]],
+                "WindTurbine_6": [[0, 0, 0, 0], [832, 150]], "WindTurbine_7": [[0, 0, 0, 0], [188, 457]]}
     st = datetime.now().strftime('%B %d,%Y %H.%M.%S')
     fileName = "CSV Files\Data Log " + st + ".csv"
     # Uncomment to get positions of each target in inches
@@ -310,7 +310,7 @@ if __name__ == "__main__":
                     if turbines[name][1][0] == coordinates[0][location] and turbines[name][1][1] == coordinates[1][location]:
                         target_turbine = name
                 # List the target turbine number
-                print(">>>>>>>>>>>>>>>> TARGET TURBINE " + str(target_turbine) + "\n")
+                print(">>>>>>>>>>>>>>>> TARGET TURBINE: " + str(target_turbine) + "\n")
       
                 # Rotate the drone to face the next location
                 drone.go_to(coordinates[0][location], coordinates[1][location], rotate_only=True) 
