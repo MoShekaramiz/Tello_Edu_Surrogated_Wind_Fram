@@ -3,24 +3,30 @@ import haar_cascade as hc
 import movement as mov
 from check_camera import check_camera  
 import numpy
+import time
+import csv
+import sys
+import os
 
 fbRange = [62000,82000] # [32000, 52000] # preset parameter for detected image boundary size
 w, h = 720, 480         # display size of the screen
 
-def calibrate(drone_class, land=False, x_coordinate=0, y_coordinate=0):
+def calibrate(drone_class, fileName, start, st, fileFlag, land=False, x_coordinate=0, y_coordinate=0):
     # with open('OutputLog.csv', 'r') as outFile:
     #             start = int(outFile.readline())
     # with open('OutputLog.csv', 'a') as outFile:
     #             outFile.write(f"Calibration at ({x_coordinate, y_coordinate}) started at: {round(time()-start)}\n")
     drone = drone_class.get_drone()
-    drone_class.go_to(x_coordinate, y_coordinate, rotate_only=True)
+    # drone_class.go_to(x_coordinate, y_coordinate, rotate_only=True)
     frame = drone.get_frame_read()
     img = frame.frame
     img = cv.resize(img, (w, h))
-    img, circle, width, center = hc.find_circles(img, green=False)
-    cv.imshow("Scanning For Calibration Marker", img)
-    cv.waitKey(1)
-    cv.destroyWindow("Scanning For Calibration Marker")
+    # img, circle, width, center = hc.find_circles(img, green=False)
+    width = 0
+    center = 0
+    # cv.imshow("Scanning For Calibration Marker", img)
+    # cv.waitKey(1)
+    # cv.destroyWindow("Scanning For Calibration Marker")
     drone_class.go_to(x_coordinate - 200, y_coordinate)
     drone_class.go_to(drone_class.get_x_location(), drone_class.get_y_location(), 0)
     drone_class.move(down=40)
@@ -79,8 +85,38 @@ def calibrate(drone_class, land=False, x_coordinate=0, y_coordinate=0):
                     drone_class.set_coordinates(x_coordinate, y_coordinate, 30)
                     drone.send_command_with_return("downvision 0")
                     cv.destroyWindow("Downward Output")
+                    current = time.time()
                     drone.land()
-                
+                    numRows = 0          
+                    CsvFile = open(fileName, 'r') 
+                    csvreader = csv.reader(CsvFile, delimiter=',')
+                    for row in csvreader:
+                        numRows = numRows + 1
+                        previous_time = row[3]
+                    previous_time = float(previous_time)
+                    CsvFile.close()
+                    print('numRows:', numRows)
+                    print('previous_time:', previous_time)
+                    csvFile = open(fileName, "a")
+                    csvwriter = csv.writer(csvFile, lineterminator='\n')
+                    if((current-previous_time-start)%60 < 10 and (current-start)%60 < 10):
+                        csvwriter.writerow(['Landing helipad', current-previous_time-start, str(int((current-previous_time-start)//60)) + '.0' + str((current-previous_time-start)%60), current-start, str(int((current-start)//60)) + '.0' + str((current-start)%60), str(drone.get_battery()) + ' %'])
+                    elif((current-previous_time-start)%60 < 10):
+                        csvwriter.writerow(['Landing helipad', current-previous_time-start, str(int((current-previous_time-start)//60)) + '.0' + str((current-previous_time-start)%60), current-start, str(int((current-start)//60)) + '.' + str((current-start)%60), str(drone.get_battery()) + ' %'])
+                    elif((current-start)%60 < 10):
+                        csvwriter.writerow(['Landing helipad', current-previous_time-start, str(int((current-previous_time-start)//60)) + '.' + str((current-previous_time-start)%60), current-start, str(int((current-start)//60)) + '.0' + str((current-start)%60), str(drone.get_battery()) + ' %'])
+                    else:
+                        csvwriter.writerow(['Landing helipad', current-previous_time-start, str(int((current-previous_time-start)//60)) + '.' + str((current-previous_time-start)%60), current-start, str(int((current-start)//60)) + '.' + str((current-start)%60), str(drone.get_battery()) + ' %'])
+                    csvFile.close()
+                    if(fileFlag == 1):
+                        fName = 'CSV Files\Successful ' + str(numRows-2) + '-Fan test Data Log ' + st + '.csv'
+                    else:
+                        fName = 'CSV Files\Failure Data Log' + st + '.csv'
+                    fName = os.path.dirname(__file__) + '\\' + fName
+                    fileName = os.path.dirname(__file__) + '\\' + fileName
+                    csvFile.close()
+                    os.rename(fileName, fName)
+                    sys.exit()
             else:
                 x = round(-(circle_x-160)/10)
                 y = round(-(circle_y-120)/10)
@@ -113,50 +149,50 @@ def calibrate(drone_class, land=False, x_coordinate=0, y_coordinate=0):
                     drone_class.move(back=60, left=60, down=20)
                     img_counter = 0
 
-    frames_since_positive = 0
-    angle = 0
-    up_count = 0
-    while angle_calibrated is False:
-        frame = drone.get_frame_read()
-        img = frame.frame
-        img, info = hc.find_circles(img, down=False, green=True)
-        cv.imshow("Angle Recalibration", img)
-        cv.waitKey(1)
+    # frames_since_positive = 0
+    # angle = 0
+    # up_count = 0
+    # while angle_calibrated is False:
+    #     frame = drone.get_frame_read()
+    #     img = frame.frame
+    #     img, info = hc.find_circles(img, down=False, green=True)
+    #     cv.imshow("Angle Recalibration", img)
+    #     cv.waitKey(1)
 
-        if info is not None:
-            circle_x = info[0][0][0]
-            circle_y = info[0][0][1]
-            frames_since_positive = 0
+    #     if info is not None:
+    #         circle_x = info[0][0][0]
+    #         circle_y = info[0][0][1]
+    #         frames_since_positive = 0
 
-            if(450 < circle_x < 470):
-                for i in range(5):
-                    drone.send_rc_control(0, 0, 0, 0)
-                # The drone is centered on the target and the coordinates and angle are now calibrated
-                angle_calibrated = True
-                drone_class.set_coordinates(x_coordinate, y_coordinate, 30, 0)
-                cv.destroyWindow("Angle Recalibration")
-                if land is False:
-                    drone_class.move(up=(110 - (up_count * 20)))
-            else:
-                print(circle_x)
-                x = round((circle_x-460)/15)
-                if x in range(-20, -3) or x in range(3, 20):
-                        if x < 0: x = -9
-                        elif x != 0: x = 9
-                drone.send_rc_control(0, 0, 0, x)
+    #         if(450 < circle_x < 470):
+    #             for i in range(5):
+    #                 drone.send_rc_control(0, 0, 0, 0)
+    #             # The drone is centered on the target and the coordinates and angle are now calibrated
+    #             angle_calibrated = True
+    #             drone_class.set_coordinates(x_coordinate, y_coordinate, 30, 0)
+    #             cv.destroyWindow("Angle Recalibration")
+    #             if land is False:
+    #                 drone_class.move(up=(110 - (up_count * 20)))
+    #         else:
+    #             print(circle_x)
+    #             x = round((circle_x-460)/15)
+    #             if x in range(-20, -3) or x in range(3, 20):
+    #                     if x < 0: x = -9
+    #                     elif x != 0: x = 9
+    #             drone.send_rc_control(0, 0, 0, x)
 
-        else:
-            frames_since_positive += 1
-            #drone.send_rc_control(0, 0, 0, 0)
-            if frames_since_positive == 30 and (angle % 360 != 0 or angle == 0):
-                frames_since_positive = 0
-                drone_class.move(cw=30)
-                angle = angle + 30
-            elif angle % 360 == 0 and angle != 0:
-                drone_class.move(up=20)
-                up_count += 1
-            if up_count == 3:
-                break
+    #     else:
+    #         frames_since_positive += 1
+    #         #drone.send_rc_control(0, 0, 0, 0)
+    #         if frames_since_positive == 30 and (angle % 360 != 0 or angle == 0):
+    #             frames_since_positive = 0
+    #             drone_class.move(cw=30)
+    #             angle = angle + 30
+    #         elif angle % 360 == 0 and angle != 0:
+    #             drone_class.move(up=20)
+    #             up_count += 1
+    #         if up_count == 3:
+    #             break
             
     
     # with open('OutputLog.csv', 'a') as outFile:
@@ -207,7 +243,7 @@ def go_to_helipad(drone, width, center, flag_rotate=0, flag_shift=0, flag_shift_
         elif distance <= 10:
             print("distance is 0")
             distance = 0
-        if(0 < x <= 350):
+        if(0 < x <= 350): #maybe try 355
             # The drone sees the blue circle in the left half of the image
             new_angle = int(round(((360 - x) / 360) * 41.3))
             print("new_angle: " , new_angle)
@@ -218,7 +254,7 @@ def go_to_helipad(drone, width, center, flag_rotate=0, flag_shift=0, flag_shift_
                 drone.move(ccw=new_angle)  
                 flag_rotate = new_angle * -1
                 flag_shift = 0
-            else:
+            else: 
             # If our opposite O found from distance * sin(theta) > 20 shift the drone left by O to center on the blue circle.
                 drone.move(left=shift)
                 flag_shift = shift
@@ -228,7 +264,7 @@ def go_to_helipad(drone, width, center, flag_rotate=0, flag_shift=0, flag_shift_
             go_to_helipad(drone, width, center, flag_rotate, flag_shift, flag_shift_direction)
             img_pass = 1
 
-        elif(x >= 370):
+        elif(x >= 370): #maybe try 365
             # The drone sees the blue circle in the right half of the image
             new_angle = int(round(((x - 360) / 360) * 41.3))
             target_angle = drone.get_angle()-new_angle

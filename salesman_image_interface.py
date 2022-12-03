@@ -1,5 +1,6 @@
 '''The main object detection and drone flight module. By Branden Pinney 2022'''
-
+# Angel's comment
+from downvision_calibration import calibrate
 from time import sleep
 import math
 import cv2 as cv
@@ -10,6 +11,8 @@ import mission
 import math
 import movement as mov
 import numpy
+import csv
+import time
 
 fbRange = [62000,82000] # [32000, 52000] # preset parameter for detected image boundary size
 w, h = 720, 480         # display size of the screen
@@ -17,11 +20,12 @@ location = [0, 0, 0, 0] # Initialized list of x, y and angle coordinates for the
 turbine_locations = []  # List containing the locations of found turbines
 
 
-def trackObject(drone, info, turbines, starting_location, target=None, flag_rotate=0, flag_shift=0, flag_shift_direction = "none"):
+def trackObject(drone, info, turbines, starting_location, fileName, start, flag_time, st, fileFlag, target=None, flag_rotate=0, flag_shift=0, flag_shift_direction = "none"):
     '''Take the variable for the drone, the output array from calling findTurbine in haar_cascade.py, and the current drone x,y location and relative angle (initialized as [0, 0, 0]).
     It scans for the target object of findTurbine and approaches the target. Once it is at a pre-determined distance fbRange, it will scan and return the value of the QR code
     and return the drone to the starting point.'''
     # if the object is no longer detected, attempt to find it with 10 more frames
+    print("fileName: ", fileName)
     camera = drone.get_drone()
     if info[0][0] == 0:
         for i in range(100): #originally 10
@@ -36,15 +40,15 @@ def trackObject(drone, info, turbines, starting_location, target=None, flag_rota
     # if we did not find the center after finding it previously and our last command was a rotate. Rotate the same degree in the opposite direction
     if info[0][0] == 0 and flag_rotate != 0:
         drone.move(ccw=flag_rotate)
-        trackObject(drone, info, turbines, starting_location, target, flag_rotate)
+        trackObject(drone, info, turbines, starting_location, fileName, start, flag_time, st, fileFlag, target, flag_rotate)
     # if we did not find the center after finding it previously and our last command was a shift left. Move right the same distance.
     elif info[0][0] == 0 and flag_shift != 0 and flag_shift_direction == "left":
         drone.move(right=flag_shift)
-        trackObject(drone, info, turbines, starting_location, target, flag_shift)
+        trackObject(drone, info, turbines, starting_location, fileName, start, flag_time, st, fileFlag, target,flag_shift)
     # if we did not find the center after finding it previously and our last command was a shift right. Move left the same distance.
     elif info[0][0] == 0 and flag_shift != 0 and flag_shift_direction == "right":
         drone.move(left=flag_shift)
-        trackObject(drone, info, turbines, starting_location, target, flag_shift)
+        trackObject(drone, info, turbines, starting_location, fileName, start, flag_time, st, fileFlag, target, flag_shift)
     elif info[0][0] == 0:
         return False
 
@@ -99,7 +103,7 @@ def trackObject(drone, info, turbines, starting_location, target=None, flag_rota
                 flag_rotate = 0
                 flag_shift_direction = "left" 
             info = check_camera(camera)      
-            trackObject(drone, info, turbines, starting_location, target, flag_rotate,  flag_shift, flag_shift_direction)
+            trackObject(drone, info, turbines, starting_location, fileName, start, flag_time, st, fileFlag, target, flag_rotate,  flag_shift, flag_shift_direction)
             img_pass = 1
 
         elif(x >= 380):
@@ -131,19 +135,19 @@ def trackObject(drone, info, turbines, starting_location, target=None, flag_rota
                 flag_rotate = 0
                 flag_shift_direction = "right"  
             info = check_camera(camera)       
-            trackObject(drone, info, turbines, starting_location, target, flag_rotate,  flag_shift, flag_shift_direction)
+            trackObject(drone, info, turbines, starting_location, fileName, start, flag_time, st, fileFlag, target, flag_rotate,  flag_shift, flag_shift_direction)
             img_pass = 1
 
         if area > fbRange[0] and area < fbRange[1] and img_pass == 0:
             # The drone has approached the target and will scan for a QR code 
-            qr_detection(drone, turbines, starting_location, target)
+            qr_detection(drone, turbines, starting_location, fileName, start, flag_time, st, fileFlag, target)
             return True
 
         elif area > fbRange[1] and img_pass == 0:
             # The drone is too close to the target
             drone.move(back=20)
             info = check_camera(camera)
-            trackObject(drone, info, turbines, starting_location, target)
+            trackObject(drone, info, turbines, starting_location, fileName, start, flag_time, st, fileFlag,target)
 
         elif area < fbRange[0] and area != 0 and img_pass == 0:
             # The drone is too far from the target
@@ -158,17 +162,20 @@ def trackObject(drone, info, turbines, starting_location, target=None, flag_rota
                     else:
                         drone.move(fwd=distance)
                         distance -= distance
-            qr_detection(drone, turbines, starting_location, target)
+            qr_detection(drone, turbines, starting_location, fileName, start, flag_time, st, fileFlag, target)
             return True
             #return location
     # else:
     #     if location[0:2] != starting_location: # If the drone has moved, return to the starting position
     #         drone.go_to(starting_location[0], starting_location[1], starting_location[2])
 
-def qr_detection(drone, turbines, starting_location, target=None):
+def qr_detection(drone, turbines, starting_location, fileName, start, flag_time, st, fileFlag, target=None):
     '''Begins searching for a QR code at the current location of the drone'''
     # with open('OutputLog.csv', 'r') as outFile:
     #             start = int(outFile.readline())
+    print("flag_time:", flag_time)
+    if(flag_time == 1):
+        previous_time = start
     drone_lower = drone.get_drone()
     drone.move(down=110)
     if drone_lower.get_height() > 50:
@@ -197,18 +204,35 @@ def qr_detection(drone, turbines, starting_location, target=None):
             drone_var = drone.get_drone()
             # print(">>>>>>>>>>>>>>>>CURRENT FLIGHT TIME: ", drone_var.get_flight_time())
             print(">>>>>>>>>>>>>>>>QR CODE FOUND: ", QR)
+            current = time.time()
+            csvFile = open(fileName, "a")
+            csvwriter = csv.writer(csvFile, lineterminator='\n')
+            turb = QR
+            turb = turb.replace('d', 'd ')
+            turb = turb.replace('_', ' ')
+            if((current-previous_time)%60 < 10 and (current-start)% 60 < 10):
+                csvwriter.writerow([turb, current-previous_time, str(int((current-previous_time)//60)) + '.0' + str((current-previous_time)%60), current-start, str(int((current-start)//60)) + '.0' + str((current-start)%60), str(drone_var.get_battery()) + ' %'])
+            elif((current-previous_time)%60 < 10):
+                csvwriter.writerow([turb, current-previous_time, str(int((current-previous_time)//60)) + '.0' + str((current-previous_time)%60), current-start, str(int((current-start)//60)) + '.' + str((current-start)%60), str(drone_var.get_battery()) + ' %'])
+            elif((current-start)% 60 < 10):
+                csvwriter.writerow([turb, current-previous_time, str(int((current-previous_time)//60)) + '.' + str((current-previous_time)%60), current-start, str(int((current-start)//60)) + '.0' + str((current-start)%60), str(drone_var.get_battery()) + ' %'])
+            else:
+                csvwriter.writerow([turb, current-previous_time, str(int((current-previous_time)//60)) + '.' + str((current-previous_time)%60), current-start, str(int((current-start)//60)) + '.' + str((current-start)%60), str(drone_var.get_battery()) + ' %'])
+            csvFile.close()
+            previous_time = current
+            
             # Angel - Comment this line below when not testing individual fans
             # drone.land()
             # with open('OutputLog.csv', 'a') as outFile:
             #     outFile.write(f"Found QR code:{QR} at {round(time()-start)}\n")
             # 
-            if QR == target:
+            if QR == 'FanTurbine_3': #target
                 drone.append_turbine_locations(QR)
                 turbine_found = 0 # Flag to determine if the correct turbine was found
                 video.stop_qr()
 
                 try: 
-                    for i in turbines:
+                    for i in turbines: 
                         if i == QR:
                             turbine_found = 1
                             drone.move(up=90)
@@ -247,6 +271,7 @@ def qr_detection(drone, turbines, starting_location, target=None):
                 video.stop_qr()
                 drone.move(up=70)
                 drone.go_to(0, 0, 0)
+                calibrate(drone, fileName, start, st, fileFlag, False)
                 drone.land()
         # Snake path algorithm to find qr code to scan
         # By default, the forward search loop comes first
@@ -311,6 +336,6 @@ def qr_detection(drone, turbines, starting_location, target=None):
 #         img = frame.frame
 #         img = cv.resize(img, (w, h))
 #         img, info = hc.findTurbine(img)
-#         location = trackObject(drone, info, location, turbines)
+#         location = trackObject(drone, info, location, turbines, , fileName, start, flag_time)
 #         img = cv.resize(img, None, fx=1, fy=1, interpolation=cv.INTER_AREA)
         

@@ -7,9 +7,11 @@ from salesman_image_interface import trackObject, qr_detection
 from downvision_calibration import calibrate
 import time
 import sys
+import csv
 import movement as mov
-# Angel's edit - import random
+# Angel's edit
 import random
+from datetime import datetime
 start = time.time()
 
 
@@ -54,16 +56,37 @@ start = time.time()
 # ypos = np.append(ypos, ypos[0])
 # data = np.array([xpos, ypos], np.int32)
 
+# Testing landing pad Lab
+# xpos = np.array([0, 320, 260, 150])
+# xpos = np.append(xpos, xpos[0])
+# ypos = np.array([0, 0, 220, 400])
+# ypos = np.append(ypos, ypos[0])
+# data = np.array([xpos, ypos], np.int32)
+
+# Testing landing pad Atrium
+# xpos = np.array([0, 447, 1000])
+# xpos = np.append(xpos, xpos[0])
+# ypos = np.array([0, 0, 0])
+# ypos = np.append(ypos, ypos[0])
+# data = np.array([xpos, ypos], np.int32)
+
+# Testing landing pad Atrium Fan 3 
+xpos = np.array([0, 217, 1000])
+xpos = np.append(xpos, xpos[0])
+ypos = np.array([0, -426, 0])
+ypos = np.append(ypos, ypos[0])
+data = np.array([xpos, ypos], np.int32)
+
 # Testing three random fans
 xfans = [360, 832, 217, 613, 58, 832, 188]
 yfans = [58, 409, 224, 460, 125, 150, 457]
 # list of fan numbers, we will choose a random value from the list
-list1 = [1, 2, 3, 4, 5, 6, 7]
-random_choice1 = random.choice(list1)
-list1.remove(random_choice1)
-random_choice2 = random.choice(list1)
-list1.remove(random_choice2)
-random_choice3 = random.choice(list1)
+# list1 = [1, 2, 3, 4, 5, 6, 7]
+# random_choice1 = random.choice(list1)
+# list1.remove(random_choice1)
+# random_choice2 = random.choice(list1)
+# list1.remove(random_choice2)
+# random_choice3 = random.choice(list1)
 # Change this number below to determine which fan to test, if you want random fan, comment out the whole line below
 # random_choice1 = 1
 # random_choice2 = 2
@@ -108,6 +131,7 @@ data = np.array([xpos, ypos], np.int32)
 # ypos = np.array([0, yfans[random_choice-1], 0])
 # ypos = np.append(ypos, ypos[0])
 # data = np.array([xpos, ypos], np.int32) 
+
 
 class TravelingSalesman():
     def __init__(self):
@@ -198,8 +222,9 @@ if __name__ == "__main__":
         outFile.write(f"{round(start)}\n")
     turbines = {"WindTurbine_1": [[0, 0, 0, 0], [360, 58]], "WindTurbine_2": [[0, 0, 0, 0], [832, 409]], "WindTurbine_3": [[0, 0, 0, 0], [217, 224]],
                 "WindTurbine_4": [[0, 0, 0, 0], [613, 460]], "WindTurbine_5": [[0, 0, 0, 0], [58, 125]],
-                "WindTurbine_6": [[0, 0, 0, 0], [832, 150]], "WindTurbine_7": [[0, 0, 0, 0], [188, 457]]}
-
+                "WindTurbine_6": [[0, 0, 0, 0], [531, 150]], "WindTurbine_7": [[0, 0, 0, 0], [188, 457]]}
+    st = datetime.now().strftime('%B %d,%Y %H.%M.%S')
+    fileName = "CSV Files\Data Log " + st + ".csv"
     # Uncomment to get positions of each target in inches
     # with open('Positions.csv', 'w') as outFile: 
     #     for item in turbines:
@@ -210,12 +235,19 @@ if __name__ == "__main__":
     # with open('OutputLog.csv', 'a') as outFile:
     #     outFile.write(f"Annealing finished at {round(time.time()-start)}\n")
     path.plot()
+    fileFlag = 0
     drone = mov.movement()
     start_time = time.time()
     coordinates = path.get_path()
     # drone.append_current_path(coordinates)
-
     camera = drone.get_drone()
+    Headings  = ['Location', 'Time to find Location (s)', 'Time to find Location (m.s)', 'Total time up to this point (s)', 'Total time up to this point (m.s)', 'Current Battery Life (%)']
+    csvFile = open(fileName, "w")
+    csvwriter = csv.writer(csvFile, lineterminator='\n')
+    csvwriter.writerow(Headings)
+    csvwriter.writerow(['Starting Helipad', 0, 0, 0, 0, str(camera.get_battery()) + ' %'])
+    csvFile.close()
+    flag_time = 1
     # with open('OutputLog.csv', 'a') as outFile:
     #     outFile.write(f"Starting battery: {camera.get_battery()}\n")
     coordinates = np.delete(coordinates, 0, axis=1)
@@ -250,7 +282,7 @@ if __name__ == "__main__":
                     else:
                         drone.go_to(1000, 550, 0)
                         quadrant = 1
-                calibrate(drone, land=False)
+                calibrate(drone, fileName, start, st, fileFlag = 0, land=False)
                 drone.land(True)
                 try:
                     input("DRONE BATTERY LOW. CHANGE BATTERY, RECONNECT, THEN PRESS ENTER.")
@@ -270,7 +302,8 @@ if __name__ == "__main__":
                 break
             test += 1
             if coordinates[0][location] == 0 or coordinates[0][location] == 1000: # second number to be changed to whatever the boundary size is
-                calibrate(drone, False, coordinates[0][location], coordinates[1][location])
+                fileFlag = 1
+                calibrate(drone, fileName, start, st, fileFlag, False, coordinates[0][location], coordinates[1][location])
             else:
                 target_turbine = None
                 for name in turbines:
@@ -287,7 +320,7 @@ if __name__ == "__main__":
 
                 # Take 10 images to find the location of the target and do the mission if it is found
                 info = check_camera(camera)      
-                found = trackObject(drone, info, turbines, [drone.get_x_location(), drone.get_y_location(), drone.get_angle()], target_turbine)
+                found = trackObject(drone, info, turbines, [drone.get_x_location(), drone.get_y_location(), drone.get_angle()], fileName, start, flag_time, st, fileFlag, target_turbine)
                 
                 # If it is not seen move towards the target
                 img_counter = 0
@@ -297,21 +330,22 @@ if __name__ == "__main__":
                     if dist > 35 + x_distance_cutoff:
                         # Angel's edit of - x_distance_cutoff
                         drone.go_to(coordinates[0][location] - x_distance_cutoff, coordinates[1][location], half_travel=True)
-                        found = trackObject(drone, info, turbines, [drone.get_x_location(), drone.get_y_location(), drone.get_angle()], target_turbine)
+                        found = trackObject(drone, info, turbines, [drone.get_x_location(), drone.get_y_location(), drone.get_angle()], fileName, start, flag_time, st, fileFlag, target_turbine)
+                        flag_time = 0
                     else:
-                        qr_detection(drone, turbines, [drone.get_x_location(), drone.get_y_location(), drone.get_z_location()], target_turbine)
+                        qr_detection(drone, turbines, [drone.get_x_location(), drone.get_y_location(), drone.get_z_location()], fileName, start, flag_time, st, fileFlag, target_turbine)
+                        flag_time = 0
                         found = True
                 if coordinates[0][location] == coordinates[0][-1] and coordinates[1][location] == coordinates[1][-1]:
                     finished = True
 
-    drone.go_to(ending_angle=0)
-    print(">>>>>>>>>>>>>>>> TOTAL FLIGHT TIME: ", time.time() - start_time)
-
-    # with open('OutputLog.csv', 'a') as outFile:
-    #             outFile.write(f"Ended at: {round(time.time()-start)}\n")
-    #             outFile.write(f"Ending battery: {camera.get_battery()}\n")
-    calibrate(drone, land=True)
-    drone.land(turn_off = True)
+    # drone.go_to(ending_angle=0)
+    # print(">>>>>>>>>>>>>>>> TOTAL FLIGHT TIME: ", time.time() - start_time)
+    # # with open('OutputLog.csv', 'a') as outFile:
+    # #             outFile.write(f"Ended at: {round(time.time()-start)}\n")
+    # #             outFile.write(f"Ending battery: {camera.get_battery()}\n")
+    # calibrate(drone, fileName, start, st, fileFlag = 1, land=True)
+    # drone.land(turn_off = True)
 
 
     
