@@ -98,10 +98,10 @@ def find_circles(img, down=True, green=False):
         if green == False:
             circles = cv.HoughCircles(cimg, cv.HOUGH_GRADIENT, 1, 120,
                             param1=80, param2=15,
-                            minRadius = 20, maxRadius = 250)
+                            minRadius = 5, maxRadius = 250)
         else:
             circles = cv.HoughCircles(cimg, cv.HOUGH_GRADIENT, 1, 120,
-                            param1=80, param2=25, 
+                            param1=80, param2=35, 
                             minRadius = 15, maxRadius = 200) # original: 80
 
 

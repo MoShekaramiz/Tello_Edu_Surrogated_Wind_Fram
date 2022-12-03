@@ -314,13 +314,13 @@ def qr_detection(drone, turbines, starting_location, fileName, start, flag_time,
             elif (img_counter%105) == 0:
                 drone.move(left=(snake_path_length))
             elif (img_counter%90) == 0:
-                drone.move(fwd=(forward_distance))
+                drone.move(fwd=(2 * forward_distance))
             elif (img_counter%75) == 0:
                 drone.move(right=(snake_path_length))
             elif (img_counter%60) == 0:
                 drone.move(right=(snake_path_length))
             elif (img_counter%45) == 0:
-                drone.move(fwd=(forward_distance))
+                drone.move(fwd=(2 * forward_distance))
             elif (img_counter%30) == 0:
                 drone.move(left=(2*snake_path_length))
             elif (img_counter%15) == 0:

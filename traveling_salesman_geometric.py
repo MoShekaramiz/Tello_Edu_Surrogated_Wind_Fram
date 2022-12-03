@@ -71,22 +71,22 @@ start = time.time()
 # data = np.array([xpos, ypos], np.int32)
 
 # Testing landing pad Atrium Fan 3 
-xpos = np.array([0, 217, 1000])
-xpos = np.append(xpos, xpos[0])
-ypos = np.array([0, -426, 0])
-ypos = np.append(ypos, ypos[0])
-data = np.array([xpos, ypos], np.int32)
+# xpos = np.array([0, 217, 1000])
+# xpos = np.append(xpos, xpos[0])
+# ypos = np.array([0, -426, 0])
+# ypos = np.append(ypos, ypos[0])
+# data = np.array([xpos, ypos], np.int32)
 
 # Testing three random fans
 xfans = [360, 832, 217, 613, 58, 832, 188]
 yfans = [58, 409, 224, 460, 125, 150, 457]
 # list of fan numbers, we will choose a random value from the list
-# list1 = [1, 2, 3, 4, 5, 6, 7]
-# random_choice1 = random.choice(list1)
-# list1.remove(random_choice1)
-# random_choice2 = random.choice(list1)
-# list1.remove(random_choice2)
-# random_choice3 = random.choice(list1)
+list1 = [1, 2, 3, 4, 5, 6, 7]
+random_choice1 = random.choice(list1)
+list1.remove(random_choice1)
+random_choice2 = random.choice(list1)
+list1.remove(random_choice2)
+random_choice3 = random.choice(list1)
 # Change this number below to determine which fan to test, if you want random fan, comment out the whole line below
 # random_choice1 = 1
 # random_choice2 = 2
