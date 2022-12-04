@@ -225,7 +225,7 @@ def qr_detection(drone, turbines, starting_location, fileName, start, flag_time,
             # with open('OutputLog.csv', 'a') as outFile:
             #     outFile.write(f"Found QR code:{QR} at {round(time()-start)}\n")
             # 
-            if QR == 'FanTurbine_3': #target
+            if QR == target: #target
                 drone.append_turbine_locations(QR)
                 turbine_found = 0 # Flag to determine if the correct turbine was found
                 video.stop_qr()

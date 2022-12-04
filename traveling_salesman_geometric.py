@@ -216,7 +216,8 @@ class TravelingSalesman():
             if num != 0 and calc < 20: print(f"Path too short at index: {i} to {i+1}")
             energy += calc
         return energy
-
+xfans = [360, 832, 217, 613, 61, 832, 188]
+yfans = [58, 409, 224, 460, 132, 150, 457]
 if __name__ == "__main__":
     with open('OutputLog.csv', 'w') as outFile:
         outFile.write(f"{round(start)}\n")
