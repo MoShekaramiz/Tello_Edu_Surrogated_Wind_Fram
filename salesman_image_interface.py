@@ -177,6 +177,14 @@ def qr_detection(drone, turbines, starting_location, fileName, start, flag_time,
     print("fileName:", fileName)
     if(flag_time == 1):
         previous_time = start
+    else:
+        CsvFile = open(fileName, 'r') 
+        csvreader = csv.reader(CsvFile, delimiter=',')
+        for row in csvreader:
+            previous_time = row[3]
+        previous_time = float(previous_time)
+        CsvFile.close()
+    print('previous_time:', previous_time)
     drone_lower = drone.get_drone()
     drone.move(down=110)
     if drone_lower.get_height() > 50:
@@ -209,16 +217,26 @@ def qr_detection(drone, turbines, starting_location, fileName, start, flag_time,
             turb = QR
             turb = turb.replace('d', 'd ')
             turb = turb.replace('_', ' ')
-            if((current-previous_time)%60 < 10 and (current-start)% 60 < 10):
-                csvwriter.writerow([turb, current-previous_time, str(int((current-previous_time)//60)) + '.0' + str((current-previous_time)%60), current-start, str(int((current-start)//60)) + '.0' + str((current-start)%60), str(drone_var.get_battery()) + ' %'])
-            elif((current-previous_time)%60 < 10):
-                csvwriter.writerow([turb, current-previous_time, str(int((current-previous_time)//60)) + '.0' + str((current-previous_time)%60), current-start, str(int((current-start)//60)) + '.' + str((current-start)%60), str(drone_var.get_battery()) + ' %'])
-            elif((current-start)% 60 < 10):
-                csvwriter.writerow([turb, current-previous_time, str(int((current-previous_time)//60)) + '.' + str((current-previous_time)%60), current-start, str(int((current-start)//60)) + '.0' + str((current-start)%60), str(drone_var.get_battery()) + ' %'])
+            if(flag_time == 1):
+                if((current-previous_time)%60 < 10 and (current-start)% 60 < 10):
+                    csvwriter.writerow([turb, current-previous_time, str(int((current-previous_time)//60)) + '.0' + str((current-previous_time)%60), current-start, str(int((current-start)//60)) + '.0' + str((current-start)%60), str(drone_var.get_battery()) + ' %'])
+                elif((current-previous_time)%60 < 10):
+                    csvwriter.writerow([turb, current-previous_time, str(int((current-previous_time)//60)) + '.0' + str((current-previous_time)%60), current-start, str(int((current-start)//60)) + '.' + str((current-start)%60), str(drone_var.get_battery()) + ' %'])
+                elif((current-start)% 60 < 10):
+                    csvwriter.writerow([turb, current-previous_time, str(int((current-previous_time)//60)) + '.' + str((current-previous_time)%60), current-start, str(int((current-start)//60)) + '.0' + str((current-start)%60), str(drone_var.get_battery()) + ' %'])
+                else:
+                    csvwriter.writerow([turb, current-previous_time, str(int((current-previous_time)//60)) + '.' + str((current-previous_time)%60), current-start, str(int((current-start)//60)) + '.' + str((current-start)%60), str(drone_var.get_battery()) + ' %'])
             else:
-                csvwriter.writerow([turb, current-previous_time, str(int((current-previous_time)//60)) + '.' + str((current-previous_time)%60), current-start, str(int((current-start)//60)) + '.' + str((current-start)%60), str(drone_var.get_battery()) + ' %'])
+                if((current-previous_time-start)%60 < 10 and (current-start)%60 < 10):
+                    csvwriter.writerow([turb, current-previous_time-start, str(int((current-previous_time-start)//60)) + '.0' + str((current-previous_time-start)%60), current-start, str(int((current-start)//60)) + '.0' + str((current-start)%60), str(drone_var.get_battery()) + ' %'])
+                elif((current-previous_time-start)%60 < 10):
+                    csvwriter.writerow([turb, current-previous_time-start, str(int((current-previous_time-start)//60)) + '.0' + str((current-previous_time-start)%60), current-start, str(int((current-start)//60)) + '.' + str((current-start)%60), str(drone_var.get_battery()) + ' %'])
+                elif((current-start)%60 < 10):
+                    csvwriter.writerow([turb, current-previous_time-start, str(int((current-previous_time-start)//60)) + '.' + str((current-previous_time-start)%60), current-start, str(int((current-start)//60)) + '.0' + str((current-start)%60), str(drone_var.get_battery()) + ' %'])
+                else:
+                    csvwriter.writerow([turb, current-previous_time-start, str(int((current-previous_time-start)//60)) + '.' + str((current-previous_time-start)%60), current-start, str(int((current-start)//60)) + '.' + str((current-start)%60), str(drone_var.get_battery()) + ' %'])
             csvFile.close()
-            previous_time = current
+            # previous_time = current
             
             # Angel - Comment this line below when not testing individual fans
             # drone.land()
