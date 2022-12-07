@@ -201,7 +201,7 @@ def qr_detection(drone, turbines, starting_location, fileName, start, flag_time,
     search_loop_counter = 1
     snake_path_length = 30
     # Distance to move foward for snake path
-    forward_distance = 30
+    forward_distance = 60
 
     while True:
         QR, img, info = droneReadQR(drone.get_drone())
@@ -237,9 +237,6 @@ def qr_detection(drone, turbines, starting_location, fileName, start, flag_time,
                     csvwriter.writerow([turb, current-previous_time-start, str(int((current-previous_time-start)//60)) + '.' + str((current-previous_time-start)%60), current-start, str(int((current-start)//60)) + '.' + str((current-start)%60), str(drone_var.get_battery()) + ' %'])
             csvFile.close()
             # previous_time = current
-            
-            # Angel - Comment this line below when not testing individual fans
-            # drone.land()
             # with open('OutputLog.csv', 'a') as outFile:
             #     outFile.write(f"Found QR code:{QR} at {round(time()-start)}\n")
             # 
@@ -297,47 +294,33 @@ def qr_detection(drone, turbines, starting_location, fileName, start, flag_time,
             # This if statement is checking if the drone has made a full loop searching
             if img_counter == 120:
                 # Check which search pattern the drone has already attempted.
-                if search_loop_counter == 1:
-                    # Snake path search
-                    print("Drone completed snake search loop, repeating forward")
-                    # This will start the search again
-                    img_counter = 0
-                    # Keep track of which search increment we are in
-                    search_loop_counter += 1
-                elif search_loop_counter == 2:
-                    # Snake path search
-                    print("Drone completed snake search loop, repeating forward")
-                    # This will start the search again
-                    img_counter = 0
-                    # Keep track of which search increment we are in
-                    search_loop_counter += 1
-                elif search_loop_counter == 3:
-                    # Snake path search
-                    print("Drone completed snake search loop, repeating forward")
+                if search_loop_counter < 4:
+                    print("Drone completed snake search loop, repeating again")
                     # This will start the search again
                     img_counter = 0
                     # Keep track of which search increment we are in
                     search_loop_counter += 1
                 elif search_loop_counter == 4:
                     # Tell drone to go home and land
-                    print("Qr code not found. Telling drone to go back to helipad and land")
-                    drone.move(up=70)
+                    print("QR code not found. Telling drone to go back to helipad and land")
+                    drone.move(up=110)
                     drone.go_to(0, 0, 0)
                     # calibrate(drone_class, land=False, x_coordinate=0, y_coordinate=0):
                     drone.land()
                 else:
                     # search_loop_counter should not ever be this value
                     print("ERROR, search_loop_counter is an unexpected value of : " + str(search_loop_counter))
+            # Snake Path search for QR code
             elif (img_counter%105) == 0:
                 drone.move(left=(snake_path_length))
             elif (img_counter%90) == 0:
-                drone.move(fwd=(2 * forward_distance))
+                drone.move(fwd=(forward_distance))
             elif (img_counter%75) == 0:
                 drone.move(right=(snake_path_length))
             elif (img_counter%60) == 0:
                 drone.move(right=(snake_path_length))
             elif (img_counter%45) == 0:
-                drone.move(fwd=(2 * forward_distance))
+                drone.move(fwd=(forward_distance))
             elif (img_counter%30) == 0:
                 drone.move(left=(2*snake_path_length))
             elif (img_counter%15) == 0:

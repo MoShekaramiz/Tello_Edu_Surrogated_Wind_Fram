@@ -14,7 +14,7 @@ from datetime import datetime
 start = time.time()
 
 # Testing 1-7 random fans
-number_of_fans = 2 # Change this number to the number of fans you would like to test 
+number_of_fans = 3 # Change this number to the number of fans you would like to test 
 fans_x_coordinates = [360, 832, 217, 613, 61, 832, 188]
 fans_y_coordinates = [58, 409, 224, 460, 132, 150, 457]
 list1 = [1, 2, 3, 4, 5, 6, 7] # List of fans 1-7 identified by their QR code number
