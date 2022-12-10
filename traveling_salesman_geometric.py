@@ -30,8 +30,8 @@ if number_of_fans == 1: # The program requires 3 points, so testing just 1 fan w
     path_y_coordinates = [0, fans_y_coordinates[fans_list[0] - 1], 0] # Minus 1 since lists are 0-based and there is no 0th fan
     print("\n>>>>>>>>>>>>>>>>>>>>> CHOOSING FAN " + str(fans_list[0]))
 else:  # When we are using more than 1 fan
-    path_x_coordinates = [0] # This will have starting point and randomly selected x coordinates of fans
-    path_y_coordinates = [0] # This will have starting point and randomly selected y coordinates of fans
+    path_x_coordinates = [0] # This will have starting point 0 and randomly selected x coordinates of fans
+    path_y_coordinates = [0] # This will have starting point 0 and randomly selected y coordinates of fans
     print("\n>>>>>>>>>>>>>>>>>>>>> CHOOSING FANS ", end ="")
     for index in range(number_of_fans): # Set up x and y coordinates of randomly selected fans and print which fans are part of the path
         path_x_coordinates.append(fans_x_coordinates[fans_list[index] - 1]) # Minus 1 since lists are 0-based and there is no 0th fan
