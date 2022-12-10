@@ -97,7 +97,7 @@ def find_circles(img, down=True, green=False):
         cimg = cv.cvtColor(output, cv.COLOR_BGR2GRAY)
         if green == False:
             circles = cv.HoughCircles(cimg, cv.HOUGH_GRADIENT, 1, 120,
-                            param1=80, param2=15,
+                            param1=80, param2=30,
                             minRadius = 5, maxRadius = 250)
         else:
             circles = cv.HoughCircles(cimg, cv.HOUGH_GRADIENT, 1, 120,

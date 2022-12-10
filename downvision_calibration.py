@@ -27,7 +27,7 @@ def calibrate(drone_class, fileName, start, st, fileFlag, land=False, x_coordina
     # cv.imshow("Scanning For Calibration Marker", img)
     # cv.waitKey(1)
     # cv.destroyWindow("Scanning For Calibration Marker")
-    drone_class.go_to(x_coordinate - 200, y_coordinate)
+    drone_class.go_to(x_coordinate - 300, y_coordinate)
     drone_class.go_to(drone_class.get_x_location(), drone_class.get_y_location(), 0)
     drone_class.move(down=40)
     found = go_to_helipad(drone_class, width, center)
