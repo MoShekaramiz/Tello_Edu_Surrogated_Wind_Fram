@@ -47,35 +47,6 @@ ypos = np.array(path_y_coordinates)
 ypos = np.append(ypos, ypos[0])
 data = np.array([xpos, ypos], np.int32) 
 
-# Lab Test Points
-# distance check points
-# xpos = np.array([0, 300, 0])
-# xpos = np.append(xpos, xpos[0])
-# ypos = np.array([0, -200, 0])
-# ypos = np.append(ypos, ypos[0])
-# data = np.array([xpos, ypos], np.int32)
-
-# Testing landing pad Lab
-# xpos = np.array([0, 320, 260, 150])
-# xpos = np.append(xpos, xpos[0])
-# ypos = np.array([0, 0, 220, 400])
-# ypos = np.append(ypos, ypos[0])
-# data = np.array([xpos, ypos], np.int32)
-
-# Testing landing pad Atrium
-# xpos = np.array([0, 447, 1000])
-# xpos = np.append(xpos, xpos[0])
-# ypos = np.array([0, 0, 0])
-# ypos = np.append(ypos, ypos[0])
-# data = np.array([xpos, ypos], np.int32)
-
-# Testing landing pad Atrium Fan 3 
-# xpos = np.array([0, 217, 1000])
-# xpos = np.append(xpos, xpos[0])
-# ypos = np.array([0, -426, 0])
-# ypos = np.append(ypos, ypos[0])
-# data = np.array([xpos, ypos], np.int32)
-
 class TravelingSalesman():
     def __init__(self):
         path1 = np.copy(data)
