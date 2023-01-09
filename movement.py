@@ -30,7 +30,7 @@ class movement():
             self.video()
             sleep(1)
         self.drone.takeoff()
-        print("Current battery remaining: ", self.drone.get_battery())
+        print(">>>>>>>>>>>>>>>>>>>>> Current battery remaining: ", self.drone.get_battery())
         self.drone.send_command_with_return("downvision 0")
         self.new_location[2] = self.drone.get_height()
         sleep(2)

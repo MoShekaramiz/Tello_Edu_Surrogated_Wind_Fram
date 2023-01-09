@@ -8,6 +8,12 @@ import csv
 import sys
 import os
 
+# Angel
+from datetime import datetime
+st = datetime.now().strftime('%B %d,%Y %H.%M.%S')
+fileName = "CSV Files/Data Log " + st + ".csv"
+start = time.time()
+
 fbRange = [62000,82000] # [32000, 52000] # preset parameter for detected image boundary size
 w, h = 720, 480         # display size of the screen
 
@@ -27,26 +33,32 @@ def calibrate(drone_class, fileName, start, st, fileFlag, land=False, x_coordina
     # cv.imshow("Scanning For Calibration Marker", img)
     # cv.waitKey(1)
     # cv.destroyWindow("Scanning For Calibration Marker")
-    drone_class.go_to(x_coordinate - 300, y_coordinate)
-    drone_class.go_to(drone_class.get_x_location(), drone_class.get_y_location(), 0)
-    drone_class.move(down=40)
-    found = go_to_helipad(drone_class, width, center)
-    #drone_class.go_to(drone_class.get_x_location(), drone_class.get_y_location(), 0)
-    if found == False:
-        drone_class.go_to(x_coordinate, y_coordinate, 0)
-    # found = go_to_helipad(drone_class, width, center)
-    # cv.destroyWindow("Scanning For Calibration Marker")
-    # if found == False:
-    #     print("Not found.")
-    #     drone_class.go_to((x_coordinate + drone_class.get_x_location())/2, (y_coordinate + drone_class.get_y_location())/2)
-    #     found = go_to_helipad(drone_class, width, center)
-    #     if found == False:
-    #         drone_class.go_to((x_coordinate + drone_class.get_x_location())/2, (y_coordinate + drone_class.get_y_location())/2)
-    #         found = go_to_helipad(drone_class, width, center)
-    #         print("Not found, second time.")
-    #         if found == False:
-    #             drone_class.go_to(x_coordinate, y_coordinate)
-    #             print("Not found, third time")
+    angel_bool = True
+    if angel_bool == True:
+        # do this
+        drone_class.go_to(0+30, 0, 0)
+        drone_class.move(down=40)
+    else:
+        drone_class.go_to(-300, 0)
+        drone_class.go_to(drone_class.get_x_location(), drone_class.get_y_location(), 0)
+        drone_class.move(down=40)
+        found = go_to_helipad(drone_class, width, center)
+        #drone_class.go_to(drone_class.get_x_location(), drone_class.get_y_location(), 0)
+        if found == False:
+            drone_class.go_to(0, 0, 0)
+        # found = go_to_helipad(drone_class, width, center)
+        # cv.destroyWindow("Scanning For Calibration Marker")
+        # if found == False:
+        #     print("Not found.")
+        #     drone_class.go_to((x_coordinate + drone_class.get_x_location())/2, (y_coordinate + drone_class.get_y_location())/2)
+        #     found = go_to_helipad(drone_class, width, center)
+        #     if found == False:
+        #         drone_class.go_to((x_coordinate + drone_class.get_x_location())/2, (y_coordinate + drone_class.get_y_location())/2)
+        #         found = go_to_helipad(drone_class, width, center)
+        #         print("Not found, second time.")
+        #         if found == False:
+        #             drone_class.go_to(x_coordinate, y_coordinate)
+        #             print("Not found, third time")
     print("><><><><><><><><><><><><><>", drone.get_height())
     print("><><><><><><><><><><><><><>", drone.get_height())
     height = drone.get_height()
@@ -86,35 +98,38 @@ def calibrate(drone_class, fileName, start, st, fileFlag, land=False, x_coordina
                     cv.destroyWindow("Downward Output")
                     current = time.time()
                     drone.land()
-                    numRows = 0          
-                    CsvFile = open(fileName, 'r') 
-                    csvreader = csv.reader(CsvFile, delimiter=',')
-                    for row in csvreader:
-                        numRows = numRows + 1
-                        previous_time = row[3]
-                    previous_time = float(previous_time)
-                    CsvFile.close()
-                    print('numRows:', numRows)
-                    print('previous_time:', previous_time)
-                    csvFile = open(fileName, "a")
-                    csvwriter = csv.writer(csvFile, lineterminator='\n')
-                    if((current-previous_time-start)%60 < 10 and (current-start)%60 < 10):
-                        csvwriter.writerow(['Landing helipad', current-previous_time-start, str(int((current-previous_time-start)//60)) + '.0' + str((current-previous_time-start)%60), current-start, str(int((current-start)//60)) + '.0' + str((current-start)%60), str(drone.get_battery()) + ' %'])
-                    elif((current-previous_time-start)%60 < 10):
-                        csvwriter.writerow(['Landing helipad', current-previous_time-start, str(int((current-previous_time-start)//60)) + '.0' + str((current-previous_time-start)%60), current-start, str(int((current-start)//60)) + '.' + str((current-start)%60), str(drone.get_battery()) + ' %'])
-                    elif((current-start)%60 < 10):
-                        csvwriter.writerow(['Landing helipad', current-previous_time-start, str(int((current-previous_time-start)//60)) + '.' + str((current-previous_time-start)%60), current-start, str(int((current-start)//60)) + '.0' + str((current-start)%60), str(drone.get_battery()) + ' %'])
-                    else:
-                        csvwriter.writerow(['Landing helipad', current-previous_time-start, str(int((current-previous_time-start)//60)) + '.' + str((current-previous_time-start)%60), current-start, str(int((current-start)//60)) + '.' + str((current-start)%60), str(drone.get_battery()) + ' %'])
-                    csvFile.close()
-                    if(fileFlag == 1):
-                        fName = 'CSV Files\Successful ' + str(numRows-2) + '-Fan test Data Log ' + st + '.csv'
-                    else:
-                        fName = 'CSV Files\Failure Data Log' + st + '.csv'
-                    fName = os.path.dirname(__file__) + '\\' + fName
-                    fileName = os.path.dirname(__file__) + '\\' + fileName
-                    csvFile.close()
-                    os.rename(fileName, fName)
+                    try:
+                        numRows = 0          
+                        CsvFile = open(fileName, 'r') 
+                        csvreader = csv.reader(CsvFile, delimiter=',')
+                        for row in csvreader:
+                            numRows = numRows + 1
+                            previous_time = row[3]
+                        previous_time = float(previous_time)
+                        CsvFile.close()
+                        print('numRows:', numRows)
+                        print('previous_time:', previous_time)
+                        csvFile = open(fileName, "a")
+                        csvwriter = csv.writer(csvFile, lineterminator='\n')
+                        if((current-previous_time-start)%60 < 10 and (current-start)%60 < 10):
+                            csvwriter.writerow(['Landing helipad', current-previous_time-start, str(int((current-previous_time-start)//60)) + '.0' + str((current-previous_time-start)%60), current-start, str(int((current-start)//60)) + '.0' + str((current-start)%60), str(drone.get_battery()) + ' %'])
+                        elif((current-previous_time-start)%60 < 10):
+                            csvwriter.writerow(['Landing helipad', current-previous_time-start, str(int((current-previous_time-start)//60)) + '.0' + str((current-previous_time-start)%60), current-start, str(int((current-start)//60)) + '.' + str((current-start)%60), str(drone.get_battery()) + ' %'])
+                        elif((current-start)%60 < 10):
+                            csvwriter.writerow(['Landing helipad', current-previous_time-start, str(int((current-previous_time-start)//60)) + '.' + str((current-previous_time-start)%60), current-start, str(int((current-start)//60)) + '.0' + str((current-start)%60), str(drone.get_battery()) + ' %'])
+                        else:
+                            csvwriter.writerow(['Landing helipad', current-previous_time-start, str(int((current-previous_time-start)//60)) + '.' + str((current-previous_time-start)%60), current-start, str(int((current-start)//60)) + '.' + str((current-start)%60), str(drone.get_battery()) + ' %'])
+                        csvFile.close()
+                        if(fileFlag == 1):
+                            fName = 'CSV Files\Successful ' + str(numRows-2) + '-Fan test Data Log ' + st + '.csv'
+                        else:
+                            fName = 'CSV Files\Failure Data Log' + st + '.csv'
+                        fName = os.path.dirname(__file__) + '\\' + fName
+                        fileName = os.path.dirname(__file__) + '\\' + fileName
+                        csvFile.close()
+                        os.rename(fileName, fName)
+                    except FileNotFoundError:
+                        print("File not appeneded") 
                     sys.exit()
             else:
                 x = round(-(circle_x-160)/10)
@@ -134,19 +149,34 @@ def calibrate(drone_class, fileName, start, st, fileFlag, land=False, x_coordina
             if frames_since_positive == 5:
                 frames_since_positive = 0
                 img_counter += 1
-                if img_counter == 30:
-                    drone_class.move(fwd=60)
-                elif img_counter == 60:
-                    drone_class.move(left=60)
-                elif img_counter == 90 or img_counter == 120:
-                    drone_class.move(back=60)
-                elif img_counter == 150 or img_counter == 180:
-                    drone_class.move(right=60)
-                elif img_counter == 210 or img_counter == 240:
-                    drone_class.move(fwd=60)
-                elif img_counter == 270:
-                    drone_class.move(back=60, left=60, down=20)
+                if img_counter == 30 or img_counter == 60:
+                    drone_class.move(right=30)
+                elif img_counter == 90:
+                    drone_class.move(left=90)
+                elif img_counter == 120:
+                    drone_class.move(left=30)
+                elif img_counter == 150:
+                    drone_class.move(back=30)
+                elif img_counter == 180 or img_counter == 210 or img_counter == 240 or img_counter == 270:
+                    drone_class.move(right=30)
+                elif img_counter == 300:
+                    drone_class.move(back=30)
+                elif img_counter == 330 or img_counter == 360:
+                    drone_class.move(left=30)
                     img_counter = 0
+                # if img_counter == 30 or img_counter == 60:
+                #     drone_class.move(fwd=30)
+                # elif img_counter == 90 or img_counter == 120:
+                #     drone_class.move(left=30)
+                # elif img_counter == 150 or img_counter == 180 or img_counter == 210 or img_counter == 240:
+                #     drone_class.move(back=30)
+                # elif img_counter == 270 or img_counter == 300 or img_counter == 330 or img_counter == 360:
+                #     drone_class.move(right=30)
+                # elif img_counter == 390 or img_counter == 420 or img_counter == 450 or img_counter == 480:
+                #     drone_class.move(fwd=30)
+                # elif img_counter == 510 or img_counter == 540:
+                #     drone_class.move(back=30, left=30)
+                #     img_counter = 0
 
     # frames_since_positive = 0
     # angle = 0
@@ -335,5 +365,6 @@ if __name__ == "__main__":
     # feed.start()
     # #feed.run()
     # sleep(1)
-    calibrate(drone, True, 200, 0)
+    # calibrate(drone, True, 200, 0, fileFlag=0)
+    calibrate(drone, fileName, start, st, fileFlag = 0, land=True)
     drone.land()

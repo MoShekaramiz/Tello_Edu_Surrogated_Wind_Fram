@@ -212,30 +212,32 @@ def qr_detection(drone, turbines, starting_location, fileName, start, flag_time,
             # print(">>>>>>>>>>>>>>>>CURRENT FLIGHT TIME: ", drone_var.get_flight_time())
             print(">>>>>>>>>>>>>>>>QR CODE FOUND: ", QR)
             current = time.time()
-            csvFile = open(fileName, "a")
-            csvwriter = csv.writer(csvFile, lineterminator='\n')
-            turb = QR
-            turb = turb.replace('d', 'd ')
-            turb = turb.replace('_', ' ')
-            if(flag_time == 1):
-                if((current-previous_time)%60 < 10 and (current-start)% 60 < 10):
-                    csvwriter.writerow([turb, current-previous_time, str(int((current-previous_time)//60)) + '.0' + str((current-previous_time)%60), current-start, str(int((current-start)//60)) + '.0' + str((current-start)%60), str(drone_var.get_battery()) + ' %'])
-                elif((current-previous_time)%60 < 10):
-                    csvwriter.writerow([turb, current-previous_time, str(int((current-previous_time)//60)) + '.0' + str((current-previous_time)%60), current-start, str(int((current-start)//60)) + '.' + str((current-start)%60), str(drone_var.get_battery()) + ' %'])
-                elif((current-start)% 60 < 10):
-                    csvwriter.writerow([turb, current-previous_time, str(int((current-previous_time)//60)) + '.' + str((current-previous_time)%60), current-start, str(int((current-start)//60)) + '.0' + str((current-start)%60), str(drone_var.get_battery()) + ' %'])
-                else:
-                    csvwriter.writerow([turb, current-previous_time, str(int((current-previous_time)//60)) + '.' + str((current-previous_time)%60), current-start, str(int((current-start)//60)) + '.' + str((current-start)%60), str(drone_var.get_battery()) + ' %'])
-            else:
-                if((current-previous_time-start)%60 < 10 and (current-start)%60 < 10):
-                    csvwriter.writerow([turb, current-previous_time-start, str(int((current-previous_time-start)//60)) + '.0' + str((current-previous_time-start)%60), current-start, str(int((current-start)//60)) + '.0' + str((current-start)%60), str(drone_var.get_battery()) + ' %'])
-                elif((current-previous_time-start)%60 < 10):
-                    csvwriter.writerow([turb, current-previous_time-start, str(int((current-previous_time-start)//60)) + '.0' + str((current-previous_time-start)%60), current-start, str(int((current-start)//60)) + '.' + str((current-start)%60), str(drone_var.get_battery()) + ' %'])
-                elif((current-start)%60 < 10):
-                    csvwriter.writerow([turb, current-previous_time-start, str(int((current-previous_time-start)//60)) + '.' + str((current-previous_time-start)%60), current-start, str(int((current-start)//60)) + '.0' + str((current-start)%60), str(drone_var.get_battery()) + ' %'])
-                else:
-                    csvwriter.writerow([turb, current-previous_time-start, str(int((current-previous_time-start)//60)) + '.' + str((current-previous_time-start)%60), current-start, str(int((current-start)//60)) + '.' + str((current-start)%60), str(drone_var.get_battery()) + ' %'])
-            csvFile.close()
+            try:
+                with open(fileName, "a") as csvFile:
+                    csvwriter = csv.writer(csvFile, lineterminator='\n')
+                    turb = QR
+                    turb = turb.replace('d', 'd ')
+                    turb = turb.replace('_', ' ')
+                    if(flag_time == 1):
+                        if((current-previous_time)%60 < 10 and (current-start)% 60 < 10):
+                            csvwriter.writerow([turb, current-previous_time, str(int((current-previous_time)//60)) + '.0' + str((current-previous_time)%60), current-start, str(int((current-start)//60)) + '.0' + str((current-start)%60), str(drone_var.get_battery()) + ' %'])
+                        elif((current-previous_time)%60 < 10):
+                            csvwriter.writerow([turb, current-previous_time, str(int((current-previous_time)//60)) + '.0' + str((current-previous_time)%60), current-start, str(int((current-start)//60)) + '.' + str((current-start)%60), str(drone_var.get_battery()) + ' %'])
+                        elif((current-start)% 60 < 10):
+                            csvwriter.writerow([turb, current-previous_time, str(int((current-previous_time)//60)) + '.' + str((current-previous_time)%60), current-start, str(int((current-start)//60)) + '.0' + str((current-start)%60), str(drone_var.get_battery()) + ' %'])
+                        else:
+                            csvwriter.writerow([turb, current-previous_time, str(int((current-previous_time)//60)) + '.' + str((current-previous_time)%60), current-start, str(int((current-start)//60)) + '.' + str((current-start)%60), str(drone_var.get_battery()) + ' %'])
+                    else:
+                        if((current-previous_time-start)%60 < 10 and (current-start)%60 < 10):
+                            csvwriter.writerow([turb, current-previous_time-start, str(int((current-previous_time-start)//60)) + '.0' + str((current-previous_time-start)%60), current-start, str(int((current-start)//60)) + '.0' + str((current-start)%60), str(drone_var.get_battery()) + ' %'])
+                        elif((current-previous_time-start)%60 < 10):
+                            csvwriter.writerow([turb, current-previous_time-start, str(int((current-previous_time-start)//60)) + '.0' + str((current-previous_time-start)%60), current-start, str(int((current-start)//60)) + '.' + str((current-start)%60), str(drone_var.get_battery()) + ' %'])
+                        elif((current-start)%60 < 10):
+                            csvwriter.writerow([turb, current-previous_time-start, str(int((current-previous_time-start)//60)) + '.' + str((current-previous_time-start)%60), current-start, str(int((current-start)//60)) + '.0' + str((current-start)%60), str(drone_var.get_battery()) + ' %'])
+                        else:
+                            csvwriter.writerow([turb, current-previous_time-start, str(int((current-previous_time-start)//60)) + '.' + str((current-previous_time-start)%60), current-start, str(int((current-start)//60)) + '.' + str((current-start)%60), str(drone_var.get_battery()) + ' %'])
+            except FileNotFoundError:
+                print("File not appeneded") 
             # previous_time = current
             # with open('OutputLog.csv', 'a') as outFile:
             #     outFile.write(f"Found QR code:{QR} at {round(time()-start)}\n")
@@ -252,7 +254,7 @@ def qr_detection(drone, turbines, starting_location, fileName, start, flag_time,
                             drone.move(up=90)
                             mission.mission0(drone, turbines[i][0], QR)
                             turbines.pop(i) 
-
+                            
                             if len(turbines) != 0:
                                 video.start_haar()
                                 sleep(0.5)
@@ -260,11 +262,9 @@ def qr_detection(drone, turbines, starting_location, fileName, start, flag_time,
                                 sleep(0.5)
                                 #drone.go_to(starting_location[0], starting_location[1], starting_location[2])
                                 break
-
                             else:
                                 video.stop_qr()
-                                drone.go_to(0, 0, 0)
-                                drone.land()
+                                calibrate(drone, fileName, start, st, fileFlag, False)
 
                     if turbine_found == 0:
                         drone.move(up=110)
@@ -283,10 +283,8 @@ def qr_detection(drone, turbines, starting_location, fileName, start, flag_time,
             else: # This section controls what the drone does if the QR code doesn't match the target
                 print(f">>>>>>>>>>>>>>>>QR CODE NOT MATCHING: {QR} != {target}")
                 video.stop_qr()
-                drone.move(up=70)
-                drone.go_to(0, 0, 0)
+                drone.move(up=110)
                 calibrate(drone, fileName, start, st, fileFlag, False)
-                drone.land()
         # Snake path algorithm to find qr code to scan
         # By default, the forward search loop comes first
         else:
@@ -304,9 +302,8 @@ def qr_detection(drone, turbines, starting_location, fileName, start, flag_time,
                     # Tell drone to go home and land
                     print("QR code not found. Telling drone to go back to helipad and land")
                     drone.move(up=110)
-                    drone.go_to(0, 0, 0)
-                    # calibrate(drone_class, land=False, x_coordinate=0, y_coordinate=0):
-                    drone.land()
+                    # Tell drone to land on helipadd
+                    calibrate(drone, fileName, start, st, fileFlag, False)
                 else:
                     # search_loop_counter should not ever be this value
                     print("ERROR, search_loop_counter is an unexpected value of : " + str(search_loop_counter))

@@ -6,7 +6,6 @@ from check_camera import check_camera
 from salesman_image_interface import trackObject, qr_detection
 from downvision_calibration import calibrate
 import time
-import sys
 import csv
 import movement as mov
 import random
@@ -15,16 +14,16 @@ start = time.time()
 
 # Testing 1-7 random fans
 number_of_fans = 3 # Change this number to the number of fans you would like to test 
-fans_x_coordinates = [360, 832, 217, 613, 61, 832, 188]
-fans_y_coordinates = [58, 409, 224, 460, 132, 150, 457]
+fans_x_coordinates = [360, 832, 550, 613, 61, 832, 188]
+fans_y_coordinates = [48, 409, 224, 460, 127, 150, 457]
 list1 = [1, 2, 3, 4, 5, 6, 7] # List of fans 1-7 identified by their QR code number
-fans_list = [] # Randomly selected order of fans will be inputted here
+fans_list = [] # Randomly selected order of fans will be inputted here  
 for x in range(number_of_fans): # Put fan numbers into list in which the order is random
     random_fan = random.choice(list1)
     fans_list.append(random_fan)
     list1.remove(random_fan)
 # Change these numbers below to determine which fans to test, if you want random fan, comment out the fans_list below
-# fans_list = [1, 2, 3, 4, 5, 6, 7]
+# fans_list = [3, 2, 3, 4, 5, 6, 7]
 if number_of_fans == 1: # The program requires 3 points, so testing just 1 fan will need the (0,0) coordinate twice
     path_x_coordinates = [0, fans_x_coordinates[fans_list[0] - 1], 0] # Minus 1 since lists are 0-based and there is no 0th fan
     path_y_coordinates = [0, fans_y_coordinates[fans_list[0] - 1], 0] # Minus 1 since lists are 0-based and there is no 0th fan
@@ -94,21 +93,38 @@ class TravelingSalesman():
         plt.rcParams["font.family"] = "Times New Roman"
         figure, axis = plt.subplots(2, 1)
         axis[0].axis([0, 1000, 0, 550])
-        axis[0].title.set_text("Path Before Optimization")
-        axis[0].set_xlabel('x')
-        axis[0].set_ylabel('y')
+        # axis[0].title.set_text("Path Before Optimization")
+        axis[0].set_title('Path Before Optimization', fontsize=16)
+        axis[0].set_xlabel('x (cm)', fontsize=16)
+        axis[0].set_ylabel('y (cm)', fontsize=16)
         # plt.axis([0, 285, 0, 285])
         for i, j in zip(data[0], data[1]):
             axis[0].text(i, j+20, '({}, {})'.format(i, j), fontsize='small')
         axis[0].text(10, 500, f'Total Energy: {int(self.energy_calc(data))}', fontsize='small')
-        axis[0].plot(data[0], data[1], '-o', markersize=4)
+        axis[0].plot(data[0], data[1], '-o', markersize=4) 
         axis[0].quiver(data[0][:-1], data[1][:-1], data[0][1:]-data[0][:-1], 
                    data[1][1:]-data[1][:-1],scale_units='xy', angles='xy', scale=1, color='teal', width=0.005)
+        # Angel's edit - beginning
+        # plot_index = 0
+        # for x,y in zip(data[0],data[1]):
+        #     if plot_index == 0 or plot_index == number_of_fans + 1:
+        #         plot_index += 1
+        #         continue
+        #     label = "Turbine #" + str(plot_index) + "   "
+        #     axis[0].annotate(label, # this is the value which we want to label (text)
+        #                 (x,y), # x and y is the points location where we have to label
+        #                 textcoords="offset points",
+        #                 xytext=(-20,5), # this for the distance between the points
+        #                 # and the text label
+        #                 ha='center')
+        #     plot_index += 1
+        # Angel's edit - end
 
         axis[1].axis([0, 1000, 0, 550])
-        axis[1].title.set_text("Path After Optimization")
-        axis[1].set_xlabel('x')
-        axis[1].set_ylabel('y')
+        # axis[1].title.set_text("Path After Optimization")
+        axis[1].set_title('Path After Optimization', fontsize=16)
+        axis[1].set_xlabel('x (cm)', fontsize=16)
+        axis[1].set_ylabel('y (cm)', fontsize=16)
         # plt.axis([0, 285, 0, 285])
         for i, j in zip(self.path_min[0], self.path_min[1]):
             axis[1].text(i, j+20, '({}, {})'.format(i, j), fontsize='small')
@@ -116,6 +132,21 @@ class TravelingSalesman():
         axis[1].plot(self.path_min[0], self.path_min[1], '-o', markersize=4)
         axis[1].quiver(self.path_min[0][:-1], self.path_min[1][:-1], self.path_min[0][1:]-self.path_min[0][:-1], 
                    self.path_min[1][1:]-self.path_min[1][:-1],scale_units='xy', angles='xy', scale=1, color='teal', width=0.005)
+        # Angel's edit - beginning
+        # plot_index = 0
+        # for x,y in zip(self.path_min[0],self.path_min[1]):
+        #     if plot_index == 0 or plot_index == number_of_fans + 1:
+        #         plot_index += 1
+        #         continue
+        #     label = "Turbine #" + str(plot_index) + "   "
+        #     axis[1].annotate(label, # this is the value which we want to label (text)
+        #                 (x,y), # x and y is the points location where we have to label
+        #                 textcoords="offset points",
+        #                 xytext=(-20,5), # this for the distance between the points
+        #                 # and the text label
+        #                 ha='center')
+        #     plot_index += 1
+        # Angel's edit - end
         plt.show()
 
     def get_path(self):
@@ -217,6 +248,7 @@ if __name__ == "__main__":
                 fileFlag = 1
                 calibrate(drone, fileName, start, st, fileFlag, False, coordinates[0][location], coordinates[1][location])
             else:
+                print("not Calibrate")
                 target_turbine = None
                 for name in turbines:
                     if turbines[name][1][0] == coordinates[0][location] and turbines[name][1][1] == coordinates[1][location]:
@@ -233,7 +265,6 @@ if __name__ == "__main__":
                 # Take 10 images to find the location of the target and do the mission if it is found
                 info = check_camera(camera)      
                 found = trackObject(drone, info, turbines, [drone.get_x_location(), drone.get_y_location(), drone.get_angle()], fileName, start, flag_time, st, fileFlag, target_turbine)
-                
                 # If it is not seen move towards the target
                 img_counter = 0
                 while found == False:
@@ -249,7 +280,11 @@ if __name__ == "__main__":
                         flag_time = 0
                         found = True
                 if coordinates[0][location] == coordinates[0][-1] and coordinates[1][location] == coordinates[1][-1]:
+                    fileFlag = 1
+                    calibrate(drone, fileName, start, st, fileFlag, False, coordinates[0][location], coordinates[1][location])
                     finished = True
+
+
 
     # drone.go_to(ending_angle=0)
     # print(">>>>>>>>>>>>>>>> TOTAL FLIGHT TIME: ", time.time() - start_time)

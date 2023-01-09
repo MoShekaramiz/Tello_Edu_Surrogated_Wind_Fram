@@ -40,12 +40,13 @@ def findTurbine(img, cascade=0):
     if len(turbineListW) != 0: 
         # if there is items in the area list, find the maximum value and return
         for i in range(len(turbineListW)):
-            distance = int((650 * 40.64) / turbineListW[i]) - 40
-            if (np.abs(300 - distance) < n):
+            distance = int((650 * 40.64) / turbineListW[i]) # - 40
+            if (np.abs(300 - distance) < n): # Angel - 300
                 idx = i
-                n = np.abs(300 - distance)
+                n = np.abs(300 - distance) # Angel - 300
+                # print("Distance in find turbine: ", distance)
         #i = turbineListArea.index(max(turbineListArea))
-        distance = int((650 * 40.64) / turbineListW[idx]) - 40
+        distance = int((650 * 40.64) / turbineListW[idx]) # - 40
         # print("Distance in find turbine: ", distance)
         return img, [turbineListC[idx], turbineListArea[idx], turbineListW[idx]]
     else:
@@ -79,10 +80,14 @@ def find_circles(img, down=True, green=False):
             greenLower = (29, 86, 6)
             greenUpper = (64, 255, 255)
         else:
-            blueLower = (40, 105, 105)
+            # blueLower = (40, 95, 95)
             #orig LOW (40, 115, 115), 50, 75
-            blueUpper = (102, 255, 255)
+            # Angel
+            blueLower = (10, 60, 87)
+            # blueUpper = (115, 255, 255)
             #orig HIGH (102, 255, 255)
+            # Angel
+            blueUpper = (43, 106, 141)
         # greenLower = (40, 97, 20)
         # greenUpper = (64, 255, 255)
         blurred = cv.GaussianBlur(img, (11, 11), 0)
@@ -97,7 +102,7 @@ def find_circles(img, down=True, green=False):
         cimg = cv.cvtColor(output, cv.COLOR_BGR2GRAY)
         if green == False:
             circles = cv.HoughCircles(cimg, cv.HOUGH_GRADIENT, 1, 120,
-                            param1=80, param2=30,
+                            param1=80, param2=20,
                             minRadius = 5, maxRadius = 250)
         else:
             circles = cv.HoughCircles(cimg, cv.HOUGH_GRADIENT, 1, 120,
@@ -134,8 +139,10 @@ if __name__ == "__main__":
 
     drone.streamon()
     while True:
-         frame = drone.get_frame_read()
-         img = frame.frame
-         img, info = find_circles(img, down=False, green=True)
-         cv.imshow("Output", img)
-         cv.waitKey(1)
+        frame = drone.get_frame_read()
+        img = frame.frame
+        # Below line is used for green circles since green circles returns only 2 values
+        # img, info = find_circles(img, down=False, green=True) 
+        img, info, radius, center = find_circles(img, down=False, green=False)
+        cv.imshow("Output", img)
+        cv.waitKey(1)
