@@ -116,7 +116,7 @@ class TravelingSalesman():
                         (x,y), # x and y is the points location where we want to label
                         textcoords="offset points",
                         weight="bold",
-                        xytext=(-25,7.5), # this for the distance between the points and the text label
+                        xytext=(-26,7), # this for the distance between the points and the turbine text label
                         ha='center')
             plot_index += 1
         # Labeling Turbine numbers - end
@@ -146,7 +146,7 @@ class TravelingSalesman():
                         (x,y), # x and y is the points location where we want to label
                         textcoords="offset points",
                         weight="bold",
-                        xytext=(-25,7.5), # this for the distance between the points and the text label
+                        xytext=(-26,7), # this for the distance between the points and the turbine text label
                         ha='center')
             plot_index += 1
         # Labeling Turbine numbers - end
