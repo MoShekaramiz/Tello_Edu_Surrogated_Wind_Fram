@@ -93,14 +93,12 @@ class TravelingSalesman():
         plt.rcParams["font.family"] = "Times New Roman"
         figure, axis = plt.subplots(2, 1)
         axis[0].axis([0, 1000, 0, 550])
-        # axis[0].title.set_text("Path Before Optimization")
-        axis[0].set_title('Path Before Optimization', fontsize=16)
+        axis[0].set_title('Path Before Optimization', fontsize=20)
         axis[0].set_xlabel('x (cm)', fontsize=16)
         axis[0].set_ylabel('y (cm)', fontsize=16)
-        # plt.axis([0, 285, 0, 285])
-        for i, j in zip(data[0], data[1]):
+        for i, j in zip(data[0], data[1]): # Writes the (x,y) coordinates above the coordinate location
             axis[0].text(i, j+20, '({}, {})'.format(i, j), fontsize='small')
-        axis[0].text(10, 500, f'Total Energy: {int(self.energy_calc(data))}', fontsize='small')
+        axis[0].text(10, 500, f'Total Energy: {int(self.energy_calc(data))}', fontsize='medium', weight="bold")
         axis[0].plot(data[0], data[1], '-o', markersize=4) 
         axis[0].quiver(data[0][:-1], data[1][:-1], data[0][1:]-data[0][:-1], 
                    data[1][1:]-data[1][:-1],scale_units='xy', angles='xy', scale=1, color='teal', width=0.005)
@@ -113,24 +111,23 @@ class TravelingSalesman():
             if plot_index > number_of_fans:
                 break
             turbine_number = fans_y_coordinates.index(y) + 1 # Plus 1 since lists are 0-based, using y since y-coordinates never repeated in fans_y_coordinates
-            label = "Turbine #" + str(turbine_number) + "   "
+            label = "Turbine #" + str(turbine_number)
             axis[0].annotate(label, # this is the text which we want to use as a label
                         (x,y), # x and y is the points location where we want to label
                         textcoords="offset points",
-                        xytext=(-20,6), # this for the distance between the points and the text label
+                        weight="bold",
+                        xytext=(-25,7.5), # this for the distance between the points and the text label
                         ha='center')
             plot_index += 1
         # Labeling Turbine numbers - end
 
         axis[1].axis([0, 1000, 0, 550])
-        # axis[1].title.set_text("Path After Optimization")
-        axis[1].set_title('Path After Optimization', fontsize=16)
+        axis[1].set_title('Path After Optimization', fontsize=20)
         axis[1].set_xlabel('x (cm)', fontsize=16)
         axis[1].set_ylabel('y (cm)', fontsize=16)
-        # plt.axis([0, 285, 0, 285])
-        for i, j in zip(self.path_min[0], self.path_min[1]):
+        for i, j in zip(self.path_min[0], self.path_min[1]): # Writes the (x,y) coordinates above the coordinate location
             axis[1].text(i, j+20, '({}, {})'.format(i, j), fontsize='small')
-        axis[1].text(10, 500, f'Total Energy: {int(self.energy_calc(self.path_min))}', fontsize='small')
+        axis[1].text(10, 500, f'Total Energy: {int(self.energy_calc(self.path_min))}', fontsize='medium', weight="bold")
         axis[1].plot(self.path_min[0], self.path_min[1], '-o', markersize=4)
         axis[1].quiver(self.path_min[0][:-1], self.path_min[1][:-1], self.path_min[0][1:]-self.path_min[0][:-1], 
                    self.path_min[1][1:]-self.path_min[1][:-1],scale_units='xy', angles='xy', scale=1, color='teal', width=0.005)
@@ -144,17 +141,19 @@ class TravelingSalesman():
                 break
             # turbine_number = fans_list[plot_index-1]
             turbine_number = fans_y_coordinates.index(y) + 1 # Plus 1 since lists are 0-based, using y since y-coordinates never repeated in fans_y_coordinates
-            label = "Turbine #" + str(turbine_number) + "   "
+            label = "Turbine #" + str(turbine_number)
             axis[1].annotate(label, # this is the text which we want to use as a label
                         (x,y), # x and y is the points location where we want to label
                         textcoords="offset points",
-                        xytext=(-20,6), # this for the distance between the points and the text label
+                        weight="bold",
+                        xytext=(-25,7.5), # this for the distance between the points and the text label
                         ha='center')
             plot_index += 1
         # Labeling Turbine numbers - end
 
-        # Below, change the values of None to values desired
-        plt.subplots_adjust(left=None, bottom=None, right=None, top=None, wspace=None, hspace=0.6)
+        # You can play with the configure subplots button on bottom of graph for desired look, but changes are not remembered
+        # Below, change the values of None to values desired 
+        plt.subplots_adjust(left=None, bottom=None, right=None, top=None, wspace=None, hspace=0.35)
         manager = plt.get_current_fig_manager()
         manager.full_screen_toggle() # Make full screen for better view, Alt-F4 to exit full screen
         plt.show()
