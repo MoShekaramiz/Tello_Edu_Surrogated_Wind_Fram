@@ -147,6 +147,10 @@ class TravelingSalesman():
         #                 ha='center')
         #     plot_index += 1
         # Angel's edit - end
+        # Below, change the values of None to values desired
+        plt.subplots_adjust(left=None, bottom=None, right=None, top=None, wspace=None, hspace=0.6)
+        manager = plt.get_current_fig_manager()
+        manager.full_screen_toggle() # Make full screen for better view, Alt-F4 to exit full screen
         plt.show()
 
     def get_path(self):
