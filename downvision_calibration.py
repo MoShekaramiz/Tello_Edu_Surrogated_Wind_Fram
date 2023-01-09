@@ -33,11 +33,13 @@ def calibrate(drone_class, fileName, start, st, fileFlag, land=False, x_coordina
     # cv.imshow("Scanning For Calibration Marker", img)
     # cv.waitKey(1)
     # cv.destroyWindow("Scanning For Calibration Marker")
+    # Code to ignore blue circle search - start
     angel_bool = True
     if angel_bool == True:
         # do this
         drone_class.go_to(0+30, 0, 0)
         drone_class.move(down=40)
+    # Code to ignore blue circle search - end
     else:
         drone_class.go_to(-300, 0)
         drone_class.go_to(drone_class.get_x_location(), drone_class.get_y_location(), 0)
@@ -149,6 +151,7 @@ def calibrate(drone_class, fileName, start, st, fileFlag, land=False, x_coordina
             if frames_since_positive == 5:
                 frames_since_positive = 0
                 img_counter += 1
+                # Snake path search path algorithm below
                 if img_counter == 30 or img_counter == 60:
                     drone_class.move(right=30)
                 elif img_counter == 90:
@@ -164,6 +167,7 @@ def calibrate(drone_class, fileName, start, st, fileFlag, land=False, x_coordina
                 elif img_counter == 330 or img_counter == 360:
                     drone_class.move(left=30)
                     img_counter = 0
+                # Spiral path search algorithm below
                 # if img_counter == 30 or img_counter == 60:
                 #     drone_class.move(fwd=30)
                 # elif img_counter == 90 or img_counter == 120:
