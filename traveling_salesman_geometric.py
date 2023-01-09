@@ -13,7 +13,7 @@ from datetime import datetime
 start = time.time()
 
 # Testing 1-7 random fans
-number_of_fans = 3 # Change this number to the number of fans you would like to test 
+number_of_fans = 7 # Change this number to the number of fans you would like to test 
 fans_x_coordinates = [360, 832, 550, 613, 61, 832, 188]
 fans_y_coordinates = [48, 409, 224, 460, 127, 150, 457]
 list1 = [1, 2, 3, 4, 5, 6, 7] # List of fans 1-7 identified by their QR code number
@@ -104,21 +104,23 @@ class TravelingSalesman():
         axis[0].plot(data[0], data[1], '-o', markersize=4) 
         axis[0].quiver(data[0][:-1], data[1][:-1], data[0][1:]-data[0][:-1], 
                    data[1][1:]-data[1][:-1],scale_units='xy', angles='xy', scale=1, color='teal', width=0.005)
-        # Angel's edit - beginning
-        # plot_index = 0
-        # for x,y in zip(data[0],data[1]):
-        #     if plot_index == 0 or plot_index == number_of_fans + 1:
-        #         plot_index += 1
-        #         continue
-        #     label = "Turbine #" + str(plot_index) + "   "
-        #     axis[0].annotate(label, # this is the value which we want to label (text)
-        #                 (x,y), # x and y is the points location where we have to label
-        #                 textcoords="offset points",
-        #                 xytext=(-20,5), # this for the distance between the points
-        #                 # and the text label
-        #                 ha='center')
-        #     plot_index += 1
-        # Angel's edit - end
+        # Labeling Turbine numbers - beginning
+        plot_index = 0
+        for x,y in zip(data[0],data[1]):
+            if plot_index == 0: # Skip first loop since there is no turbine at origin (0,0)
+                plot_index += 1
+                continue
+            if plot_index > number_of_fans:
+                break
+            turbine_number = fans_y_coordinates.index(y) + 1 # Plus 1 since lists are 0-based, using y since y-coordinates never repeated in fans_y_coordinates
+            label = "Turbine #" + str(turbine_number) + "   "
+            axis[0].annotate(label, # this is the text which we want to use as a label
+                        (x,y), # x and y is the points location where we want to label
+                        textcoords="offset points",
+                        xytext=(-20,6), # this for the distance between the points and the text label
+                        ha='center')
+            plot_index += 1
+        # Labeling Turbine numbers - end
 
         axis[1].axis([0, 1000, 0, 550])
         # axis[1].title.set_text("Path After Optimization")
@@ -132,21 +134,25 @@ class TravelingSalesman():
         axis[1].plot(self.path_min[0], self.path_min[1], '-o', markersize=4)
         axis[1].quiver(self.path_min[0][:-1], self.path_min[1][:-1], self.path_min[0][1:]-self.path_min[0][:-1], 
                    self.path_min[1][1:]-self.path_min[1][:-1],scale_units='xy', angles='xy', scale=1, color='teal', width=0.005)
-        # Angel's edit - beginning
-        # plot_index = 0
-        # for x,y in zip(self.path_min[0],self.path_min[1]):
-        #     if plot_index == 0 or plot_index == number_of_fans + 1:
-        #         plot_index += 1
-        #         continue
-        #     label = "Turbine #" + str(plot_index) + "   "
-        #     axis[1].annotate(label, # this is the value which we want to label (text)
-        #                 (x,y), # x and y is the points location where we have to label
-        #                 textcoords="offset points",
-        #                 xytext=(-20,5), # this for the distance between the points
-        #                 # and the text label
-        #                 ha='center')
-        #     plot_index += 1
-        # Angel's edit - end
+        # Labeling Turbine numbers - beginning
+        plot_index = 0
+        for x,y in zip(self.path_min[0],self.path_min[1]):
+            if plot_index == 0: # Skip first loop since there is no turbine at origin (0,0)
+                plot_index += 1
+                continue
+            if plot_index > number_of_fans:
+                break
+            # turbine_number = fans_list[plot_index-1]
+            turbine_number = fans_y_coordinates.index(y) + 1 # Plus 1 since lists are 0-based, using y since y-coordinates never repeated in fans_y_coordinates
+            label = "Turbine #" + str(turbine_number) + "   "
+            axis[1].annotate(label, # this is the text which we want to use as a label
+                        (x,y), # x and y is the points location where we want to label
+                        textcoords="offset points",
+                        xytext=(-20,6), # this for the distance between the points and the text label
+                        ha='center')
+            plot_index += 1
+        # Labeling Turbine numbers - end
+
         # Below, change the values of None to values desired
         plt.subplots_adjust(left=None, bottom=None, right=None, top=None, wspace=None, hspace=0.6)
         manager = plt.get_current_fig_manager()
