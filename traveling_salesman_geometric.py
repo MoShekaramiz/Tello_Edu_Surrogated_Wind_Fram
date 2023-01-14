@@ -153,7 +153,9 @@ class TravelingSalesman():
 
         # You can play with the configure subplots button on bottom of graph for desired look, but changes are not remembered
         # Below, change the values of None to values desired 
-        plt.subplots_adjust(left=0.07, bottom=0.26, right=0.7, top=0.93, wspace=0.2, hspace=0.4)
+        # Albin plt.subplots_adjust(left=0.07, bottom=0.395, right=0.6, top=0.93, wspace=0.2, hspace=0.4)
+
+        plt.subplots_adjust(left=0.07, bottom=0.395, right=0.6, top=0.93, wspace=0.2, hspace=0.4)
         manager = plt.get_current_fig_manager()
         manager.full_screen_toggle() # Make full screen for better view, Alt-F4 to exit full screen
         plt.show()
