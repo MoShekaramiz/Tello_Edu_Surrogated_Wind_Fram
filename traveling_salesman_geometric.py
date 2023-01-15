@@ -13,9 +13,9 @@ from datetime import datetime
 start = time.time()
 
 # Testing 1-7 random fans
-number_of_fans = 7 # Change this number to the number of fans you would like to test 
-fans_x_coordinates = [360, 832, 550, 613, 61, 832, 188]
-fans_y_coordinates = [48, 409, 224, 460, 127, 150, 457]
+number_of_fans = 3 # Change this number to the number of fans you would like to test 
+fans_x_coordinates = [360, 832, 550, 613, 161, 832, 188]
+fans_y_coordinates = [48, 409, 224, 460, 227, 150, 457]
 list1 = [1, 2, 3, 4, 5, 6, 7] # List of fans 1-7 identified by their QR code number
 fans_list = [] # Randomly selected order of fans will be inputted here  
 for x in range(number_of_fans): # Put fan numbers into list in which the order is random
@@ -23,7 +23,7 @@ for x in range(number_of_fans): # Put fan numbers into list in which the order i
     fans_list.append(random_fan)
     list1.remove(random_fan)
 # Change these numbers below to determine which fans to test, if you want random fan, comment out the fans_list below
-# fans_list = [3, 2, 3, 4, 5, 6, 7]
+# fans_list = [1, 6, 5, 4, 5, 6, 7]
 if number_of_fans == 1: # The program requires 3 points, so testing just 1 fan will need the (0,0) coordinate twice
     path_x_coordinates = [0, fans_x_coordinates[fans_list[0] - 1], 0] # Minus 1 since lists are 0-based and there is no 0th fan
     path_y_coordinates = [0, fans_y_coordinates[fans_list[0] - 1], 0] # Minus 1 since lists are 0-based and there is no 0th fan
@@ -153,6 +153,7 @@ class TravelingSalesman():
 
         # You can play with the configure subplots button on bottom of graph for desired look, but changes are not remembered
         # Below, change the values of None to values desired 
+        # Angel's values that work with his computer screen
         plt.subplots_adjust(left=0.07, bottom=0.26, right=0.7, top=0.93, wspace=0.2, hspace=0.4)
         manager = plt.get_current_fig_manager()
         manager.full_screen_toggle() # Make full screen for better view, Alt-F4 to exit full screen

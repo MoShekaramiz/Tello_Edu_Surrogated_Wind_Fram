@@ -141,8 +141,11 @@ if __name__ == "__main__":
     while True:
         frame = drone.get_frame_read()
         img = frame.frame
+
         # Below line is used for green circles since green circles returns only 2 values
         # img, info = find_circles(img, down=False, green=True) 
+        
+        # Below line is used for blue circles since blue circles returns 4 values
         img, info, radius, center = find_circles(img, down=False, green=False)
         cv.imshow("Output", img)
         cv.waitKey(1)

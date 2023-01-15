@@ -159,11 +159,11 @@ def calibrate(drone_class, fileName, start, st, fileFlag, land=False, x_coordina
                 elif img_counter == 120:
                     drone_class.move(left=30)
                 elif img_counter == 150:
-                    drone_class.move(back=30)
+                    drone_class.move(back=45)
                 elif img_counter == 180 or img_counter == 210 or img_counter == 240 or img_counter == 270:
                     drone_class.move(right=30)
                 elif img_counter == 300:
-                    drone_class.move(back=30)
+                    drone_class.move(back=45)
                 elif img_counter == 330 or img_counter == 360:
                     drone_class.move(left=30)
                     img_counter = 0
