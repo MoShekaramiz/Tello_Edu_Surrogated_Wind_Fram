@@ -219,24 +219,7 @@ if __name__ == "__main__":
             index += 1
             if camera.get_battery() < 20:
                 print("\n" + ">>>>>>>>>>>>>>>> DRONE BATTERY LOW. CHANGE BATTERY!")
-                xpos = coordinates[0][index:]
-                ypos = coordinates[1][index:]
-                current_x = drone.get_x_location()
-                current_y = drone.get_y_location()
-                quadrant = 0
-                if 1000 - current_x > 500:
-                    if 550 - current_y > 325:
-                        drone.go_to(0, 0, 0)
-                    else:
-                        drone.go_to(0, 550, 0)
-                        quadrant = 2
-                else:
-                    if 550 - current_y > 325:
-                        drone.go_to(1000, 0, 0)
-                        quadrant = 4
-                    else:
-                        drone.go_to(1000, 550, 0)
-                        quadrant = 1
+                drone.go_to(0, 0, 0)
                 calibrate(drone, fileName, start, st, fileFlag = 0, land=False)
                 drone.land(True)
                 try:
@@ -244,12 +227,6 @@ if __name__ == "__main__":
                 except:
                     input("DRONE BATTERY LOW. CHANGE BATTERY, RECONNECT, THEN PRESS ENTER.")
                 drone = mov.movement()
-                if quadrant == 1:
-                    drone.set_coordinates(1000, 550)
-                elif quadrant == 2:
-                    drone.set_coordinates(0, 550)
-                elif quadrant == 4:
-                    drone.set_coordinates(1000, 550)
                 path = TravelingSalesman() 
                 path.plot()
                 coordinates = path.get_path()

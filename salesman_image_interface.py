@@ -72,7 +72,6 @@ def trackObject(drone, info, turbines, starting_location, fileName, start, flag_
         turbine_locations = drone.get_turbine_locations()
         for i in turbine_locations:
             if(i[0] < targetx < i[1]) and (i[2] < targety < i[3]):
-                # Angel - Make the drone stop short in the x direction and face the fan
                 # Third parameter should be 0 for the angle to be facing the turbines
                 drone.go_to(starting_location[0], starting_location[1], 0)
                 return
