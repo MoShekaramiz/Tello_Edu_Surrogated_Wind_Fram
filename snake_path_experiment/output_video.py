@@ -27,7 +27,7 @@ class LiveFeed(threading.Thread):
 
             while not self.qr.is_set():
                 QR, img, info = droneReadQR(self.drone)
-                if len(QR) > 0 and QR is not None:
+                if len(QR) > 0:
                     # font
                     font = cv.FONT_HERSHEY_PLAIN
                     try:

@@ -1,5 +1,0 @@
-{
-    "board": "arduino:samd:mkr1000",
-    "port": "COM9",
-    "sketch": "wifi_test.ino"
-}

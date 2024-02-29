@@ -1,6 +1,0 @@
-{
-    "board": "arduino:samd:mkr1000",
-    "programmer": "arduino:sam_ice",
-    "port": "COM6",
-    "sketch": "test_gps.ino"
-}

@@ -7,8 +7,8 @@ import time
 import csv
 import sys
 import os
-from djitellopy import Tello
 
+# Angel
 from datetime import datetime
 st = datetime.now().strftime('%B %d,%Y %H.%M.%S')
 fileName = "CSV Files/Data Log " + st + ".csv"
@@ -34,44 +34,42 @@ def calibrate(drone_class, fileName, start, st, fileFlag, land=False, x_coordina
     # cv.waitKey(1)
     # cv.destroyWindow("Scanning For Calibration Marker")
     
-    # Go to expected location of helipad
-    x_distance  = 0 # 160
-    y_distance  = 0
-    drone_class.go_to(x_distance, y_distance, 0)
-    # drone_class.move(down=40) # For traveling salesman experiments
-    drone_class.go_to(targetz=20) # For the distance experiments
-
-    snake_path_side_length = 30 # Distance the drone moves latrally in the snake path flight 
-    snake_path_back_length = 40 # Distance the drone moves back in the snake path flight
-    spiral_distance = 20 # Distance the drone travels in the spiral path flight
-    img_increment = 10 # How many images we want to check per movement in search of the helipad
-    planned_paths = ['snake', 'spiral'] # Options of flight patterns to search the helipad with
-    chosen_path = planned_paths[1] # Select one of the options
-    
-    # # Code for blue circle search
-    # drone_class.go_to(-300, 0)
-    # drone_class.go_to(drone_class.get_x_location(), drone_class.get_y_location(), 0)
-    # drone_class.move(down=40)
-    # found = go_to_helipad(drone_class, width, center)
-    # #drone_class.go_to(drone_class.get_x_location(), drone_class.get_y_location(), 0)
-    # if found == False:
-    #     drone_class.go_to(0, 0, 0)
-    # found = go_to_helipad(drone_class, width, center)
-    # cv.destroyWindow("Scanning For Calibration Marker")
-    # if found == False:
-    #     print("Not found.")
-    #     drone_class.go_to((x_coordinate + drone_class.get_x_location())/2, (y_coordinate + drone_class.get_y_location())/2)
-    #     found = go_to_helipad(drone_class, width, center)
-    #     if found == False:
-    #         drone_class.go_to((x_coordinate + drone_class.get_x_location())/2, (y_coordinate + drone_class.get_y_location())/2)
-    #         found = go_to_helipad(drone_class, width, center)
-    #         print("Not found, second time.")
-    #         if found == False:
-    #             drone_class.go_to(x_coordinate, y_coordinate)
+    # Code to ignore blue circle search - start
+    angel_bool = True
+    if angel_bool == True:
+        # Stop in front of helipad
+        x_cutoff_distance = 40
+        y_cutoff_distance = 70
+        drone_class.go_to(0+x_cutoff_distance, 0+y_cutoff_distance, 0)
+        drone_class.move(down=40)
+    # Code to ignore blue circle search - end
+    else:
+        drone_class.go_to(-300, 0)
+        drone_class.go_to(drone_class.get_x_location(), drone_class.get_y_location(), 0)
+        drone_class.move(down=40)
+        found = go_to_helipad(drone_class, width, center)
+        #drone_class.go_to(drone_class.get_x_location(), drone_class.get_y_location(), 0)
+        if found == False:
+            drone_class.go_to(0, 0, 0)
+        # found = go_to_helipad(drone_class, width, center)
+        # cv.destroyWindow("Scanning For Calibration Marker")
+        # if found == False:
+        #     print("Not found.")
+        #     drone_class.go_to((x_coordinate + drone_class.get_x_location())/2, (y_coordinate + drone_class.get_y_location())/2)
+        #     found = go_to_helipad(drone_class, width, center)
+        #     if found == False:
+        #         drone_class.go_to((x_coordinate + drone_class.get_x_location())/2, (y_coordinate + drone_class.get_y_location())/2)
+        #         found = go_to_helipad(drone_class, width, center)
+        #         print("Not found, second time.")
+        #         if found == False:
+        #             drone_class.go_to(x_coordinate, y_coordinate)
         #             print("Not found, third time")
     print("><><><><><><><><><><><><><>", drone.get_height())
     print("><><><><><><><><><><><><><>", drone.get_height())
     height = drone.get_height()
+
+    snake_path_side_length = 30
+    snake_path_back_length = 40
     while height > 30:
         drone.send_rc_control(0, 0, -20, 0)
         height = drone.get_height()
@@ -104,16 +102,11 @@ def calibrate(drone_class, fileName, start, st, fileFlag, land=False, x_coordina
                     drone.send_rc_control(0, 0, 0, 0)
                     location_calibrated = True
                     drone_class.set_coordinates(x_coordinate, y_coordinate, 30)
-                    # drone.send_command_with_return("downvision 1")
-                    drone.send_command_with_return("downvision 0")
+                    drone.send_command_with_return("downvision 1")
                     cv.destroyWindow("Downward Output")
                     current = time.time()
-                    if not land:
-                        print('>>>>>>>>>> DRONE IS TO NOT LAND')
-                        return location_calibrated 
-                    else:
-                        drone_class.land()
-                        print("Called drone.land() on line 108 of calibrate function")
+                    drone.land()
+                    print("Called drone.land() on line 108 of calibrate function")
 
                     try:
                         numRows = 0          
@@ -149,7 +142,7 @@ def calibrate(drone_class, fileName, start, st, fileFlag, land=False, x_coordina
                     except FileNotFoundError:
                         print("File not appeneded") 
                         # Return to other file so that we can collect the total flying time of drone
-                        return  # Return so we can print the flight time
+                        return # Return so we can print the flight time
             else:
                 x = round(-(circle_x-160)/10)
                 y = round(-(circle_y-120)/10)
@@ -168,64 +161,49 @@ def calibrate(drone_class, fileName, start, st, fileFlag, land=False, x_coordina
             if frames_since_positive == 5:
                 frames_since_positive = 0
                 img_counter += 1
-                if img_counter % img_increment == 0:
-                    drone_class.get_battery()
-                if chosen_path == 'snake':
-                    # Snake path search path algorithm below
-                    if img_counter == 1 * img_increment or img_counter == 2 * img_increment:
-                        drone_class.move(right=snake_path_side_length)
-                    elif img_counter == 3 * img_increment:
-                        drone_class.move(left=3*snake_path_side_length)
-                    elif img_counter == 4 * img_increment:
-                        drone_class.move(left=snake_path_side_length)
-                    elif img_counter == 5 * img_increment:
-                        drone_class.move(back=snake_path_back_length)
-                    elif img_counter == 6 * img_increment or img_counter == 7 * img_increment or img_counter == 8 * img_increment or img_counter == 9 * img_increment:
-                        drone_class.move(right=snake_path_side_length)
-                    elif img_counter == 10 * img_increment:
-                        drone_class.move(back=snake_path_back_length)
-                    elif img_counter == 11 * img_increment or img_counter == 12 * img_increment or img_counter == 13 * img_increment or img_counter == 14 * img_increment:
-                        drone_class.move(left=snake_path_back_length)
-                    elif img_counter == 15 * img_increment:
-                        drone_class.move(back=snake_path_back_length)
-                    elif img_counter == 16 * img_increment or img_counter == 17 * img_increment or img_counter == 18 * img_increment or img_counter == 19 * img_increment:
-                        drone_class.move(right=snake_path_side_length)
-                    elif img_counter >= 20 * img_increment: # Here, we are likely in the sensor issue where the drone is not low enough
-                        print("Search will be restarted at a lower length if feasible")
-                        drone_class.go_to(0+x_distance, 0+y_distance, 0) # Stop in front of the helipad to snake path search backwards        
-                        while height > 20: # Get to the height needed to detect helipad
-                            drone.send_rc_control(0, 0, -20, 0)
-                            height = drone.get_height()
-                        for i in range(5):
-                            drone.send_rc_control(0, 0, 0, 0)
-                        print("><><><><><><><><><><><><><>", drone.get_height())       
-                        img_counter = 0
-                elif chosen_path == 'spiral':
-                    # Spiral path search algorithm below
-                    if img_counter == 1 * img_increment or img_counter == 2 * img_increment:
-                        drone_class.move(fwd=spiral_distance)
-                    elif img_counter == 3 * img_increment or img_counter == 4 * img_increment:
-                        drone_class.move(left=spiral_distance)
-                    elif img_counter == 5 * img_increment or img_counter == 6 * img_increment or img_counter == 7 * img_increment or img_counter == 8 * img_increment:
-                        drone_class.move(back=spiral_distance)
-                    elif img_counter == 9 * img_increment or img_counter == 10 * img_increment or img_counter == 11 * img_increment or img_counter == 12 * img_increment:
-                        drone_class.move(right=spiral_distance)
-                    elif img_counter == 13 * img_increment or img_counter == 14 * img_increment or img_counter == 15 * img_increment or img_counter == 16 * img_increment:
-                        drone_class.move(fwd=spiral_distance)
-                    elif img_counter == 17 * img_increment or img_counter == 18 * img_increment:
-                        drone_class.move(back=spiral_distance, left=spiral_distance)
-                    elif img_counter >= 19 * img_increment:
-                        print("Search will be restarted at a lower length if feasible")
-                        drone_class.go_to(0+x_distance, 0+y_distance, 0) # Stop over expected location of the helipad       
-                        while height > 20: # Get to the height needed to detect helipad
-                            drone.send_rc_control(0, 0, -20, 0)
-                            height = drone.get_height()
-                        for i in range(5):
-                            drone.send_rc_control(0, 0, 0, 0)
-                        print("><><><><><><><><><><><><><>", drone.get_height())  
-                        img_counter = 0
-                else:
-                    print('>>>>>>>>>>>>>>>> ERROR: NO PLANNED PATH CHOSEN')
+                # Snake path search path algorithm below
+                if img_counter == 30 or img_counter == 60:
+                    drone_class.move(right=snake_path_side_length)
+                elif img_counter == 90:
+                    drone_class.move(left=3*snake_path_side_length)
+                elif img_counter == 120:
+                    drone_class.move(left=snake_path_side_length)
+                elif img_counter == 150:
+                    drone_class.move(back=snake_path_back_length)
+                elif img_counter == 180 or img_counter == 210 or img_counter == 240 or img_counter == 270:
+                    drone_class.move(right=snake_path_side_length)
+                elif img_counter == 300:
+                    drone_class.move(back=snake_path_back_length)
+                elif img_counter == 330 or img_counter == 360 or img_counter == 390 or img_counter == 420:
+                    drone_class.move(left=snake_path_back_length)
+                elif img_counter == 450:
+                    drone_class.move(back=snake_path_back_length)
+                elif img_counter == 480 or img_counter == 510 or img_counter == 540 or img_counter == 570:
+                    drone_class.move(right=snake_path_side_length)
+                elif img_counter == 600: # Here, we are likely in the sensor issue where the drone is not low enough
+                    print("Search will be restarted at a lower length if feasible")
+                    drone_class.go_to(0+x_cutoff_distance, 0+y_cutoff_distance, 0)# Stop in front of the helipad to snake path search backwards        
+                    while height > 20: # Get to the height needed to detect helipad
+                        drone.send_rc_control(0, 0, -20, 0)
+                        height = drone.get_height()
+                    for i in range(5):
+                        drone.send_rc_control(0, 0, 0, 0)
+                    print("><><><><><><><><><><><><><>", drone.get_height())       
+                    img_counter = 0
+                # Spiral path search algorithm below
+                # if img_counter == 30 or img_counter == 60:
+                #     drone_class.move(fwd=30)
+                # elif img_counter == 90 or img_counter == 120:
+                #     drone_class.move(left=30)
+                # elif img_counter == 150 or img_counter == 180 or img_counter == 210 or img_counter == 240:
+                #     drone_class.move(back=30)
+                # elif img_counter == 270 or img_counter == 300 or img_counter == 330 or img_counter == 360:
+                #     drone_class.move(right=30)
+                # elif img_counter == 390 or img_counter == 420 or img_counter == 450 or img_counter == 480:
+                #     drone_class.move(fwd=30)
+                # elif img_counter == 510 or img_counter == 540:
+                #     drone_class.move(back=30, left=30)
+                #     img_counter = 0
 
     # frames_since_positive = 0
     # angle = 0
@@ -405,25 +383,14 @@ def go_to_helipad(drone, width, center, flag_rotate=0, flag_shift=0, flag_shift_
             return True  
 
 if __name__ == "__main__":
-    drone = mov.movement(height=30)
-    calibrate(drone, fileName, start, st, fileFlag = 0, land=False)
-    
-    # drone = Tello()
-    # drone.connect()
-    # drone.streamon()
-    # drone.send_command_with_return("downvision 0")
-    # frame = drone.get_frame_read()
-    # img = frame.frame
-    # img = cv.resize(img, (w, h))
-    # cv.imshow("Output", img)
-    # cv.waitKey(1)
-    # drone.send_command_with_return("downvision 1")
-    # while True:
-    #     frame = drone.get_frame_read()
-    #     img = frame.frame
-    #     print('Attempting downward output')
-    #     cv.imshow("Downward Output", img)
-    #     cv.waitKey(1)
-
-
-
+    drone = mov.movement()
+    # drone.go_to(220, 200)
+    # drone.go_to(100, 78)
+    # drone.move_down(20)
+    # feed = LiveFeed(drone)
+    # feed.start()
+    # #feed.run()
+    # sleep(1)
+    # calibrate(drone, True, 200, 0, fileFlag=0)
+    calibrate(drone, fileName, start, st, fileFlag = 0, land=True)
+    drone.land()

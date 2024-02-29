@@ -9,7 +9,6 @@ def check_camera(drone, circles=False):
     '''Takes the lower drone class frome drone.get_drone(), a boolean parameter for circle detection, and returns
     the information from the object detection. circles=False returns the information of the haar-cascade detection.
     circles=True returns the image, the list of circles, the width, and center pixel of the detected circle.'''
-    # sleep(1) # Give a second for image to stabilize, not certain if this will help
     frame = drone.get_frame_read()
     sleep(0.2)
     img = frame.frame

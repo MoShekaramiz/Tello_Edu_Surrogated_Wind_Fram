@@ -1,6 +1,0 @@
-{
-    "board": "arduino:samd:mkr1000",
-    "programmer": "arduino:sam_ice",
-    "sketch": "ir_sensor.ino",
-    "port": "COM6"
-}

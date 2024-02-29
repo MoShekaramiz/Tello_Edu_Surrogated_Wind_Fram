@@ -28,21 +28,12 @@ def droneReadQR(drone):
     frame = drone.get_frame_read()
     img = frame.frame
     qr = cv.QRCodeDetector()
-    # Sometimes an error will close the output window box, perhaps img is empty or None
-    try:
-        QR, bbox, s = qr.detectAndDecode(img)
-        info = [[0, 0], 0, 0]
-        if len(QR) > 0:
-            img, info = boundingBox(img, bbox)
-        return QR, img, info
-    except e:
-        print(f'>>>>>>>>>>>>>>>> ERROR FROM qr.detectAndDecode(img): {e}')
-        if img is None:
-            print(f'>>>>>>>>>>>>>>>> img is None')
-        if QR is None:
-            print(f'>>>>>>>>>>>>>>>> QR is None')
-        return None, None, info
-    
+    QR, bbox, s = qr.detectAndDecode(img)
+    info = [[0, 0], 0, 0]
+    if len(QR) > 0:
+        img, info = boundingBox(img, bbox)
+
+    return QR, img, info
 
 if __name__ == "__main__":
     make_QR(["WindTurbine_1", "WindTurbine_2", "WindTurbine_3", "WindTurbine_4", "WindTurbine_5",

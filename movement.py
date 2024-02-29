@@ -9,15 +9,21 @@ from time import sleep
 from output_video import LiveFeed
 import sys
 import os
+import csv
+from vars import mission_filename
 
 CWD = os.getcwd()
 
 class movement():
+
+    traversal_altitude = 0
+    
     def __init__(self, height=70, stream=True):
         self.drone = Tello()               # Drone class initialized by calling: drone = Tello()
         self.new_location = [0, 0, 0, 0]   # [x location, y location, z location, angle]
         self.turbine_locations = []        # List of all known turbine locations
         self.video_stream = None
+        self.traversal_altitude = 0
         self.takeoff(height, stream)
     
     def takeoff(self, height=70, stream=True): 
@@ -36,6 +42,8 @@ class movement():
         sleep(2)
         self.move(up=height)
         sleep(1)
+        self.traversal_altitude = self.get_z_location()
+        print(f'>>>>>>>>>>>>>>>> TRAVERSAL ALTITUDE: {self.traversal_altitude}')
     
     def video(self):
         self.video_stream = LiveFeed(self.drone)
@@ -43,9 +51,13 @@ class movement():
     
     def land(self, turn_off = False):
         '''Lands the drone at the end of flight.'''
-        print(">>>>>>>>>>>>>>>> BATTERY REMAINING: ", self.drone.get_battery())
-        print(">>>>>>>>>>>>>>>> ENDING FLIGHT TIME: ", self.drone.get_flight_time())
         self.drone.land()
+        battery = self.get_battery()
+        flight_time = self.get_flight_time()
+        fields = [f'Final Battery: {battery}', f'Final Flight Time: {flight_time}']
+        with open(mission_filename, 'a') as f:
+            writer = csv.writer(f)
+            writer.writerow(fields)
         self.video_stream.stop_haar()
         self.video_stream.stop_qr()
         self.video_stream.stop_image()
@@ -110,6 +122,71 @@ class movement():
         The function will update the current location of the drone which can be reached with movement.get_location()'''
         sleep(0.3)
         start_height = self.drone.get_height()
+
+        # Angel - round all values
+        if up != 0:
+            up = round(up)
+        if down != 0:
+            down = round(down)
+        if right != 0:
+            right = round(right)
+        if left != 0:
+            left = round(left)
+        if fwd != 0:
+            fwd = round(fwd)
+        if back != 0:
+            back = round(back)
+        if ccw != 0:
+            ccw = round(ccw)
+        if cw != 0:
+            cw = round(cw)
+
+        # Angel - account for negative values
+        if right < 0:
+            left = -right
+            right = 0
+        if left < 0:
+            right = -left
+            left = 0
+        if up < 0:
+            down = -up
+            up = 0
+        if down < 0:
+            up = -down
+            down = 0
+        if fwd < 0:
+            back = -fwd
+            fwd = 0
+        if back < 0:
+            fwd = -back
+            back = 0
+
+        # Angel - account for small values which would be out of range
+        if up < 10:
+            up = 0
+        elif  10 <= up < 20:
+            up = 20 
+        if down < 10:
+            down = 0
+        elif  10 <= down < 20:
+            down = 20 
+        if left < 10:
+            left = 0
+        elif  10 <= left < 20:
+            left = 20 
+        if right < 10:
+            right = 0
+        elif  10 <= right < 20:
+            right = 20 
+        if fwd < 10:
+            fwd = 0
+        elif  10 <= fwd < 20:
+            fwd = 20
+        if back < 10:
+            back = 0
+        elif  10 <= back < 20:
+            back = 20  
+
         if up != 0:
             # increases drone altitude
             up = round(up)
@@ -145,9 +222,16 @@ class movement():
         if fwd != 0:
             # forward takes priority -- updates x and y coordinates after movement
             fwd = round(fwd)
-            self.drone.move_forward(fwd)
-            self.new_location[0] += fwd * math.cos(math.radians(self.new_location[3]))
-            self.new_location[1] += fwd * math.sin(math.radians(self.new_location[3]))
+            if fwd < 10: # Do not move since drone needs to move minimum of 20
+                pass
+            elif fwd < 20: # Move 20 if fwd between 10 and 20
+                self.drone.move_forward(20)
+                self.new_location[0] += 20 * math.cos(math.radians(self.new_location[3]))
+                self.new_location[1] += 20 * math.sin(math.radians(self.new_location[3]))
+            else: # Just move the specified distance
+                self.drone.move_forward(fwd)
+                self.new_location[0] += fwd * math.cos(math.radians(self.new_location[3]))
+                self.new_location[1] += fwd * math.sin(math.radians(self.new_location[3]))
 
         elif fwd == 0 and back != 0:
             # updates x and y coordinates after backwards movement
@@ -489,4 +573,46 @@ class movement():
                     
         print(f"\nCURRENT LOCATION >>>>>>>>>>{self.new_location}\n")
 
+    def x_go_to(self, x_coordinate):
+        '''For when you want to go to an x-coordinate without changing y-coordinate nor angle in the process'''
+        x_shift = self.get_x_location() - x_coordinate
+        if x_shift < 0: # Meaning x_shift value is negative and so we want to move forward
+            self.move(fwd=abs(x_shift))
+        else: # Meaning x_shift is positive and so we want to move to back
+            self.move(back=x_shift)
 
+    def y_go_to(self, y_coordinate):
+        '''For when you want to go to an x-coordinate without changing y-coordinate nor angle in the process'''
+        y_shift = self.get_y_location() - y_coordinate
+        if y_shift < 0: # Meaning y_shift value is negative and so we want to move to the left
+            self.move(left=abs(y_shift))
+        else: # Meaning y_shift is positive and so we want to move to the right
+            self.move(right=y_shift)
+
+    def get_battery(self):
+        '''Print battery power remaining in drone and return that value'''
+        battery = self.drone.get_battery()
+        print(f">>>>>>>>>>>>>>>> BATTERY REMAINING: {battery}")
+        return battery
+    
+    def get_flight_time(self):
+        '''Print flight time and return that value'''
+        flight_time = self.drone.get_flight_time()
+        print(f">>>>>>>>>>>>>>>> FLIGHT TIME: {flight_time}")
+        return flight_time
+    
+    def get_frame_read(self):
+        '''Return the frame from the drone camera'''
+        return self.drone.get_frame_read()
+    
+    def get_height(self):
+        '''Return the true altitude of the drone based on hardware sensor'''
+        height = self.drone.get_height()
+        print(f">>>>>>>>>>>>>>>> DRONE HEIGHT: {height}")
+        return height
+    
+    def get_traversal_altitude(self):
+        '''Return the traversal altitude determined at takeoff'''
+        altitude = self.traversal_altitude
+        print(f">>>>>>>>>>>>>>>> TRAVERSAL ALTITUDE: {altitude}")
+        return altitude
