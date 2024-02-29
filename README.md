@@ -603,7 +603,7 @@ path_energy = path.energy_calc(shortest_path)
 ## Tello IMU Calibration Instructions<a name="tello_imu_calibration"></a>
 This video demonstrates how to calibrate the Inertial Measurement Unit (IMU) of Tello drones.
 
-[![Tello IMU Calibration](https://github.com/angelrodriguez0617/Tello-Drone-Project/blob/angel_test_branch/Readme_img/Tello_IMU_Calibration_frame.jpg)](https://uvu365-my.sharepoint.com/:v:/g/personal/10801309_uvu_edu/EZEIaRa0uXJPqEB58yy91W4BHnJ7UpZLe9WT_pNogNW4og?e=Y0ydjm)
+[![Tello IMU Calibration](https://github.com/MoShekaramiz/Tello_Edu_Surrogated_Wind_Fram/blob/main/Readme_img/Tello_IMU_Calibration_frame.jpg)](https://uvu365-my.sharepoint.com/:v:/g/personal/10801309_uvu_edu/EZEIaRa0uXJPqEB58yy91W4BHnJ7UpZLe9WT_pNogNW4og?e=Y0ydjm)
 
 Video created by Brandon Pinney, former ECE student at UVU
 </p>
