@@ -1,7 +1,7 @@
 # Computer Vision-Based Path-Planning with Indoor Low-Cost Autonomous Drones: An Educational Surrogate Project for Autonomous Wind Farm Navigation
 Angel Rodriguez, Mohammad Shekaramiz, and Mohammad A.S. Masoum<br />
 
-![alt text](https://github.com/BrandenPinney/Tello-Drone-Project/blob/main/Readme_img/UVU_engineering.png "UVU Logo")
+![alt text](https://github.com/MoShekaramiz/Tello_Edu_Surrogated_Wind_Fram/blob/main/Readme_img/UVU_engineering.png "UVU Logo")
 
 The branch was developed by Mr. Angel Rodriguez, ECE student at UVU, supervised by Dr. Mohammad Shekaramiz 
 
@@ -11,7 +11,7 @@ Computer Vision-Based Path-Planning with Indoor Low-Cost Autonomous Drones: An E
 
 This work is supported by the Office of the Commissioner of Utah System of Higher Education (USHE)-Deep Technology Initiative Grant 20210016UT
 
-![alt text](https://github.com/BrandenPinney/Tello-Drone-Project/blob/main/Readme_img/USHE-logo.png "USHE Logo")
+![alt text](https://github.com/MoShekaramiz/Tello_Edu_Surrogated_Wind_Fram/blob/main/Readme_img/USHE-logo.png "USHE Logo")
     
 ## Table of Contents
 1. [Purpose](#Purpose)
@@ -555,7 +555,7 @@ This file contains the simulated annealing process for the traveling salesman pr
 ### TravelingSalesman()<a name="TravelingSalesman()"></a>
 A class that uses the numpy array of locations and a simulated annealing algorithm to attempt to optimize the shortest possible path to all the target locations.
 
-![alt text](https://github.com/angelrodriguez0617/Tello-Drone-Project/blob/angel_test_branch/Readme_img/Simulated_Annealing_25.png)
+![alt text](https://github.com/MoShekaramiz/Tello_Edu_Surrogated_Wind_Fram/blob/main/Readme_img/Simulated_Annealing_25.png)
 
 #### plot()<a name="plot()"></a>
 
@@ -603,7 +603,7 @@ path_energy = path.energy_calc(shortest_path)
 ## Tello IMU Calibration Instructions<a name="tello_imu_calibration"></a>
 This video demonstrates how to calibrate the Inertial Measurement Unit (IMU) of Tello drones.
 
-[![Tello IMU Calibration](https://github.com/angelrodriguez0617/Tello-Drone-Project/blob/angel_test_branch/Readme_img/Tello_IMU_Calibration_frame.jpg)](https://uvu365-my.sharepoint.com/:v:/g/personal/10801309_uvu_edu/EZEIaRa0uXJPqEB58yy91W4BHnJ7UpZLe9WT_pNogNW4og?e=Y0ydjm)
+[![Tello IMU Calibration](https://github.com/MoShekaramiz/Tello_Edu_Surrogated_Wind_Fram/blob/main/Readme_img/Tello_IMU_Calibration_frame.jpg)](https://uvu365-my.sharepoint.com/:v:/g/personal/10801309_uvu_edu/EZEIaRa0uXJPqEB58yy91W4BHnJ7UpZLe9WT_pNogNW4og?e=Y0ydjm)
 
 Video created by Brandon Pinney, former ECE student at UVU
 </p>
