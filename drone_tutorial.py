@@ -1,5 +1,7 @@
 '''Tutorial demonstration for connecting to the drone, outputing the live camera feed, and sending movement commands
-by Angel Rodriguez 2023'''
+by Angel Rodriguez 2023
+DJITelloPy API Reference: https://djitellopy.readthedocs.io/en/latest/tello/'''
+
 
 # Importing required libraries
 from djitellopy import Tello
