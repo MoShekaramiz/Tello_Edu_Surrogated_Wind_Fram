@@ -1,7 +1,14 @@
 # Computer Vision-Based Path-Planning with Indoor Low-Cost Autonomous Drones: An Educational Surrogate Project for Autonomous Wind Farm Navigation
 
 ## Authors
-Angel Rodriguez, Mohammad Shekaramiz, and Mohammad A.S. Masoum
+- **Angel Rodriguez** ![ORCID](https://img.shields.io/badge/ORCID-0009--0003--6360--3685-green)
+- **Joshua Zander** ![ORCID](https://img.shields.io/badge/ORCID-0009--0009--3965--8663-green)
+- **Mason Davis** ![ORCID](https://img.shields.io/badge/ORCID-0009--0003--5832--8738-green)
+- **Edwin Nazario Dejesus** ![ORCID](https://img.shields.io/badge/ORCID-0009--0009--2783--9547-green)
+- **Mohammad Shekaramiz** ![ORCID](https://img.shields.io/badge/ORCID-0000--0003--1176--3284-green)
+- **Majid Memari** ![ORCID](https://img.shields.io/badge/ORCID-0000--0001--5654--4996-green)
+- **Mohammad A.S. Masoum** ![ORCID](https://img.shields.io/badge/ORCID-0000--0001--7513--313X-green)
+
 
 ## Institution
 Utah Valley University - College of Engineering & Technology
